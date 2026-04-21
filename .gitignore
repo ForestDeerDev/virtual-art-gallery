@@ -1,0 +1,55 @@
+# 环境变量
+.env
+.env.*
+!.env.example
+
+# 操作系统文件
+.DS_Store
+Thumbs.db
+
+# IDE文件
+.vscode/
+.idea/
+*.iws
+*.iml
+*.ipr
+.classpath
+.project
+.settings/
+
+# 日志文件
+logs/
+*.log
+
+# 临时文件
+*.swp
+*.swo
+*~
+
+# Gradle
+.gradle/
+build/
+!gradle/wrapper/gradle-wrapper.jar
+!**/src/main/**/build/
+!**/src/test/**/build/
+
+# npm
+node_modules/
+dist/
+dist-ssr
+*.local
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# 后端特定
+backend/bin/
+backend/uploads/
+
+# 前端特定
+!frontend/.vscode/extensions.json
+
+# 笔记
+笔记/
