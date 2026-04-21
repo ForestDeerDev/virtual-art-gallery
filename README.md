@@ -33,6 +33,8 @@
 
 ## 🌟 功能特性
 
+![首页截图](./screenshots/home.png)
+
 ### 🖼️ 沉浸式3D画廊
 
 ```
@@ -43,12 +45,16 @@
 就像在卢浮宫、MoMA一样真实
 ```
 
+![3D画廊截图](./screenshots/gallery-3d.png)
+
 - 基于 Three.js 构建的 WebGL 3D 引擎
 - 支持第一人称视角的自由漫游
 - 实时光影渲染，还原真实观展体验
 - 交互式展品查看，支持缩放、旋转
 
 ### 🎨 艺术品全生命周期管理
+
+![搜索功能截图](./screenshots/search.png)
 
 - **上传** - 支持图片、视频等多种格式，一键上传
 - **分类** - 智能标签系统，让艺术品井井有条
@@ -168,7 +174,7 @@ virtual-art-gallery/
 1. **克隆项目**
 
 ```bash
-git clone https://github.com/yourusername/virtual-art-gallery.git
+git clone https://github.com/ForestDeerDev/virtual-art-gallery.git
 cd virtual-art-gallery/backend
 ```
 

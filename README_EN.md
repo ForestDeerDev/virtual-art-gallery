@@ -33,6 +33,8 @@ We believe that art should not be limited by physical space. Virtual Art Gallery
 
 ## 🌟 Features
 
+![Home Screenshot](./screenshots/home.png)
+
 ### 🖼️ Immersive 3D Gallery
 
 ```
@@ -43,12 +45,16 @@ You can freely move, rotate, and observe up close
 Just as real as the Louvre or MoMA
 ```
 
+![3D Gallery Screenshot](./screenshots/gallery-3d.png)
+
 - WebGL 3D engine built with Three.js
 - First-person perspective free roaming
 - Real-time lighting rendering, authentic exhibition experience
 - Interactive exhibit viewing with zoom and rotation support
 
 ### 🎨 Artwork Lifecycle Management
+
+![Search Feature Screenshot](./screenshots/search.png)
 
 - **Upload** - Support multiple formats including images and videos, one-click upload
 - **Categorize** - Smart tagging system, keeping artworks organized
@@ -168,7 +174,7 @@ virtual-art-gallery/
 1. **Clone the project**
 
 ```bash
-git clone https://github.com/yourusername/virtual-art-gallery.git
+git clone https://github.com/ForestDeerDev/virtual-art-gallery.git
 cd virtual-art-gallery/backend
 ```
 
