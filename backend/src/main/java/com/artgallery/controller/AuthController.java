@@ -2,6 +2,7 @@ package com.artgallery.controller;
 
 import com.artgallery.dto.AuthResponse;
 import com.artgallery.dto.LoginRequest;
+import com.artgallery.dto.OAuthRequest;
 import com.artgallery.dto.RegisterRequest;
 import com.artgallery.service.OAuthService;
 import com.artgallery.service.UserService;
@@ -66,19 +67,5 @@ public class AuthController {
         return ResponseEntity.ok(response);
     }
 
-    /**
-     * 第三方登录请求DTO
-     */
-    public static class OAuthRequest {
-        private String code;
-
-        public String getCode() {
-            return code;
-        }
-
-        public void setCode(String code) {
-            this.code = code;
-        }
-    }
 }
 
