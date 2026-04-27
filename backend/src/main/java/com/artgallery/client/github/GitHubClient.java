@@ -12,8 +12,8 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.web.reactive.function.client.WebClient;
 
 /**
- * GitHub API Client
- * Handles HTTP calls to GitHub OAuth API
+ * GitHub API 客户端
+ * 处理 GitHub OAuth API 的 HTTP 调用
  * 
  * @author Art Gallery Team
  */
@@ -27,19 +27,21 @@ public class GitHubClient {
     private final GitHubProperties properties;
 
     /**
-     * Exchange authorization code for access token
+     * 用授权码换取访问令牌
      * 
-     * @param code Authorization code from GitHub
-     * @return Access token
+     * @param code GitHub 返回的授权码
+     * @return 访问令牌
      */
     public String exchangeCodeForToken(String code) {
         log.info("Exchanging code for token from GitHub");
         
+        // 准备一个表，把登录需要的参数（client_id、client_secret、code）装进去，等会发给 OAuth 服务器。
         MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
         params.add("client_id", properties.getClientId());
         params.add("client_secret", properties.getClientSecret());
         params.add("code", code);
 
+        // 发一个 POST 请求，把参数发过去，等服务器返回 token，然后把结果当字符串拿回来
         String responseBody = webClient.post()
             .uri(properties.getTokenUri())
             .contentType(MediaType.APPLICATION_FORM_URLENCODED)
@@ -53,11 +55,11 @@ public class GitHubClient {
     }
 
     /**
-     * Extract access token from GitHub's form-urlencoded response
-     * Format: access_token=xxx&token_type=bearer&scope=...
+     * 从 GitHub 的表单编码响应中提取访问令牌
+     * 格式: access_token=xxx&token_type=bearer&scope=...
      * 
-     * @param tokenResponse Form-urlencoded response body
-     * @return Access token
+     * @param tokenResponse 表单编码的响应体
+     * @return 访问令牌
      */
     private String extractAccessToken(String tokenResponse) {
         if (tokenResponse == null || tokenResponse.isEmpty()) {
@@ -78,10 +80,10 @@ public class GitHubClient {
     }
 
     /**
-     * Get user information from GitHub
+     * 从 GitHub 获取用户信息
      * 
-     * @param accessToken GitHub access token
-     * @return GitHub user information
+     * @param accessToken GitHub 访问令牌
+     * @return GitHub 用户信息
      */
     public GitHubUser getUserInfo(String accessToken) {
         log.info("Fetching user info from GitHub");
@@ -96,10 +98,10 @@ public class GitHubClient {
     }
 
     /**
-     * Get user emails from GitHub
+     * 从 GitHub 获取用户邮箱
      * 
-     * @param accessToken GitHub access token
-     * @return Array of user emails
+     * @param accessToken GitHub 访问令牌
+     * @return 用户邮箱数组
      */
     public GitHubEmail[] getUserEmails(String accessToken) {
         log.info("Fetching user emails from GitHub");

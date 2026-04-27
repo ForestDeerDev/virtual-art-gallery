@@ -12,8 +12,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 /**
- * GitHub OAuth Provider Implementation
- * Orchestrates GitHub OAuth authentication flow using Client layer
+ * GitHub OAuth 提供者实现
+ * 使用 Client 层协调 GitHub OAuth 认证流程
  * 
  * @author Art Gallery Team
  */
@@ -22,11 +22,12 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class GitHubOAuthProvider implements OAuthProvider {
 
-    private final GitHubClient gitHubClient;
-    private final GitHubUserMapper userMapper;
+    private final GitHubClient gitHubClient; // GitHub API 客户端
+    private final GitHubUserMapper userMapper; // GitHub 用户信息映射器
 
     @Override
     public String exchangeCodeForToken(String code) throws OAuthException {
+        // 使用授权码换取访问令牌
         try {
             return gitHubClient.exchangeCodeForToken(code);
         } catch (Exception e) {
@@ -38,10 +39,12 @@ public class GitHubOAuthProvider implements OAuthProvider {
 
     @Override
     public OAuthUserInfo getUserInfo(String accessToken) throws OAuthException {
+        // 使用访问令牌获取用户信息
         try {
             GitHubUser githubUser = gitHubClient.getUserInfo(accessToken);
             
             String email = githubUser.getEmail();
+            // 如果用户信息中没有邮箱，则从邮箱列表中获取主邮箱
             if (email == null || email.isEmpty()) {
                 GitHubEmail[] emails = gitHubClient.getUserEmails(accessToken);
                 email = userMapper.findPrimaryEmail(emails);
@@ -57,6 +60,7 @@ public class GitHubOAuthProvider implements OAuthProvider {
 
     @Override
     public String getProviderName() {
+        // 返回 OAuth 提供者名称
         return "github";
     }
 }

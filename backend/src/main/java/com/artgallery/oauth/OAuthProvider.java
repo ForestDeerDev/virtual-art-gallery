@@ -1,37 +1,37 @@
 package com.artgallery.oauth;
 
 /**
- * OAuth Provider Interface
- * Defines standard OAuth capabilities for third-party login providers
+ * OAuth 提供者接口
+ * 定义第三方登录提供商的标准 OAuth 功能
  * 
- * Strategy Pattern: Each OAuth provider implements this interface
+ * 策略模式：每个 OAuth 提供者都实现此接口
  * 
  * @author Art Gallery Team
  */
 public interface OAuthProvider {
 
     /**
-     * Exchange authorization code for access token
+     * 使用授权码交换访问令牌
      * 
-     * @param code Authorization code from OAuth provider
-     * @return Access token string
-     * @throws OAuthException if token exchange fails
+     * @param code 来自 OAuth 提供商的授权码
+     * @return 访问令牌字符串
+     * @throws OAuthException 如果令牌交换失败
      */
     String exchangeCodeForToken(String code) throws OAuthException;
 
     /**
-     * Get user information using access token
+     * 使用访问令牌获取用户信息
      * 
-     * @param accessToken Access token from OAuth provider
-     * @return OAuth user information
-     * @throws OAuthException if user info retrieval fails
+     * @param accessToken 来自 OAuth 提供商的访问令牌
+     * @return OAuth 用户信息
+     * @throws OAuthException 如果获取用户信息失败
      */
     OAuthUserInfo getUserInfo(String accessToken) throws OAuthException;
 
     /**
-     * Get provider name (e.g., "github", "google", "wechat")
+     * 获取提供商名称（例如："github"、"google"、"wechat"）
      * 
-     * @return Provider name
+     * @return 提供商名称
      */
     String getProviderName();
 }

@@ -32,24 +32,24 @@ public class OAuthServiceImpl implements OAuthService {
     }
 
     /**
-     * Handle OAuth login
+     * 处理 OAuth 登录
      * 
-     * @param provider OAuth provider name (e.g., "github", "google")
-     * @param code Authorization code from OAuth provider
-     * @return Authentication response with JWT token and user info
-     * @throws OAuthException if OAuth flow fails
+     * @param provider OAuth 提供商名称（如 "github", "google"）
+     * @param code 来自 OAuth 提供商的授权码
+     * @return 包含 JWT 令牌和用户信息的认证响应
+     * @throws OAuthException 如果 OAuth 流程失败
      */
     public AuthResponse oauthLogin(String provider, String code) throws OAuthException {
-        // Get the appropriate OAuth provider
+        // 获取对应的 OAuth 提供商
         OAuthProvider oauthProvider = providerRegistry.getProvider(provider);
 
-        // Exchange code for access token
+        // 用授权码换取访问令牌
         String accessToken = oauthProvider.exchangeCodeForToken(code);
 
-        // Get user info using access token
+        // 使用访问令牌获取用户信息
         OAuthUserInfo userInfo = oauthProvider.getUserInfo(accessToken);
 
-        // Delegate to UserService for user login/registration and JWT generation
+        // 委托给 UserService 进行用户登录/注册和 JWT 生成
         AuthResponse authResponse = userService.oauthLogin(userInfo);
 
         return authResponse;

@@ -8,11 +8,11 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 /**
- * OAuth Provider Registry
- * Manages all OAuth provider implementations
+ * OAuth 提供者注册表
+ * 管理所有 OAuth 提供者实现
  * 
- * Factory/Registry Pattern: Automatically registers all OAuthProvider beans
- * and provides lookup by provider name
+ * 工厂/注册表模式：自动注册所有 OAuthProvider bean
+ * 并通过提供者名称进行查找
  * 
  * @author Art Gallery Team
  */
@@ -22,10 +22,11 @@ public class OAuthProviderRegistry {
     private final Map<String, OAuthProvider> providers;
 
     /**
-     * Constructor - auto-injects all OAuthProvider implementations
+     * 构造函数 - 自动注入所有 OAuthProvider 实现
      * 
-     * @param providerCollection Collection of all OAuthProvider beans
+     * @param providerCollection 所有 OAuthProvider bean 的集合
      */
+    // https://chatgpt.com/c/69ec8bac-b650-83ea-9689-c3ed1906a629
     public OAuthProviderRegistry(Collection<OAuthProvider> providerCollection) {
         this.providers = providerCollection.stream()
             .collect(Collectors.toMap(
@@ -35,11 +36,11 @@ public class OAuthProviderRegistry {
     }
 
     /**
-     * Get OAuth provider by name
+     * 根据名称获取 OAuth 提供者
      * 
-     * @param providerName Provider name (e.g., "github", "google")
-     * @return OAuth provider implementation
-     * @throws OAuthException if provider not found
+     * @param providerName 提供者名称（例如 "github", "google"）
+     * @return OAuth 提供者实现
+     * @throws OAuthException 如果未找到提供者
      */
     public OAuthProvider getProvider(String providerName) throws OAuthException {
         OAuthProvider provider = providers.get(providerName.toLowerCase());
@@ -51,19 +52,19 @@ public class OAuthProviderRegistry {
     }
 
     /**
-     * Check if provider is supported
+     * 检查提供者是否受支持
      * 
-     * @param providerName Provider name
-     * @return true if supported, false otherwise
+     * @param providerName 提供者名称
+     * @return 如果支持返回 true，否则返回 false
      */
     public boolean isProviderSupported(String providerName) {
         return providers.containsKey(providerName.toLowerCase());
     }
 
     /**
-     * Get all registered provider names
+     * 获取所有已注册的提供者名称
      * 
-     * @return Collection of provider names
+     * @return 提供者名称集合
      */
     public Collection<String> getSupportedProviders() {
         return providers.keySet();
