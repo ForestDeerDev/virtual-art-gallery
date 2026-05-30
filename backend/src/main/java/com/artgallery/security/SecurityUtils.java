@@ -18,6 +18,7 @@ public class SecurityUtils {
      * 
      * @return Authentication对象
      */
+    // 对 Spring Security 的获取认证信息逻辑做了一层统一封装
     public static Authentication getAuthentication() {
         return SecurityContextHolder.getContext().getAuthentication();
     }
@@ -30,6 +31,7 @@ public class SecurityUtils {
      */
     public static UserPrincipal getCurrentUserPrincipal() {
         Authentication authentication = getAuthentication();
+        // 认证信息不存在或Principal为null，说明用户未认证
         if (authentication == null || authentication.getPrincipal() == null) {
             throw new BusinessException("UNAUTHORIZED", "用户未认证", HttpStatus.UNAUTHORIZED);
         }
@@ -79,6 +81,7 @@ public class SecurityUtils {
      */
     public static boolean isAuthenticated() {
         Authentication authentication = getAuthentication();
+        // 检查认证信息是否存在、是否已认证、且不是匿名用户
         return authentication != null && 
                authentication.isAuthenticated() && 
                !"anonymousUser".equals(authentication.getPrincipal());

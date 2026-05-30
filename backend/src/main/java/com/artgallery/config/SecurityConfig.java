@@ -55,24 +55,24 @@ public class SecurityConfig {
             // 配置请求授权
             .authorizeHttpRequests(auth -> auth
                 // 公开访问的接口
-                .requestMatchers("/auth/**").permitAll()
-                .requestMatchers(HttpMethod.GET, "/artworks").permitAll()
-                .requestMatchers(HttpMethod.GET, "/artworks/search").permitAll()
-                .requestMatchers(HttpMethod.GET, "/artworks/*").permitAll()
-                .requestMatchers(HttpMethod.POST, "/artworks").hasAnyRole("USER", "ADMIN")
-                .requestMatchers(HttpMethod.PUT, "/artworks/*").hasAnyRole("USER", "ADMIN")
-                .requestMatchers(HttpMethod.DELETE, "/artworks/*").hasAnyRole("USER", "ADMIN")
+                .requestMatchers("/auth/**").permitAll() // 认证相关接口
+                .requestMatchers(HttpMethod.GET, "/artworks").permitAll() // 艺术品列表
+                .requestMatchers(HttpMethod.GET, "/artworks/search").permitAll() // 搜索
+                .requestMatchers(HttpMethod.GET, "/artworks/*").permitAll() // 单个艺术品
+                .requestMatchers(HttpMethod.POST, "/artworks").hasAnyRole("USER", "ADMIN") // 创建艺术品
+                .requestMatchers(HttpMethod.PUT, "/artworks/*").hasAnyRole("USER", "ADMIN") // 更新艺术品
+                .requestMatchers(HttpMethod.DELETE, "/artworks/*").hasAnyRole("USER", "ADMIN") // 删除艺术品
                 // 互动相关接口
-                .requestMatchers(HttpMethod.GET, "/interactions/**").permitAll()
-                .requestMatchers(HttpMethod.POST, "/interactions/**").hasAnyRole("USER", "ADMIN")
-                .requestMatchers(HttpMethod.DELETE, "/interactions/**").hasAnyRole("USER", "ADMIN")
+                .requestMatchers(HttpMethod.GET, "/interactions/**").permitAll() // 互动列表
+                .requestMatchers(HttpMethod.POST, "/interactions/**").hasAnyRole("USER", "ADMIN") // 创建互动
+                .requestMatchers(HttpMethod.DELETE, "/interactions/**").hasAnyRole("USER", "ADMIN") // 删除互动
                 // 其他接口
-                .requestMatchers("/uploads/**").permitAll()
-                .requestMatchers("/upload/**").hasAnyRole("USER", "ADMIN")
-                .requestMatchers("/user/info").authenticated()
-                .requestMatchers("/user/**").authenticated()
-                .requestMatchers("/admin/**").hasRole("ADMIN")
-                .anyRequest().authenticated()
+                .requestMatchers("/uploads/**").permitAll() // 上传文件
+                .requestMatchers("/upload/**").hasAnyRole("USER", "ADMIN") // 上传接口
+                .requestMatchers("/user/info").authenticated() // 用户信息
+                .requestMatchers("/user/**").authenticated() // 用户相关接口
+                .requestMatchers("/admin/**").hasRole("ADMIN") // 管理员接口
+                .anyRequest().authenticated() // 其他接口需要认证
             )
             
             // 添加JWT认证过滤器

@@ -55,12 +55,18 @@ public class AdminController {
      */
     @PutMapping("/users/{id}/role")
     public ResponseEntity<UserDTO> updateUserRole(
+            // 获取路径中的 id 参数，例如：/users/1/role 中的 1
             @PathVariable Long id,
+            // 获取请求体中的 JSON 数据，例如："role": "admin"
             @RequestBody Map<String, String> request) {
         
+        // 从请求体中取出 role 字段的值，request.get("role") -> "admin"
         String roleStr = request.get("role");
+         // 转成大写后转换为 UserRole 枚举类型，"admin" -> "ADMIN"，UserRole.ADMIN
         UserRole role = UserRole.valueOf(roleStr.toUpperCase());
+        // 调用业务层方法更新用户角色
         UserDTO user = userService.updateUserRole(id, role);
+        // 返回 HTTP 200 响应，并把更新后的用户数据返回给前端
         return ResponseEntity.ok(user);
     }
 
