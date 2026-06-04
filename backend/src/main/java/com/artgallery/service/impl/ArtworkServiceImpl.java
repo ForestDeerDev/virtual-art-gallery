@@ -9,12 +9,16 @@ import com.artgallery.mapper.ArtworkMapper;
 import com.artgallery.repository.ArtworkRepository;
 import com.artgallery.repository.UserRepository;
 import com.artgallery.service.ArtworkService;
+import com.artgallery.service.FileStorageService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import java.util.List;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import java.util.stream.Collectors;
 
@@ -29,6 +33,8 @@ import java.util.stream.Collectors;
 @Transactional
 @SuppressWarnings("nullness")
 public class ArtworkServiceImpl implements ArtworkService {
+
+    private static final Logger logger = LoggerFactory.getLogger(ArtworkServiceImpl.class);
 
     /**
      * 艺术作品数据访问层
@@ -48,10 +54,13 @@ public class ArtworkServiceImpl implements ArtworkService {
      */
     private final ArtworkMapper artworkMapper;
 
-    public ArtworkServiceImpl(ArtworkRepository artworkRepository, UserRepository userRepository, ArtworkMapper artworkMapper) {
+    private final FileStorageService fileStorageService;
+
+    public ArtworkServiceImpl(ArtworkRepository artworkRepository, UserRepository userRepository, ArtworkMapper artworkMapper, FileStorageService fileStorageService) {
         this.artworkRepository = artworkRepository;
         this.userRepository = userRepository;
         this.artworkMapper = artworkMapper;
+        this.fileStorageService = fileStorageService;
     }
 
     /**
@@ -253,8 +262,14 @@ public class ArtworkServiceImpl implements ArtworkService {
         // 验证权限
         verifyArtworkPermission(artwork, userId, "删除");
 
-        // 执行删除操作
+        // 先保存文件URL（在删除前获取）
+        String imageUrl = artwork.getImageUrl();
+
+        // 先删除数据库记录
         artworkRepository.delete(artwork);
+
+        // 文件删除放在事务外执行，避免影响数据库操作
+        deleteArtworkFileSafe(imageUrl);
     }
 
     /**
@@ -270,13 +285,39 @@ public class ArtworkServiceImpl implements ArtworkService {
         // 批量查询要删除的作品
         List<Artwork> artworks = artworkRepository.findByIdIn(ids);
         
-        // 逐个检查权限，确保用户有权限删除所有作品
-        for (Artwork artwork : artworks) {
-            verifyArtworkPermission(artwork, userId, "删除作品：" + artwork.getTitle());
-        }
+        // 先收集所有要删除的文件URL
+        List<String> imageUrls = artworks.stream()
+            .peek(artwork -> verifyArtworkPermission(artwork, userId, "删除作品：" + artwork.getTitle()))
+            .map(Artwork::getImageUrl)
+            .filter(url -> url != null && !url.isEmpty())
+            .toList();
 
-        // 批量删除作品
+        // 先删除数据库记录
         artworkRepository.deleteAll(artworks);
+
+        // 文件删除放在事务外执行，避免影响数据库操作
+        for (String imageUrl : imageUrls) {
+            deleteArtworkFileSafe(imageUrl);
+        }
+    }
+
+    /**
+     * 安全删除艺术作品图片文件（事务外执行）
+     * 捕获异常不影响主流程，记录日志便于后续清理
+     *
+     * @param imageUrl 图片URL
+     */
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    public void deleteArtworkFileSafe(String imageUrl) {
+        if (imageUrl == null || imageUrl.isEmpty()) {
+            return;
+        }
+        try {
+            fileStorageService.deleteFile(imageUrl);
+        } catch (Exception e) {
+            logger.warn("删除文件失败，URL: {}, 错误: {}", imageUrl, e.getMessage());
+            // 文件删除失败不影响数据库删除，记录日志便于后续人工清理
+        }
     }
 
     /**
