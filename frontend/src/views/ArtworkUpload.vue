@@ -131,9 +131,11 @@
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import Navbar from '@/components/Navbar.vue'
+import { useArtworkStore } from '@/stores/artwork'
 import artworkApi from '@/api/artwork'
 
 const router = useRouter()
+const artworkStore = useArtworkStore()
 
 const form = ref({
   title: '',
@@ -210,7 +212,7 @@ const handleSubmit = async () => {
   success.value = ''
 
   try {
-    await artworkApi.createArtwork(form.value)
+    await artworkStore.createArtwork(form.value)
     success.value = '作品发布成功！'
     
     setTimeout(() => {

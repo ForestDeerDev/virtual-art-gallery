@@ -63,13 +63,13 @@
 
           <!-- Artworks Table -->
           <el-card>
-            <div v-if="loading" class="loading-spinner">
+            <div v-if="artworkStore.loading" class="loading-spinner">
               <el-icon class="is-loading" :size="50"><Loading /></el-icon>
             </div>
-            <div v-else-if="artworks.length === 0" class="text-center py-5 text-muted">
+            <div v-else-if="artworkStore.artworks.length === 0" class="text-center py-5 text-muted">
               暂无作品
             </div>
-            <el-table v-else :data="artworks" stripe @selection-change="handleSelectionChange">
+            <el-table v-else :data="artworkStore.artworks" stripe @selection-change="handleSelectionChange">
               <el-table-column type="selection" width="55" />
               <el-table-column label="预览" width="100">
                 <template #default="{ row }">
@@ -192,15 +192,15 @@
 import { ref, onMounted, computed } from 'vue'
 import { useRoute } from 'vue-router'
 import Navbar from '@/components/Navbar.vue'
-import artworkApi from '@/api/artwork'
+import { useArtworkStore } from '@/stores/artwork'
 import { ElMessage, ElMessageBox } from 'element-plus'
 
 const route = useRoute()
+const artworkStore = useArtworkStore()
 
 const activeMenu = computed(() => route.path)
 
-const artworks = ref([])
-const loading = ref(true)
+
 const selectedArtworks = ref([])
 const showCreateModal = ref(false)
 const showBatchUpdateModal = ref(false)
@@ -222,7 +222,7 @@ const batchUpdateForm = ref({
 })
 
 const allSelected = computed(() => {
-  return artworks.value.length > 0 && selectedArtworks.value.length === artworks.value.length
+  return artworkStore.artworks.length > 0 && selectedArtworks.value.length === artworkStore.artworks.length
 })
 
 onMounted(() => {
@@ -230,23 +230,10 @@ onMounted(() => {
 })
 
 const loadArtworks = async () => {
-  loading.value = true
   try {
-    const response = await artworkApi.getArtworks({ pageSize: 100 })
-    artworks.value = response.data || []
+    await artworkStore.fetchArtworks({ pageSize: 100 })
   } catch (error) {
     console.error('获取作品列表失败:', error)
-    // 使用模拟数据
-    artworks.value = Array.from({ length: 10 }, (_, i) => ({
-      id: i + 1,
-      title: `作品 ${i + 1}`,
-      artist: `艺术家 ${i + 1}`,
-      category: ['油画', '水彩', '素描'][i % 3],
-      imageUrl: 'https://via.placeholder.com/300',
-      createTime: '2024-01-01'
-    }))
-  } finally {
-    loading.value = false
   }
 }
 
@@ -284,8 +271,7 @@ const handleDelete = async (id) => {
       type: 'warning'
     })
 
-    await artworkApi.deleteArtwork(id)
-    artworks.value = artworks.value.filter(a => a.id !== id)
+    await artworkStore.deleteArtwork(id)
     ElMessage.success('删除成功')
   } catch (error) {
     if (error !== 'cancel') {
@@ -306,8 +292,7 @@ const handleBatchDelete = async () => {
       }
     )
 
-    await artworkApi.batchDeleteArtworks(selectedArtworks.value)
-    artworks.value = artworks.value.filter(a => !selectedArtworks.value.includes(a.id))
+    await artworkStore.batchDeleteArtworks(selectedArtworks.value)
     selectedArtworks.value = []
     ElMessage.success('批量删除成功')
   } catch (error) {
@@ -358,15 +343,10 @@ const handleSubmit = async () => {
     delete artworkData.tagsInput
 
     if (editingArtwork.value) {
-      await artworkApi.updateArtwork(editingArtwork.value.id, artworkData)
-      const index = artworks.value.findIndex(a => a.id === editingArtwork.value.id)
-      if (index > -1) {
-        artworks.value[index] = { ...artworks.value[index], ...artworkData }
-      }
+      await artworkStore.updateArtwork(editingArtwork.value.id, artworkData)
       ElMessage.success('更新成功')
     } else {
-      const response = await artworkApi.createArtwork(artworkData)
-      artworks.value.unshift(response.data || response)
+      await artworkStore.createArtwork(artworkData)
       ElMessage.success('创建成功')
     }
 
