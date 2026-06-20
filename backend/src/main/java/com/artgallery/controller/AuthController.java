@@ -61,7 +61,7 @@ public class AuthController {
      */
     @PostMapping("/oauth/{provider}")
     public ResponseEntity<AuthResponse> oauthLogin(
-            @PathVariable String provider,
+            @PathVariable("provider") String provider,
             @RequestBody OAuthRequest request) {
         AuthResponse response = oauthService.oauthLogin(provider, request.getCode());
         return ResponseEntity.ok(response);

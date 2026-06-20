@@ -56,7 +56,7 @@ public class AdminController {
     @PutMapping("/users/{id}/role")
     public ResponseEntity<UserDTO> updateUserRole(
             // 获取路径中的 id 参数，例如：/users/1/role 中的 1
-            @PathVariable Long id,
+            @PathVariable("id") Long id,
             // 获取请求体中的 JSON 数据，例如："role": "admin"
             @RequestBody Map<String, String> request) {
         
@@ -79,7 +79,7 @@ public class AdminController {
      * @return 成功响应
      */
     @DeleteMapping("/users/{id}")
-    public ResponseEntity<Void> deleteUser(@PathVariable Long id) {
+    public ResponseEntity<Void> deleteUser(@PathVariable("id") Long id) {
         userService.deleteUser(id);
         return ResponseEntity.noContent().build();
     }

@@ -42,7 +42,7 @@ public class UserController {
      * @return 用户信息
      */
     @GetMapping("/{id}")
-    public ResponseEntity<UserDTO> getUserById(@PathVariable Long id) {
+    public ResponseEntity<UserDTO> getUserById(@PathVariable("id") Long id) {
         UserDTO userDTO = userService.getUserInfo(id);
         return ResponseEntity.ok(userDTO);
     }

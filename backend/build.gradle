@@ -65,9 +65,11 @@ tasks.named('test') {
     useJUnitPlatform()
 }
 
-// 设置编码
+// 设置编码和编译参数
 tasks.withType(JavaCompile) {
     options.encoding = 'UTF-8'
+    // 保留参数名信息，用于反射获取参数名（Spring MVC、Jackson、Lombok等需要）
+    options.compilerArgs += '-parameters'
 }
 
 // 打包配置

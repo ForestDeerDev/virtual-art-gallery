@@ -40,12 +40,12 @@ public class ArtworkController {
      */
     @GetMapping
     public ResponseEntity<PageResponse<ArtworkDTO>> getArtworks(
-            @RequestParam(required = false) Integer page,
-            @RequestParam(required = false) Integer pageSize,
-            @RequestParam(required = false) String category,
-            @RequestParam(required = false) String sortBy,
-            @RequestParam(required = false) String tags,
-            @RequestParam(required = false) Boolean featured) {
+            @RequestParam(name = "page", required = false) Integer page,
+            @RequestParam(name = "pageSize", required = false) Integer pageSize,
+            @RequestParam(name = "category", required = false) String category,
+            @RequestParam(name = "sortBy", required = false) String sortBy,
+            @RequestParam(name = "tags", required = false) String tags,
+            @RequestParam(name = "featured", required = false) Boolean featured) {
         
         PageResponse<ArtworkDTO> response = artworkService.getArtworks(
             page, pageSize, category, sortBy, tags, featured
@@ -62,7 +62,7 @@ public class ArtworkController {
      * @return 作品详情
      */
     @GetMapping("/{id}")
-    public ResponseEntity<ArtworkDTO> getArtworkById(@PathVariable Long id) {
+    public ResponseEntity<ArtworkDTO> getArtworkById(@PathVariable("id") Long id) {
         ArtworkDTO artwork = artworkService.getArtworkById(id);
         return ResponseEntity.ok(artwork);
     }
@@ -97,7 +97,7 @@ public class ArtworkController {
     @PutMapping("/{id}")
     @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
     public ResponseEntity<ArtworkDTO> updateArtwork(
-            @PathVariable Long id,
+            @PathVariable("id") Long id,
             @RequestBody ArtworkUpdateRequest request) {
         Long userId = SecurityUtils.getCurrentUserId();
         ArtworkDTO artwork = artworkService.updateArtwork(id, request, userId);
@@ -115,7 +115,7 @@ public class ArtworkController {
      */
     @DeleteMapping("/{id}")
     @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
-    public ResponseEntity<Void> deleteArtwork(@PathVariable Long id) {
+    public ResponseEntity<Void> deleteArtwork(@PathVariable("id") Long id) {
         Long userId = SecurityUtils.getCurrentUserId();
         artworkService.deleteArtwork(id, userId);
         return ResponseEntity.noContent().build();
@@ -167,9 +167,9 @@ public class ArtworkController {
      */
     @GetMapping("/search")
     public ResponseEntity<PageResponse<ArtworkDTO>> searchArtworks(
-            @RequestParam String keyword,
-            @RequestParam(required = false) Integer page,
-            @RequestParam(required = false) Integer pageSize) {
+            @RequestParam(name = "keyword") String keyword,
+            @RequestParam(name = "page", required = false) Integer page,
+            @RequestParam(name = "pageSize", required = false) Integer pageSize) {
         
         PageResponse<ArtworkDTO> response = artworkService.searchArtworks(keyword, page, pageSize);
         return ResponseEntity.ok(response);
