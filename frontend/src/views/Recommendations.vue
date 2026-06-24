@@ -110,6 +110,7 @@ import Navbar from '@/components/Navbar.vue'
 import Footer from '@/components/Footer.vue'
 import { useUserStore } from '@/stores/user'
 import artworkApi from '@/api/artwork'
+import { cleanTags, parseCommaSeparated } from '@/utils/tags'
 
 const userStore = useUserStore()
 
@@ -119,13 +120,7 @@ const loading = ref(true)
 const userTags = computed(() => {
   const tags = userStore.userInfo?.tags
   console.log('User tags raw data:', tags)
-  if (!tags) return []
-  if (Array.isArray(tags)) {
-    // 过滤掉无效的标签值，包括仅包含问号的标签
-    return tags.filter(tag => tag && tag.trim() !== '' && !/^\?+$/.test(tag))
-  }
-  // 如果tags是字符串，将其分割为数组
-  return tags.split(',').map(tag => tag.trim()).filter(tag => tag && tag !== '' && !/^\?+$/.test(tag))
+  return cleanTags(tags)
 })
 
 onMounted(async () => {
@@ -157,7 +152,7 @@ const loadRecommendations = async () => {
       // 根据标签匹配推荐
       recommendations.value = all
         .map(artwork => {
-          const artworkTags = Array.isArray(artwork.tags) ? artwork.tags : (artwork.tags || '').split(',').map(t => t.trim()).filter(t => t)
+          const artworkTags = parseCommaSeparated(artwork.tags)
           const matchingTags = artworkTags.filter(tag =>
             userTags.value.includes(tag)
           )

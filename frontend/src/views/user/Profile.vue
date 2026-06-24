@@ -87,6 +87,7 @@ import { ref, onMounted } from 'vue'
 import Navbar from '@/components/Navbar.vue'
 import { useUserStore } from '@/stores/user'
 import userApi from '@/api/user'
+import { parseCommaSeparated } from '@/utils/tags'
 
 const userStore = useUserStore()
 
@@ -108,7 +109,7 @@ onMounted(() => {
     form.value.username = userStore.userInfo.username || ''
     form.value.email = userStore.userInfo.email || ''
     const tags = userStore.userInfo.tags || []
-    form.value.tags = Array.isArray(tags) ? tags : tags.split(',').map(tag => tag.trim()).filter(tag => tag)
+    form.value.tags = parseCommaSeparated(tags)
   }
 })
 

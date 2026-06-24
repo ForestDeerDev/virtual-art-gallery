@@ -39,7 +39,7 @@
             <div v-if="artworkStore.currentArtwork.tags && (Array.isArray(artworkStore.currentArtwork.tags) ? artworkStore.currentArtwork.tags.length > 0 : artworkStore.currentArtwork.tags.trim().length > 0)" class="mt-3">
               <strong>标签：</strong>
               <el-tag
-                v-for="tag in (Array.isArray(artworkStore.currentArtwork.tags) ? artworkStore.currentArtwork.tags : artworkStore.currentArtwork.tags.split(',').map(t => t.trim()).filter(t => t))"
+                v-for="tag in parseCommaSeparated(artworkStore.currentArtwork.tags)"
                 :key="tag"
                 type="info"
                 class="me-2"
@@ -270,6 +270,7 @@ import { useArtworkStore } from '@/stores/artwork'
 import { useInteractionStore } from '@/stores/interaction'
 import Navbar from '@/components/Navbar.vue'
 import Footer from '@/components/Footer.vue'
+import { parseCommaSeparated } from '@/utils/tags'
 
 const route = useRoute()
 const userStore = useUserStore()

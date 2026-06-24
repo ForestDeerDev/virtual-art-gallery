@@ -1,16 +1,27 @@
-/**
- * Clean and normalize tags
- * @param {string|string[]} tags - Tags as string (comma-separated) or array
- * @returns {string[]} Cleaned array of tags
- */
+function normalizeTag(tag: string): string {
+  return tag.trim()
+}
+
+function isValidTag(tag: string): boolean {
+  return tag !== '' && !/^\?+$/.test(tag)
+}
+
+export function parseCommaSeparated(
+  str: string | string[],
+  separator = ','
+): string[] {
+  if (str == null) return []
+
+  const arr = Array.isArray(str)
+    ? str
+    : str.split(separator)
+
+  return arr
+    .map(normalizeTag)
+    .filter(isValidTag)
+}
+
 export function cleanTags(tags: string | string[]): string[] {
-  if (!tags) return []
-  if (Array.isArray(tags)) {
-    return tags.filter(tag => {
-      return tag && tag.trim() !== '' && !/^\?+$/.test(tag)
-    })
-  }
-  return tags.split(',').map(tag => tag.trim()).filter(tag => {
-    return tag && tag !== '' && !/^\?+$/.test(tag)
-  })
+  if (tags == null) return []
+  return parseCommaSeparated(tags)
 }

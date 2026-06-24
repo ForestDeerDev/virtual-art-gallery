@@ -194,6 +194,7 @@ import { useRoute } from 'vue-router'
 import Navbar from '@/components/Navbar.vue'
 import { useArtworkStore } from '@/stores/artwork'
 import { ElMessage, ElMessageBox } from 'element-plus'
+import { parseCommaSeparated } from '@/utils/tags'
 
 const route = useRoute()
 const artworkStore = useArtworkStore()
@@ -338,14 +339,16 @@ const handleSubmit = async () => {
   try {
     const artworkData = {
       ...form.value,
-      tags: form.value.tagsInput.split(',').map(t => t.trim()).filter(t => t)
+      tags: parseCommaSeparated(form.value.tagsInput)
     }
     delete artworkData.tagsInput
 
     if (editingArtwork.value) {
+      // 更新模式：调用 updateArtwork，传入 ID 和数据
       await artworkStore.updateArtwork(editingArtwork.value.id, artworkData)
       ElMessage.success('更新成功')
     } else {
+      // 创建模式：调用 createArtwork，仅传入数据
       await artworkStore.createArtwork(artworkData)
       ElMessage.success('创建成功')
     }
