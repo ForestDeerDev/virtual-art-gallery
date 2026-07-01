@@ -70,13 +70,16 @@ export const useInteractionStore = defineStore('interaction', () => {
     loading.value = true
     error.value = null
     try {
+      // 先获取顶层评论列表
       const response = await interactionApi.getTopLevelComments(artworkId)
       comments.value = response || []
       
       const commentsWithReplies = await Promise.all(
         comments.value.map(async (comment) => {
           try {
+            // 对每条评论，需要异步获取它的回复列表
             const replies = await interactionApi.getReplies(comment.id)
+            // 将评论和回复合并成新对象
             return { ...comment, replies: replies || [] }
           } catch {
             return { ...comment, replies: [] }
@@ -123,6 +126,8 @@ export const useInteractionStore = defineStore('interaction', () => {
     error.value = null
     try {
       await interactionApi.deleteComment(commentId)
+      // filter 方法在内部遍历时，会依次把每个评论对象传入给 c 回调函数
+      // 删除 id 等于 commentId 的评论，保留所有不匹配的评论
       comments.value = comments.value.filter((c: any) => c.id !== commentId)
       return true
     } catch (err: any) {
@@ -134,26 +139,8 @@ export const useInteractionStore = defineStore('interaction', () => {
     }
   }
 
-  async function submitReply(artworkId: number, commentId: number, content: string) {
-    loading.value = true
-    error.value = null
-    try {
-      await interactionApi.createComment(artworkId, {
-        content: content.trim(),
-        parentId: commentId
-      })
-      
-      await fetchComments(artworkId)
-      await fetchLikeStatus(artworkId)
-      
-      return true
-    } catch (err: any) {
-      error.value = err.message || '提交回复失败'
-      console.error('submitReply error:', err)
-      throw err
-    } finally {
-      loading.value = false
-    }
+  async function submitReply(artworkId: number, content: string, commentId: number) {
+    return submitComment(artworkId, content, commentId)
   }
 
   function resetLikeStatus() {

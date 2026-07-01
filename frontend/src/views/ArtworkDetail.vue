@@ -316,7 +316,7 @@ async function submitComment() {
 async function submitReply(commentId) {
   const artworkId = artworkStore.currentArtwork?.id
   if (artworkId && replyContent.value.trim()) {
-    await interactionStore.submitReply(artworkId, commentId, replyContent.value)
+    await interactionStore.submitReply(artworkId, replyContent.value, commentId)
     replyContent.value = ''
     replyingTo.value = null
   }
