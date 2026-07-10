@@ -2,6 +2,7 @@ import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import userApi from '@/api/user'
 import { cleanTags } from '@/utils/tags'
+import { resetTokenExpiredFlag } from '@/utils/initialize'
 
 function normalizeUserResponse(response: any) {
   if (response?.user?.tags) {
@@ -29,27 +30,32 @@ export const useUserStore = defineStore('user', () => {
     }
   }
 
-  async function login(credentials: any) {
-    const response = await userApi.login(credentials)
+  /**
+   * 设置认证数据的公共函数
+   * 统一处理 token、用户信息设置和重置 token 过期处理标志
+   */
+  function setAuthData(response: any) {
     token.value = response.token
     normalizeUserResponse(response)
     userInfo.value = response.user
+    resetTokenExpiredFlag()
+  }
+
+  async function login(credentials: any) {
+    const response = await userApi.login(credentials)
+    setAuthData(response)
     return response
   }
 
   async function register(userData: any) {
     const response = await userApi.register(userData)
-    token.value = response.token
-    normalizeUserResponse(response)
-    userInfo.value = response.user
+    setAuthData(response)
     return response
   }
 
   async function oauthLogin(provider: string, code: string) {
     const response = await userApi.oauthLogin(provider, code)
-    token.value = response.token
-    normalizeUserResponse(response)
-    userInfo.value = response.user
+    setAuthData(response)
     return response
   }
 

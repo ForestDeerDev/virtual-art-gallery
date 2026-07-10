@@ -9,6 +9,7 @@ import zhCn from 'element-plus/dist/locale/zh-cn.mjs'
 import * as ElementPlusIconsVue from '@element-plus/icons-vue'
 import './assets/css/main.css'
 import lazyLoad from './directives/lazyLoad'
+import { initializeApp } from './utils/initialize'
 
 const app = createApp(App)
 const pinia = createPinia()
@@ -27,5 +28,8 @@ app.use(ElementPlus, {
 })
 
 app.directive('lazy', lazyLoad)
+
+// 初始化应用
+initializeApp()
 
 app.mount('#app')

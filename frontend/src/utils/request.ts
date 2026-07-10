@@ -1,18 +1,30 @@
 import axios, { type AxiosInstance, type InternalAxiosRequestConfig, type AxiosResponse, type AxiosError } from 'axios'
 import { ElMessage } from 'element-plus'
 import { useUserStore } from '@/stores/user'
-import router from '@/router'
+import { isTokenExpired } from '@/utils/jwt'
+import { handleTokenExpired } from '@/utils/initialize'
 
 const request: AxiosInstance = axios.create({
   baseURL: '/api',
   timeout: 10000
 })
 
+
 // 请求拦截器
 request.interceptors.request.use(
   (config: InternalAxiosRequestConfig) => {
     const userStore = useUserStore()
     if (userStore.token) {
+      // 检查 token 是否已过期
+      if (isTokenExpired(userStore.token)) {
+        console.log('Token expired, logging out before request:', config.url)
+        handleTokenExpired()
+        const error = new Error('Token expired') as any
+        error.silent = true
+        // 把失败结果传递给后续 Promise 链处理
+        return Promise.reject(error)
+      }
+      
       config.headers.Authorization = `Bearer ${userStore.token}`
       console.log('Request with token:', config.url, userStore.token.substring(0, 20) + '...')
     } else {
@@ -31,13 +43,16 @@ request.interceptors.response.use(
     return response.data
   },
   (error: AxiosError) => {
+    // 如果是静默错误，不显示提示信息
+    if ((error as any).silent) {
+      return Promise.reject(error)
+    }
+
     if (error.response) {
       switch (error.response.status) {
         case 401:
-          const userStore = useUserStore()
-          userStore.logout()
-          router.push({ name: 'Login' })
-          ElMessage.error('登录已过期，请重新登录')
+          console.log('Received 401 response, logging out')
+          handleTokenExpired()
           break
         case 403:
           ElMessage.error('权限不足，您没有访问该资源的权限')
