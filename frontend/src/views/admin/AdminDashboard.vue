@@ -141,6 +141,7 @@ import { useRoute } from 'vue-router'
 import Navbar from '@/components/Navbar.vue'
 import artworkApi from '@/api/artwork'
 import adminApi from '@/api/admin'
+import type { ArtworkResponse } from '@/types/gallery'
 
 const route = useRoute()
 
@@ -158,7 +159,7 @@ const stats = ref({
   roleStats: {}
 })
 
-const recentArtworks = ref([])
+const recentArtworks = ref<ArtworkResponse[]>([])
 const loading = ref(false)
 
 onMounted(async () => {
@@ -168,9 +169,9 @@ onMounted(async () => {
       adminApi.getStats(),
       artworkApi.getArtworks({ limit: 10, sortBy: 'latest' })
     ])
-    
+
     stats.value = statsResponse || {}
-    recentArtworks.value = artworksResponse?.data || []
+    recentArtworks.value = artworksResponse.data || []
   } catch (error) {
     console.error('获取数据失败:', error)
   } finally {
