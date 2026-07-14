@@ -1,4 +1,7 @@
-export interface Artwork {
+/**
+ * 简化的艺术品 - 用于 3D 画廊展示
+ */
+export interface GalleryArtwork {
   id: number
   title: string
   artist: string
@@ -6,14 +9,18 @@ export interface Artwork {
   imageUrl: string
 }
 
-// 用户实时操作的状态
+/**
+ * 用户实时操作的状态
+ */
 export interface GalleryControlState {
   moveSpeed: number
   mouseSensitivity: number
   autoRotate: boolean
 }
 
-// 初始化配置（与控制状态分离）
+/**
+ * 初始化配置（与控制状态分离）
+ */
 export interface GalleryConfig {
   roomWidth?: number
   roomHeight?: number
@@ -25,7 +32,7 @@ export interface GalleryConfig {
 
 export interface GalleryOptions {
   container: HTMLElement
-  artworks: Artwork[]
+  artworks: GalleryArtwork[]
   getControls: () => GalleryControlState
   config?: GalleryConfig
   onArtworkClick: (id: number) => void
@@ -38,35 +45,4 @@ export interface GalleryInstance {
   mount: () => void
   dispose: () => void
   resetCamera: () => void
-}
-
-// API 响应类型
-export interface ArtworkResponse {
-  id: number
-  title: string
-  artist: string
-  category: string
-  imageUrl: string
-  description?: string
-  year?: number
-  createdAt?: string
-  updatedAt?: string
-}
-
-export interface ArtworkListResponse {
-  data: ArtworkResponse[]
-  page: number
-  pageSize: number
-  total: number
-  totalPages: number
-  hasPrevious: boolean
-  hasNext: boolean
-}
-
-export interface ArtworkDetailResponse extends ArtworkResponse {
-  videoUrl?: string
-  tags?: string
-  createTime?: string
-  dimensions?: string
-  material?: string
 }
