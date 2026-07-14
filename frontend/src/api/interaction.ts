@@ -1,16 +1,21 @@
 import request from '@/utils/request'
+import type {
+  Comment,
+  CommentCreateRequest,
+  LikeStatus
+} from '@/types'
 
 export default {
   // 点赞作品
-  likeArtwork(artworkId: number) {
+  likeArtwork(artworkId: number): Promise<LikeStatus> {
     return request({
       url: `/interactions/artworks/${artworkId}/like`,
       method: 'post'
-    })
+    }) as Promise<LikeStatus>
   },
 
   // 取消点赞作品
-  unlikeArtwork(artworkId: number) {
+  unlikeArtwork(artworkId: number): Promise<void> {
     return request({
       url: `/interactions/artworks/${artworkId}/like`,
       method: 'delete'
@@ -34,12 +39,15 @@ export default {
   },
 
   // 创建评论
-  createComment(artworkId: number, commentData: any) {
+  createComment(
+    artworkId: number,
+    commentData: CommentCreateRequest
+  ): Promise<Comment> {
     return request({
       url: `/interactions/artworks/${artworkId}/comments`,
       method: 'post',
       data: commentData
-    })
+    }) as Promise<Comment>
   },
 
   // 获取作品的顶层评论列表

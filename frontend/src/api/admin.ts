@@ -1,21 +1,22 @@
 import request from '@/utils/request'
+import type { AdminStats, UserManagement, UserRole } from '@/types'
 
 export default {
-  getStats() {
+  getStats(): Promise<AdminStats> {
     return request({
       url: '/admin/stats',
       method: 'get'
-    })
+    }) as Promise<AdminStats>
   },
 
-  getAllUsers() {
+  getAllUsers(): Promise<UserManagement[]> {
     return request({
       url: '/admin/users',
       method: 'get'
-    })
+    }) as Promise<UserManagement[]>
   },
 
-  updateUserRole(userId: number, role: string) {
+  updateUserRole(userId: number, role: UserRole) {
     return request({
       url: `/admin/users/${userId}/role`,
       method: 'put',

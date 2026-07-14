@@ -1,9 +1,17 @@
 import request from '@/utils/request'
-import type { ArtworkResponse, ArtworkListResponse, ArtworkDetailResponse } from '@/types/gallery'
+import type {
+  Artwork,
+  ArtworkListResponse,
+  ArtworkCreateRequest,
+  ArtworkUpdateRequest,
+  PageQuery,
+  BatchDeleteRequest,
+  BatchUpdateRequest
+} from '@/types'
 
 export default {
   // 获取艺术作品列表
-  getArtworks(params: { page?: number; pageSize?: number; limit?: number; sortBy?: string }): Promise<ArtworkListResponse> {
+  getArtworks(params: PageQuery): Promise<ArtworkListResponse> {
     return request({
       url: '/artworks',
       method: 'get',
@@ -12,29 +20,29 @@ export default {
   },
 
   // 获取艺术作品详情
-  getArtworkById(id: number): Promise<ArtworkDetailResponse> {
+  getArtworkById(id: number): Promise<Artwork> {
     return request({
       url: `/artworks/${id}`,
       method: 'get'
-    }) as Promise<ArtworkDetailResponse>
+    }) as Promise<Artwork>
   },
 
   // 创建艺术作品
-  createArtwork(artworkData: Partial<ArtworkResponse>): Promise<ArtworkResponse> {
+  createArtwork(artworkData: ArtworkCreateRequest): Promise<Artwork> {
     return request({
       url: '/artworks',
       method: 'post',
       data: artworkData
-    }) as Promise<ArtworkResponse>
+    }) as Promise<Artwork>
   },
 
   // 更新艺术作品
-  updateArtwork(id: number, artworkData: Partial<ArtworkResponse>): Promise<ArtworkResponse> {
+  updateArtwork(id: number, artworkData: ArtworkUpdateRequest): Promise<Artwork> {
     return request({
       url: `/artworks/${id}`,
       method: 'put',
       data: artworkData
-    }) as Promise<ArtworkResponse>
+    }) as Promise<Artwork>
   },
 
   // 删除艺术作品
@@ -46,20 +54,20 @@ export default {
   },
 
   // 批量删除艺术作品
-  batchDeleteArtworks(ids: number[]) {
+  batchDeleteArtworks(requestData: BatchDeleteRequest) {
     return request({
       url: '/artworks/batch',
       method: 'delete',
-      data: { ids }
+      data: requestData
     })
   },
 
   // 批量更新艺术作品
-  batchUpdateArtworks(updates: any[]) {
+  batchUpdateArtworks(requestData: BatchUpdateRequest) {
     return request({
       url: '/artworks/batch',
       method: 'put',
-      data: { updates }
+      data: requestData
     })
   },
 

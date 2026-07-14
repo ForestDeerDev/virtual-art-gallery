@@ -1,17 +1,25 @@
 import request from '@/utils/request'
+import type {
+  LoginRequest,
+  RegisterRequest,
+  OAuthRequest,
+  UserUpdateRequest,
+  AuthResponse,
+  User
+} from '@/types'
 
 export default {
   // 登录
-  login(credentials: any) {
+  login(credentials: LoginRequest): Promise<AuthResponse> {
     return request({
       url: '/auth/login',
       method: 'post',
       data: credentials
-    })
+    }) as Promise<AuthResponse>
   },
 
   // 注册
-  register(userData: any) {
+  register(userData: RegisterRequest) {
     return request({
       url: '/auth/register',
       method: 'post',
@@ -20,29 +28,31 @@ export default {
   },
 
   // 第三方登录
-  oauthLogin(provider: string, code: string) {
+  oauthLogin(requestData: OAuthRequest) {
     return request({
-      url: `/auth/oauth/${provider}`,
+      url: `/auth/oauth/${requestData.provider}`,
       method: 'post',
-      data: { code }
+      data: { code: requestData.code }
     })
   },
 
   // 获取用户信息
-  getUserInfo() {
+  getUserInfo(): Promise<User> {
     return request({
       url: '/user/info',
       method: 'get'
-    })
+    }) as Promise<User>
   },
 
   // 更新用户信息
-  updateProfile(userData: any) {
+  updateProfile(
+    userData: UserUpdateRequest
+  ): Promise<User> {
     return request({
       url: '/user/profile',
       method: 'put',
       data: userData
-    })
+    }) as Promise<User>
   },
 
   // 上传头像
