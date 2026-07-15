@@ -1,14 +1,15 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import interactionApi from '@/api/interaction'
+import type { Comment, LikeStatus } from '@/types'
 
 export const useInteractionStore = defineStore('interaction', () => {
-  const likeStatus = ref({
+  const likeStatus = ref<LikeStatus>({
     isLiked: false,
     likeCount: 0
   })
   
-  const comments = ref<any[]>([])
+  const comments = ref<Comment[]>([])
   const loading = ref(false)
   const error = ref<string | null>(null)
 
@@ -30,8 +31,8 @@ export const useInteractionStore = defineStore('interaction', () => {
       }
       
       return likeStatus.value
-    } catch (err: any) {
-      error.value = err.message || '获取点赞状态失败'
+    } catch (err: unknown) {
+      error.value = err instanceof Error ? err.message : '获取点赞状态失败'
       console.error('fetchLikeStatus error:', err)
       likeStatus.value = { isLiked: false, likeCount: 0 }
       throw err
@@ -46,7 +47,8 @@ export const useInteractionStore = defineStore('interaction', () => {
     try {
       let response
       if (likeStatus.value.isLiked) {
-        response = await interactionApi.unlikeArtwork(artworkId)
+        await interactionApi.unlikeArtwork(artworkId)
+        response = { likeCount: likeStatus.value.likeCount - 1 }
       } else {
         response = await interactionApi.likeArtwork(artworkId)
       }
@@ -57,8 +59,8 @@ export const useInteractionStore = defineStore('interaction', () => {
       }
       
       return likeStatus.value
-    } catch (err: any) {
-      error.value = err.message || '点赞操作失败'
+    } catch (err: unknown) {
+      error.value = err instanceof Error ? err.message : '点赞操作失败'
       console.error('toggleLike error:', err)
       throw err
     } finally {
@@ -72,15 +74,14 @@ export const useInteractionStore = defineStore('interaction', () => {
     try {
       // 先获取顶层评论列表
       const response = await interactionApi.getTopLevelComments(artworkId)
-      comments.value = response || []
+      comments.value = response
       
       const commentsWithReplies = await Promise.all(
-        comments.value.map(async (comment) => {
+        comments.value.map(async comment => {
           try {
             // 对每条评论，需要异步获取它的回复列表
             const replies = await interactionApi.getReplies(comment.id)
-            // 将评论和回复合并成新对象
-            return { ...comment, replies: replies || [] }
+            return { ...comment, replies }
           } catch {
             return { ...comment, replies: [] }
           }
@@ -89,8 +90,8 @@ export const useInteractionStore = defineStore('interaction', () => {
       
       comments.value = commentsWithReplies
       return comments.value
-    } catch (err: any) {
-      error.value = err.message || '获取评论列表失败'
+    } catch (err: unknown) {
+      error.value = err instanceof Error ? err.message : '获取评论列表失败'
       console.error('fetchComments error:', err)
       comments.value = []
       throw err
@@ -105,15 +106,15 @@ export const useInteractionStore = defineStore('interaction', () => {
     try {
       await interactionApi.createComment(artworkId, {
         content: content.trim(),
-        parentId
+        parentId: parentId || undefined
       })
       
       await fetchComments(artworkId)
       await fetchLikeStatus(artworkId)
       
       return true
-    } catch (err: any) {
-      error.value = err.message || '提交评论失败'
+    } catch (err: unknown) {
+      error.value = err instanceof Error ? err.message : '提交评论失败'
       console.error('submitComment error:', err)
       throw err
     } finally {
@@ -128,10 +129,10 @@ export const useInteractionStore = defineStore('interaction', () => {
       await interactionApi.deleteComment(commentId)
       // filter 方法在内部遍历时，会依次把每个评论对象传入给 c 回调函数
       // 删除 id 等于 commentId 的评论，保留所有不匹配的评论
-      comments.value = comments.value.filter((c: any) => c.id !== commentId)
+      comments.value = comments.value.filter(c => c.id !== commentId)
       return true
-    } catch (err: any) {
-      error.value = err.message || '删除评论失败'
+    } catch (err: unknown) {
+      error.value = err instanceof Error ? err.message : '删除评论失败'
       console.error('deleteComment error:', err)
       throw err
     } finally {

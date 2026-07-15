@@ -16,7 +16,7 @@ function normalizeUserResponse(response: any) {
 
 export const useUserStore = defineStore('user', () => {
   const token = ref('')
-  const userInfo = ref<any | null>(null)
+  const userInfo = ref<User | null>(null)
 
   const isAuthenticated = computed(() => !!token.value)
   const isAdmin = computed(() => userInfo.value?.role === 'ADMIN')
@@ -34,27 +34,27 @@ export const useUserStore = defineStore('user', () => {
    * 设置认证数据的公共函数
    * 统一处理 token、用户信息设置和重置 token 过期处理标志
    */
-  function setAuthData(response: any) {
+  function setAuthData(response: AuthResponse) {
     token.value = response.token
     normalizeUserResponse(response)
     userInfo.value = response.user
     resetTokenExpiredFlag()
   }
 
-  async function login(credentials: any) {
+  async function login(credentials: LoginRequest) {
     const response = await userApi.login(credentials)
     setAuthData(response)
     return response
   }
 
-  async function register(userData: any) {
+  async function register(userData: RegisterRequest) {
     const response = await userApi.register(userData)
     setAuthData(response)
     return response
   }
 
-  async function oauthLogin(provider: string, code: string) {
-    const response = await userApi.oauthLogin(provider, code)
+  async function oauthLogin(requestData: OAuthRequest) {
+    const response = await userApi.oauthLogin(requestData)
     setAuthData(response)
     return response
   }
@@ -64,7 +64,7 @@ export const useUserStore = defineStore('user', () => {
     userInfo.value = null
   }
 
-  async function updateUserInfo(userData: any) {
+  async function updateUserInfo(userData: UserUpdateRequest) {
     const response = await userApi.updateProfile(userData)
     normalizeUserResponse(response)
     userInfo.value = response

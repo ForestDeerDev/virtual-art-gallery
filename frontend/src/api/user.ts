@@ -19,7 +19,7 @@ export default {
   },
 
   // 注册
-  register(userData: RegisterRequest) {
+  register(userData: RegisterRequest): Promise<AuthResponse> {
     return request({
       url: '/auth/register',
       method: 'post',
@@ -28,7 +28,7 @@ export default {
   },
 
   // 第三方登录
-  oauthLogin(requestData: OAuthRequest) {
+  oauthLogin(requestData: OAuthRequest): Promise<AuthResponse> {
     return request({
       url: `/auth/oauth/${requestData.provider}`,
       method: 'post',

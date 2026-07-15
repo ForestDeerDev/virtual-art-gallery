@@ -45,15 +45,15 @@ const message = ref('')
 onMounted(async () => {
   try {
     // 从URL中获取授权码和提供商
-    const code = route.query.code
-    const provider = route.params.provider || 'github'
-    
+    const code = route.query.code as string
+    const provider = (route.params.provider as string) || 'github'
+
     if (!code) {
       throw new Error('缺少授权码')
     }
-    
+
     // 调用后端API完成登录
-    await userStore.oauthLogin(provider, code)
+    await userStore.oauthLogin({ provider, code })
     
     success.value = true
     message.value = '登录成功，正在跳转...'
@@ -63,7 +63,7 @@ onMounted(async () => {
       redirectToHome()
     }, 1500)
     
-  } catch (err) {
+  } catch (err: any) {
     console.error('OAuth登录失败:', err)
     error.value = true
     message.value = err.response?.data?.message || '登录失败，请稍后重试'

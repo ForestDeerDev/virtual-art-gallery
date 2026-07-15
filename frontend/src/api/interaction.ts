@@ -23,7 +23,7 @@ export default {
   },
 
   // 检查用户是否已点赞作品
-  checkLikeStatus(artworkId: number) {
+  checkLikeStatus(artworkId: number): Promise<LikeStatus> {
     return request({
       url: `/interactions/artworks/${artworkId}/like/status`,
       method: 'get'
@@ -31,7 +31,7 @@ export default {
   },
 
   // 获取作品点赞数量
-  getLikeCount(artworkId: number) {
+  getLikeCount(artworkId: number): Promise<{ likeCount: number }> {
     return request({
       url: `/interactions/artworks/${artworkId}/like/count`,
       method: 'get'
@@ -51,7 +51,7 @@ export default {
   },
 
   // 获取作品的顶层评论列表
-  getTopLevelComments(artworkId: number) {
+  getTopLevelComments(artworkId: number): Promise<Comment[]> {
     return request({
       url: `/interactions/artworks/${artworkId}/comments`,
       method: 'get'
@@ -59,7 +59,7 @@ export default {
   },
 
   // 获取评论的回复列表
-  getReplies(commentId: number) {
+  getReplies(commentId: number): Promise<Comment[]> {
     return request({
       url: `/interactions/comments/${commentId}/replies`,
       method: 'get'
@@ -67,7 +67,7 @@ export default {
   },
 
   // 删除评论
-  deleteComment(commentId: number) {
+  deleteComment(commentId: number): Promise<void> {
     return request({
       url: `/interactions/comments/${commentId}`,
       method: 'delete'
@@ -75,7 +75,7 @@ export default {
   },
 
   // 获取作品评论数量
-  getCommentCount(artworkId: number) {
+  getCommentCount(artworkId: number): Promise<{ count: number }> {
     return request({
       url: `/interactions/artworks/${artworkId}/comments/count`,
       method: 'get'
