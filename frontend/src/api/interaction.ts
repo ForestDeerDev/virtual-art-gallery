@@ -19,7 +19,7 @@ export default {
     return request({
       url: `/interactions/artworks/${artworkId}/like`,
       method: 'delete'
-    })
+    }) as Promise<void>
   },
 
   // 检查用户是否已点赞作品
@@ -27,7 +27,7 @@ export default {
     return request({
       url: `/interactions/artworks/${artworkId}/like/status`,
       method: 'get'
-    })
+    }) as Promise<LikeStatus>
   },
 
   // 获取作品点赞数量
@@ -35,7 +35,7 @@ export default {
     return request({
       url: `/interactions/artworks/${artworkId}/like/count`,
       method: 'get'
-    })
+    }) as Promise<{ likeCount: number }>
   },
 
   // 创建评论
@@ -55,7 +55,7 @@ export default {
     return request({
       url: `/interactions/artworks/${artworkId}/comments`,
       method: 'get'
-    })
+    }) as Promise<Comment[]>
   },
 
   // 获取评论的回复列表
@@ -63,7 +63,7 @@ export default {
     return request({
       url: `/interactions/comments/${commentId}/replies`,
       method: 'get'
-    })
+    }) as Promise<Comment[]>
   },
 
   // 删除评论
@@ -71,7 +71,7 @@ export default {
     return request({
       url: `/interactions/comments/${commentId}`,
       method: 'delete'
-    })
+    }) as Promise<void>
   },
 
   // 获取作品评论数量
@@ -79,6 +79,6 @@ export default {
     return request({
       url: `/interactions/artworks/${artworkId}/comments/count`,
       method: 'get'
-    })
+    }) as Promise<{ count: number }>
   }
 }

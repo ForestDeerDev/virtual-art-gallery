@@ -4,6 +4,10 @@ import { useUserStore } from '@/stores/user'
 import { isTokenExpired } from '@/utils/jwt'
 import { handleTokenExpired } from '@/utils/initialize'
 
+interface SilentError extends Error {
+  silent?: boolean
+}
+
 const request: AxiosInstance = axios.create({
   baseURL: '/api',
   timeout: 10000
@@ -19,7 +23,7 @@ request.interceptors.request.use(
       if (isTokenExpired(userStore.token)) {
         console.log('Token expired, logging out before request:', config.url)
         handleTokenExpired()
-        const error = new Error('Token expired') as any
+        const error: SilentError = new Error('Token expired')
         error.silent = true
         // 把失败结果传递给后续 Promise 链处理
         return Promise.reject(error)
@@ -42,13 +46,13 @@ request.interceptors.response.use(
   (response: AxiosResponse) => {
     return response.data
   },
-  (error: AxiosError) => {
+  (error: AxiosError | SilentError) => {
     // 如果是静默错误，不显示提示信息
-    if ((error as any).silent) {
+    if ('silent' in error && error.silent) {
       return Promise.reject(error)
     }
 
-    if (error.response) {
+    if ('response' in error && error.response) {
       switch (error.response.status) {
         case 401:
           console.log('Received 401 response, logging out')
@@ -64,9 +68,10 @@ request.interceptors.response.use(
           ElMessage.error('服务器错误，请稍后重试')
           break
         default:
-          ElMessage.error((error.response.data as any)?.message || '请求失败，请稍后重试')
+          const responseData = error.response.data as { message?: string }
+          ElMessage.error(responseData?.message || '请求失败，请稍后重试')
       }
-    } else if (error.code === 'ECONNABORTED') {
+    } else if ('code' in error && error.code === 'ECONNABORTED') {
       ElMessage.error('请求超时，请检查网络连接')
     } else {
       ElMessage.error('网络错误，请检查网络连接')

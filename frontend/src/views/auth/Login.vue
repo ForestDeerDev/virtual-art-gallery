@@ -84,12 +84,14 @@
 import { ref } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useUserStore } from '@/stores/user'
+import { isAxiosError } from 'axios'
+import type { LoginRequest } from '@/types'
 
 const router = useRouter()
 const route = useRoute()
 const userStore = useUserStore()
 
-const form = ref({
+const form = ref<LoginRequest & { remember: boolean }>({
   username: '',
   password: '',
   remember: false
@@ -104,16 +106,20 @@ const handleLogin = async () => {
   
   try {
     await userStore.login(form.value)
-    const redirect = route.query.redirect || '/home'
+    const redirect = (route.query.redirect as string) ?? '/home'
     router.push(redirect)
-  } catch (err) {
-    error.value = err.response?.data?.message || '登录失败，请检查用户名和密码'
+  } catch (err: unknown) {
+    if (isAxiosError<{ message?: string }>(err)) {
+      error.value = err.response?.data?.message ?? '登录失败，请检查用户名和密码'
+    } else {
+      error.value = '登录失败，请检查用户名和密码'
+    }
   } finally {
     loading.value = false
   }
 }
 
-const handleOAuthLogin = (provider) => {
+const handleOAuthLogin = (provider: string) => {
   if (provider === 'github') {
     // GitHub OAuth登录：重定向到GitHub授权页面
     const clientId = import.meta.env.VITE_GITHUB_CLIENT_ID

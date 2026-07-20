@@ -29,3 +29,10 @@ export interface UserUpdateRequest {
   avatar?: string
   tags?: string[]
 }
+
+/**
+ * 头像上传响应
+ */
+export interface UploadAvatarResponse {
+  url: string
+}

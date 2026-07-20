@@ -16,18 +16,18 @@ export default {
     }) as Promise<UserManagement[]>
   },
 
-  updateUserRole(userId: number, role: UserRole) {
+  updateUserRole(userId: number, role: UserRole): Promise<void> {
     return request({
       url: `/admin/users/${userId}/role`,
       method: 'put',
       data: { role }
-    })
+    }) as Promise<void>
   },
 
-  deleteUser(userId: number) {
+  deleteUser(userId: number): Promise<void> {
     return request({
       url: `/admin/users/${userId}`,
       method: 'delete'
-    })
+    }) as Promise<void>
   }
 }

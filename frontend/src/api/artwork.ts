@@ -4,6 +4,7 @@ import type {
   ArtworkListResponse,
   ArtworkCreateRequest,
   ArtworkUpdateRequest,
+  UploadResponse,
   PageQuery,
   BatchDeleteRequest,
   BatchUpdateRequest
@@ -46,7 +47,7 @@ export default {
   },
 
   // 删除艺术作品
-  deleteArtwork(id: number) {
+  deleteArtwork(id: number): Promise<void> {
     return request({
       url: `/artworks/${id}`,
       method: 'delete'
@@ -54,7 +55,7 @@ export default {
   },
 
   // 批量删除艺术作品
-  batchDeleteArtworks(requestData: BatchDeleteRequest) {
+  batchDeleteArtworks(requestData: BatchDeleteRequest): Promise<void> {
     return request({
       url: '/artworks/batch',
       method: 'delete',
@@ -63,7 +64,7 @@ export default {
   },
 
   // 批量更新艺术作品
-  batchUpdateArtworks(requestData: BatchUpdateRequest) {
+  batchUpdateArtworks(requestData: BatchUpdateRequest): Promise<void> {
     return request({
       url: '/artworks/batch',
       method: 'put',
@@ -72,38 +73,38 @@ export default {
   },
 
   // 搜索艺术作品
-  searchArtworks(keyword: string) {
+  searchArtworks(keyword: string): Promise<ArtworkListResponse> {
     return request({
       url: '/artworks/search',
       method: 'get',
       params: { keyword }
-    })
+    }) as Promise<ArtworkListResponse>
   },
 
   // 获取推荐作品
-  getRecommendations() {
+  getRecommendations(): Promise<Artwork[]> {
     return request({
       url: '/artworks/recommendations',
       method: 'get'
-    })
+    }) as Promise<Artwork[]>
   },
 
   // 获取所有作品分类
-  getCategories() {
+  getCategories(): Promise<string[]> {
     return request({
       url: '/artworks/categories',
       method: 'get'
-    })
+    }) as Promise<string[]>
   },
 
   // 上传作品图片
-  uploadArtworkImage(file: File) {
+  uploadArtworkImage(file: File): Promise<UploadResponse> {
     const formData = new FormData()
     formData.append('file', file)
     return request({
       url: '/upload/artwork',
       method: 'post',
       data: formData
-    })
+    }) as Promise<UploadResponse>
   }
 }

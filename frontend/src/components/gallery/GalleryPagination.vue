@@ -11,19 +11,19 @@
 </template>
 
 <script setup lang="ts">
-defineProps({
-  currentPage: {
-    type: Number,
-    default: 1
-  },
-  totalPages: {
-    type: Number,
-    default: 1
-  }
+withDefaults(defineProps<{
+  currentPage: number
+  totalPages: number
+}>(), {
+  currentPage: 1,
+  totalPages: 1
 })
 
-const emit = defineEmits(['page-change'])
+const emit = defineEmits<{
+  'page-change': [page: number]
+}>()
 
+// Element Plus 组件触发 @current-change 事件，page 由 Element Plus 内部生成并传入
 const handlePageChange = (page: number) => {
   emit('page-change', page)
 }

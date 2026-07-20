@@ -110,11 +110,19 @@ import Navbar from '@/components/Navbar.vue'
 import Footer from '@/components/Footer.vue'
 import { useUserStore } from '@/stores/user'
 import artworkApi from '@/api/artwork'
+import userApi from '@/api/user'
 import { cleanTags, parseCommaSeparated } from '@/utils/tags'
+import type { Artwork } from '@/types'
 
 const userStore = useUserStore()
 
-const recommendations = ref([])
+interface Recommendation extends Artwork {
+  matchingTags?: string[]
+  relevanceScore?: string
+  randomScore?: number
+}
+
+const recommendations = ref<Recommendation[]>([])
 const loading = ref(true)
 
 const userTags = computed(() => {
@@ -142,16 +150,16 @@ const loadRecommendations = async () => {
   loading.value = true
   try {
     const response = await artworkApi.getRecommendations()
-    recommendations.value = response.data || []
+    recommendations.value = response
     
     // 如果没有推荐，基于用户标签生成推荐
     if (recommendations.value.length === 0 && userTags.value.length > 0) {
       const allArtworks = await artworkApi.getArtworks({ pageSize: 50 })
-      const all = allArtworks.data || []
+      const all = allArtworks.data
       
       // 根据标签匹配推荐
       recommendations.value = all
-        .map(artwork => {
+        .map((artwork: Artwork) => {
           const artworkTags = parseCommaSeparated(artwork.tags)
           const matchingTags = artworkTags.filter(tag =>
             userTags.value.includes(tag)
@@ -160,22 +168,21 @@ const loadRecommendations = async () => {
             ...artwork,
             matchingTags,
             relevanceScore: matchingTags.length > 0 ? '高' : '中',
-            // 添加随机分数，用于后续随机化
             randomScore: Math.random()
-          }
+          } as Recommendation
         })
-        .filter(artwork => artwork.matchingTags.length > 0)
+        .filter(artwork => (artwork.matchingTags?.length || 0) > 0)
         .sort((a, b) => {
           // 先按匹配标签数量排序
-          if (b.matchingTags.length !== a.matchingTags.length) {
-            return b.matchingTags.length - a.matchingTags.length
+          if ((b.matchingTags?.length || 0) !== (a.matchingTags?.length || 0)) {
+            return (b.matchingTags?.length || 0) - (a.matchingTags?.length || 0)
           }
           // 匹配标签数量相同时，按随机分数排序，增加随机性
-          return b.randomScore - a.randomScore
+          return (b.randomScore || 0) - (a.randomScore || 0)
         })
         .slice(0, 12)
     }
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('获取推荐失败:', error)
     // 使用模拟数据
     recommendations.value = Array.from({ length: 8 }, (_, i) => ({
@@ -184,9 +191,17 @@ const loadRecommendations = async () => {
       artist: `艺术家 ${i + 1}`,
       category: ['油画', '水彩', '素描'][i % 3],
       imageUrl: 'https://via.placeholder.com/300',
+      tags: [],
+      artistId: i + 1,
+      viewCount: 0,
+      likeCount: 0,
+      featured: true,
+      enabled: true,
+      createTime: new Date().toISOString(),
+      updateTime: new Date().toISOString(),
       matchingTags: userTags.value.slice(0, 2),
       relevanceScore: '高'
-    }))
+    } as Recommendation))
   } finally {
     loading.value = false
   }

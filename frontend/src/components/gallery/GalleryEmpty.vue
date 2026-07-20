@@ -15,7 +15,9 @@
 <script setup lang="ts">
 import { Box, RefreshLeft } from '@element-plus/icons-vue'
 
-const emit = defineEmits(['reset'])
+const emit = defineEmits<{
+  'reset': []
+}>()
 
 const handleReset = () => {
   emit('reset')

@@ -36,7 +36,7 @@
               <h5>作品描述</h5>
             </template>
             <p class="card-text">{{ artworkStore.currentArtwork.description || '暂无描述' }}</p>
-            <div v-if="artworkStore.currentArtwork.tags && (Array.isArray(artworkStore.currentArtwork.tags) ? artworkStore.currentArtwork.tags.length > 0 : artworkStore.currentArtwork.tags.trim().length > 0)" class="mt-3">
+            <div v-if="artworkStore.currentArtwork.tags && artworkStore.currentArtwork.tags.length > 0" class="mt-3">
               <strong>标签：</strong>
               <el-tag
                 v-for="tag in parseCommaSeparated(artworkStore.currentArtwork.tags)"
@@ -271,6 +271,7 @@ import { useInteractionStore } from '@/stores/interaction'
 import Navbar from '@/components/Navbar.vue'
 import Footer from '@/components/Footer.vue'
 import { parseCommaSeparated } from '@/utils/tags'
+import type { Comment } from '@/types'
 
 const route = useRoute()
 const userStore = useUserStore()
@@ -279,15 +280,15 @@ const interactionStore = useInteractionStore()
 
 const commentContent = ref('')
 const replyContent = ref('')
-const replyingTo = ref(null)
+const replyingTo = ref<number | null>(null)
 
 onMounted(async () => {
-  const artworkId = route.params.id
+  const artworkId = route.params.id as string
   try {
-    await artworkStore.fetchArtworkById(artworkId)
-    await interactionStore.fetchLikeStatus(artworkId)
-    await interactionStore.fetchComments(artworkId)
-  } catch (error) {
+    await artworkStore.fetchArtworkById(Number(artworkId))
+    await interactionStore.fetchLikeStatus(Number(artworkId))
+    await interactionStore.fetchComments(Number(artworkId))
+  } catch (error: unknown) {
     console.error('加载作品详情失败:', error)
   }
 })
@@ -313,7 +314,7 @@ async function submitComment() {
   }
 }
 
-async function submitReply(commentId) {
+async function submitReply(commentId: number) {
   const artworkId = artworkStore.currentArtwork?.id
   if (artworkId && replyContent.value.trim()) {
     await interactionStore.submitReply(artworkId, replyContent.value, commentId)
@@ -322,7 +323,7 @@ async function submitReply(commentId) {
   }
 }
 
-function toggleReply(comment) {
+function toggleReply(comment: Comment) {
   if (replyingTo.value === comment.id) {
     replyingTo.value = null
     replyContent.value = ''
@@ -337,7 +338,7 @@ function cancelReply() {
   replyContent.value = ''
 }
 
-async function deleteComment(commentId) {
+async function deleteComment(commentId: number) {
   if (confirm('确定要删除这条评论吗？')) {
     const artworkId = artworkStore.currentArtwork?.id
     if (artworkId) {
@@ -346,7 +347,7 @@ async function deleteComment(commentId) {
   }
 }
 
-function formatDate(dateString) {
+function formatDate(dateString: string) {
   if (!dateString) return ''
   const date = new Date(dateString)
   return date.toLocaleString()

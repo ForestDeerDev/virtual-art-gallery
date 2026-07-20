@@ -86,7 +86,7 @@
             v-for="(artwork, index) in artworkStore.featuredArtworks"
             :key="artwork.id"
             class="artwork-item fade-in"
-            :ref="el => featuredItems[index] = el"
+            :ref="(el) => { featuredItems[index] = el as HTMLElement }"
           >
             <el-card class="artwork-card hover-lift" shadow="hover">
               <div class="artwork-image-container">
@@ -145,14 +145,14 @@
             v-for="(category, index) in categories"
             :key="category.name"
             class="category-item fade-in"
-            :ref="el => categoryItems[index] = el"
+            :ref="(el) => { categoryItems[index] = el as HTMLElement }"
           >
             <router-link 
               :to="`/gallery?category=${category.name}`" 
               class="category-card hover-lift"
             >
               <div class="category-icon-wrapper">
-                <el-icon :size="40" class="category-icon"><component :is="getCategoryIcon(category.icon)" /></el-icon>
+                <el-icon :size="40" class="category-icon"><component :is="category.icon" /></el-icon>
               </div>
               <h3 class="category-title">{{ category.name }}</h3>
               <p class="category-count text-muted">{{ category.count }} 件作品</p>
@@ -200,20 +200,21 @@ import { ref, onMounted, watch } from 'vue'
 import Navbar from '@/components/Navbar.vue'
 import Footer from '@/components/Footer.vue'
 import { useArtworkStore } from '@/stores/artwork'
+import type { Artwork } from '@/types'
 
 const artworkStore = useArtworkStore()
 
-const heroArtworks = ref([])
+const heroArtworks = ref<Artwork[]>([])
 
 // 用于动画的引用
-const heroContent = ref(null)
-const heroImage = ref(null)
-const featuredHeader = ref(null)
-const featuredItems = ref([])
-const viewMore = ref(null)
-const categoriesHeader = ref(null)
-const categoryItems = ref([])
-const ctaContent = ref(null)
+const heroContent = ref<HTMLElement | null>(null)
+const heroImage = ref<HTMLElement | null>(null)
+const featuredHeader = ref<HTMLElement | null>(null)
+const featuredItems = ref<(HTMLElement | null)[]>([])
+const viewMore = ref<HTMLElement | null>(null)
+const categoriesHeader = ref<HTMLElement | null>(null)
+const categoryItems = ref<(HTMLElement | null)[]>([])
+const ctaContent = ref<HTMLElement | null>(null)
 
 const categories = [
   { name: '油画', icon: 'Brush', count: 120 },
@@ -224,22 +225,21 @@ const categories = [
   { name: '数字艺术', icon: 'Monitor', count: 200 }
 ]
 
-// 获取分类图标组件
-const getCategoryIcon = (iconName) => {
-  const iconMap = {
-    'Brush': 'Brush',
-    'Droplet': 'Droplet',
-    'Edit': 'Edit',
-    'Box': 'Box',
-    'Camera': 'Camera',
-    'Monitor': 'Monitor'
+
+
+// 获取DOM元素（处理Vue组件实例情况）
+const getElement = (el: unknown): HTMLElement | null => {
+  if (!el) return null
+  // 如果是Vue组件实例，获取其根DOM元素
+  if ('$el' in (el as object)) {
+    return (el as { $el: HTMLElement }).$el
   }
-  return iconMap[iconName] || 'Grid'
+  return el as HTMLElement
 }
 
 // 图片懒加载和进入视口检测
 const checkVisibility = () => {
-  const elements = [
+  const elements: unknown[] = [
     heroContent.value,
     heroImage.value,
     featuredHeader.value,
@@ -251,17 +251,18 @@ const checkVisibility = () => {
   ]
   
   elements.forEach(el => {
-    if (el) {
-      const rect = el.getBoundingClientRect()
+    const element = getElement(el)
+    if (element) {
+      const rect = element.getBoundingClientRect()
       if (rect.top < window.innerHeight * 0.85) {
-        el.classList.add('visible')
+        element.classList.add('visible')
       }
     }
   })
 }
 
 // 从作品列表中随机选择n个作品
-const getRandomArtworks = (artworks, count) => {
+const getRandomArtworks = (artworks: Artwork[], count: number) => {
   const shuffled = [...artworks].sort(() => 0.5 - Math.random())
   return shuffled.slice(0, count)
 }
@@ -272,13 +273,13 @@ onMounted(async () => {
     heroArtworks.value = getRandomArtworks(artworkStore.featuredArtworks, 3)
   } catch (error) {
     console.error('获取精选作品失败:', error)
-    const mockArtworks = [
-      { id: 1, title: '抽象风景', artist: '张三', category: '油画', imageUrl: 'https://via.placeholder.com/300x400' },
-      { id: 2, title: '城市印象', artist: '李四', category: '水彩', imageUrl: 'https://via.placeholder.com/300x300' },
-      { id: 3, title: '人物肖像', artist: '王五', category: '素描', imageUrl: 'https://via.placeholder.com/250x350' },
-      { id: 4, title: '现代雕塑', artist: '赵六', category: '雕塑', imageUrl: 'https://via.placeholder.com/300x400' },
-      { id: 5, title: '自然风光', artist: '孙七', category: '摄影', imageUrl: 'https://via.placeholder.com/300x300' },
-      { id: 6, title: '数字梦境', artist: '周八', category: '数字艺术', imageUrl: 'https://via.placeholder.com/250x350' }
+    const mockArtworks: Artwork[] = [
+      { id: 1, title: '抽象风景', artist: '张三', category: '油画', imageUrl: 'https://via.placeholder.com/300x400', artistId: 1, viewCount: 0, likeCount: 0, featured: true, enabled: true, createTime: new Date().toISOString(), updateTime: new Date().toISOString(), tags: ['抽象', '风景'] },
+      { id: 2, title: '城市印象', artist: '李四', category: '水彩', imageUrl: 'https://via.placeholder.com/300x300', artistId: 2, viewCount: 0, likeCount: 0, featured: true, enabled: true, createTime: new Date().toISOString(), updateTime: new Date().toISOString(), tags: ['城市', '印象'] },
+      { id: 3, title: '人物肖像', artist: '王五', category: '素描', imageUrl: 'https://via.placeholder.com/250x350', artistId: 3, viewCount: 0, likeCount: 0, featured: true, enabled: true, createTime: new Date().toISOString(), updateTime: new Date().toISOString(), tags: ['人物', '肖像'] },
+      { id: 4, title: '现代雕塑', artist: '赵六', category: '雕塑', imageUrl: 'https://via.placeholder.com/300x400', artistId: 4, viewCount: 0, likeCount: 0, featured: true, enabled: true, createTime: new Date().toISOString(), updateTime: new Date().toISOString(), tags: ['雕塑', '现代'] },
+      { id: 5, title: '自然风光', artist: '孙七', category: '摄影', imageUrl: 'https://via.placeholder.com/300x300', artistId: 5, viewCount: 0, likeCount: 0, featured: true, enabled: true, createTime: new Date().toISOString(), updateTime: new Date().toISOString(), tags: ['自然', '风光'] },
+      { id: 6, title: '数字梦境', artist: '周八', category: '数字艺术', imageUrl: 'https://via.placeholder.com/250x350', artistId: 6, viewCount: 0, likeCount: 0, featured: true, enabled: true, createTime: new Date().toISOString(), updateTime: new Date().toISOString(), tags: ['数字', '梦境'] }
     ]
     artworkStore.featuredArtworks = mockArtworks
     heroArtworks.value = getRandomArtworks(mockArtworks, 3)

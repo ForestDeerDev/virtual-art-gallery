@@ -9,6 +9,7 @@
           v-model="searchKeyword" 
           @search="handleSearch" 
         />
+        <!-- 监听 update:filters 事件 -->
         <GalleryFilters 
           :filters="artworkStore.filters"
           @update:filters="handleFilterChange"
@@ -41,7 +42,7 @@
 
 <script setup lang="ts">
 import { ref, onMounted, watch } from 'vue'
-import { useRoute, useRouter } from 'vue-router'
+import { useRoute } from 'vue-router'
 import Navbar from '@/components/Navbar.vue'
 import Footer from '@/components/Footer.vue'
 import GalleryHeader from '@/components/gallery/GalleryHeader.vue'
@@ -52,21 +53,27 @@ import GalleryEmpty from '@/components/gallery/GalleryEmpty.vue'
 import GalleryPagination from '@/components/gallery/GalleryPagination.vue'
 import ArtworkCard from '@/components/gallery/ArtworkCard.vue'
 import { useArtworkStore } from '@/stores/artwork'
+import type { GalleryFilterState } from '@/types/gallery'
 
 const route = useRoute()
-const router = useRouter()
 const artworkStore = useArtworkStore()
 const searchKeyword = ref('')
 
+const getQueryString = (value: string | (string | null)[] | null | undefined): string => {
+  if (typeof value === 'string') return value
+  if (Array.isArray(value)) return value[0] || ''
+  return ''
+}
+
 onMounted(async () => {
   if (route.query.category) {
-    artworkStore.setFilters({ category: route.query.category })
+    artworkStore.setFilters({ category: getQueryString(route.query.category) })
   }
   await artworkStore.fetchArtworks()
 })
 
 watch(() => route.query.category, async (newCategory) => {
-  artworkStore.setFilters({ category: newCategory || '' })
+  artworkStore.setFilters({ category: getQueryString(newCategory) })
   await artworkStore.fetchArtworks()
 })
 
@@ -79,7 +86,7 @@ const handleSearch = () => {
   }
 }
 
-const handleFilterChange = (newFilters) => {
+const handleFilterChange = (newFilters: GalleryFilterState) => {
   artworkStore.setFilters(newFilters)
   artworkStore.fetchArtworks()
 }
@@ -90,7 +97,7 @@ const resetFilters = () => {
   artworkStore.fetchArtworks()
 }
 
-const changePage = (page) => {
+const changePage = (page: number) => {
   if (page >= 1 && page <= artworkStore.pagination.totalPages) {
     artworkStore.setPage(page)
     artworkStore.fetchArtworks()

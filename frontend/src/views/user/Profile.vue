@@ -88,10 +88,17 @@ import Navbar from '@/components/Navbar.vue'
 import { useUserStore } from '@/stores/user'
 import userApi from '@/api/user'
 import { parseCommaSeparated } from '@/utils/tags'
+import type { UserUpdateRequest } from '@/types'
 
 const userStore = useUserStore()
 
-const form = ref({
+// 本地表单类型，将 tags 设为必填
+interface ProfileForm extends Omit<UserUpdateRequest, 'avatar' | 'tags'> {
+  tags: string[]
+  avatar?: File | null
+}
+
+const form = ref<ProfileForm>({
   username: '',
   email: '',
   tags: [],
@@ -113,19 +120,20 @@ onMounted(() => {
   }
 })
 
-const handleAvatarChange = (event) => {
-  const file = event.target.files[0]
+const handleAvatarChange = (event: Event) => {
+  const target = event.target as HTMLInputElement
+  const file = target.files?.[0]
   if (file) {
     form.value.avatar = file
     const reader = new FileReader()
     reader.onload = (e) => {
-      avatarPreview.value = e.target.result
+      avatarPreview.value = e.target?.result as string
     }
     reader.readAsDataURL(file)
   }
 }
 
-const toggleTag = (tag) => {
+const toggleTag = (tag: string) => {
   const index = form.value.tags.indexOf(tag)
   if (index > -1) {
     form.value.tags.splice(index, 1)
@@ -143,7 +151,7 @@ const handleUpdate = async () => {
     // 如果有新头像，先上传头像
     if (form.value.avatar) {
       const avatarResponse = await userApi.uploadAvatar(form.value.avatar)
-      const userData = {
+      const userData: UserUpdateRequest = {
         username: form.value.username,
         email: form.value.email,
         tags: form.value.tags,
@@ -151,7 +159,7 @@ const handleUpdate = async () => {
       }
       await userStore.updateUserInfo(userData)
     } else {
-      const userData = {
+      const userData: UserUpdateRequest = {
         username: form.value.username,
         email: form.value.email,
         tags: form.value.tags
@@ -160,8 +168,8 @@ const handleUpdate = async () => {
     }
 
     success.value = '资料更新成功'
-  } catch (err) {
-    error.value = err.response?.data?.message || '更新失败，请重试'
+  } catch (err: unknown) {
+    error.value = '更新失败，请重试'
   } finally {
     loading.value = false
   }

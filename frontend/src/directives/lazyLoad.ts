@@ -1,8 +1,15 @@
 // 图片懒加载指令
 import type { Directive, DirectiveBinding } from 'vue'
 
+// 扩展 HTMLImageElement 接口，添加懒加载相关的自定义属性
+interface LazyLoadElement extends HTMLImageElement {
+  _lazyObserver?: IntersectionObserver
+  _loadImage?: () => void
+  _isInViewport?: (element: HTMLElement) => boolean
+}
+
 const lazyLoad: Directive = {
-  mounted(el: HTMLImageElement, binding: DirectiveBinding) {
+  mounted(el: LazyLoadElement, binding: DirectiveBinding) {
     console.log('Lazy load directive mounted');
     
     // 存储图片URL到dataset中，以便后续可以获取
@@ -67,14 +74,14 @@ const lazyLoad: Directive = {
       // 否则，观察目标元素
       observer.observe(el);
       // 保存observer实例，以便在组件卸载时清理
-      (el as any)._lazyObserver = observer;
+      el._lazyObserver = observer;
     }
 
     // 保存加载函数和观察器
-    (el as any)._loadImage = loadImage;
-    (el as any)._isInViewport = isInViewport;
+    el._loadImage = loadImage;
+    el._isInViewport = isInViewport;
   },
-  updated(el: HTMLImageElement, binding: DirectiveBinding) {
+  updated(el: LazyLoadElement, binding: DirectiveBinding) {
     console.log('Lazy load directive updated');
     
     // 当绑定值变化时，更新dataset并重新检查
@@ -83,20 +90,20 @@ const lazyLoad: Directive = {
       el.dataset.src = binding.value;
       
       // 立即检查元素是否在视口内
-      if ((el as any)._isInViewport && (el as any)._isInViewport(el)) {
+      if (el._isInViewport && el._isInViewport(el)) {
         console.log('Element in viewport after update, loading image');
         // 如果在视口内，立即加载图片
-        if ((el as any)._loadImage) {
-          (el as any)._loadImage();
+        if (el._loadImage) {
+          el._loadImage();
         }
       }
     }
   },
-  unmounted(el: HTMLImageElement) {
+  unmounted(el: LazyLoadElement) {
     console.log('Lazy load directive unmounted');
     // 清理observer实例
-    if ((el as any)._lazyObserver) {
-      (el as any)._lazyObserver.unobserve(el);
+    if (el._lazyObserver) {
+      el._lazyObserver.unobserve(el);
     }
   }
 };

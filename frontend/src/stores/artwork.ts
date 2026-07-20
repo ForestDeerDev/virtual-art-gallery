@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import artworkApi from '@/api/artwork'
-import type { Artwork, ArtworkCreateRequest, ArtworkUpdateRequest, PageQuery } from '@/types'
+import type { Artwork, ArtworkCreateRequest, ArtworkUpdateRequest, PageQuery, GalleryFilterState } from '@/types'
 
 export const useArtworkStore = defineStore('artwork', () => {
   const artworks = ref<Artwork[]>([])
@@ -18,7 +18,7 @@ export const useArtworkStore = defineStore('artwork', () => {
     totalElements: 0
   })
 
-  const filters = ref({
+  const filters = ref<GalleryFilterState>({
     category: '',
     sortBy: 'latest',
     tags: '',
@@ -45,12 +45,12 @@ export const useArtworkStore = defineStore('artwork', () => {
       // response 处理响应数据 作为查询结果返回给前端，然后存入 store 的状态中
       // 调用 API 获取作品列表，等待后端响应
       const response = await artworkApi.getArtworks(requestParams)
-      // 将返回的作品列表存入 store，无数据则为空数组
-      artworks.value = response.data || []
-      // 更新总页数，默认为 1 页
-      pagination.value.totalPages = response.totalPages || 1
-      // 更新总条数，默认为 0 条
-      pagination.value.totalElements = response.total || 0
+      // 将返回的作品列表存入 store
+      artworks.value = response.data
+      // 更新总页数
+      pagination.value.totalPages = response.totalPages
+      // 更新总条数
+      pagination.value.totalElements = response.total
       
       return response
     } catch (err: unknown) {
@@ -67,7 +67,7 @@ export const useArtworkStore = defineStore('artwork', () => {
     error.value = null
     try {
       const response = await artworkApi.getArtworks({ page: 0, pageSize })
-      featuredArtworks.value = response.data || []
+      featuredArtworks.value = response.data
       return featuredArtworks.value
     } catch (err: unknown) {
       error.value = err instanceof Error ? err.message : '获取精选作品失败'
@@ -102,7 +102,7 @@ export const useArtworkStore = defineStore('artwork', () => {
   async function fetchRelatedArtworks(category: string, excludeId: number, limit: number = 4) {
     try {
       const response = await artworkApi.getArtworks({ category, limit: 8 })
-      relatedArtworks.value = (response.data || [])
+      relatedArtworks.value = response.data
         .filter(item => item.id !== excludeId)
         .slice(0, limit)
       return relatedArtworks.value
@@ -123,7 +123,7 @@ export const useArtworkStore = defineStore('artwork', () => {
     error.value = null
     try {
       const response = await artworkApi.searchArtworks(keyword)
-      artworks.value = response.data || []
+      artworks.value = response.data
       pagination.value.totalPages = 1
       pagination.value.totalElements = artworks.value.length
       filters.value.keyword = keyword

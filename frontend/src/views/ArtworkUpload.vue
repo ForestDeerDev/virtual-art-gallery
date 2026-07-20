@@ -133,11 +133,17 @@ import { useRouter } from 'vue-router'
 import Navbar from '@/components/Navbar.vue'
 import { useArtworkStore } from '@/stores/artwork'
 import artworkApi from '@/api/artwork'
+import type { ArtworkCreateRequest } from '@/types'
+
+// 本地表单类型，将 tags 设为必填
+interface ArtworkUploadForm extends Omit<ArtworkCreateRequest, 'tags'> {
+  tags: string[]
+}
 
 const router = useRouter()
 const artworkStore = useArtworkStore()
 
-const form = ref({
+const form = ref<ArtworkUploadForm>({
   title: '',
   category: '',
   description: '',
@@ -152,13 +158,13 @@ const form = ref({
 const availableTags = ['抽象', '写实', '现代', '古典', '风景', '人物', '静物', '动物', '建筑', '肖像']
 const customTag = ref('')
 const imagePreview = ref('')
-const imageFile = ref(null)
+const imageFile = ref<File | null>(null)
 const uploadingImage = ref(false)
 const loading = ref(false)
 const error = ref('')
 const success = ref('')
 
-const handleImageChange = async (file) => {
+const handleImageChange = async (file: { raw: File | null }) => {
   const fileObj = file.raw
   if (!fileObj) return
 
@@ -175,7 +181,7 @@ const handleImageChange = async (file) => {
   try {
     const response = await artworkApi.uploadArtworkImage(fileObj)
     form.value.imageUrl = response.url
-  } catch (err) {
+  } catch (err: unknown) {
     error.value = '图片上传失败，请重试'
     form.value.imageUrl = ''
     imagePreview.value = ''
@@ -184,7 +190,7 @@ const handleImageChange = async (file) => {
   }
 }
 
-const toggleTag = (tag) => {
+const toggleTag = (tag: string) => {
   const index = form.value.tags.indexOf(tag)
   if (index > -1) {
     form.value.tags.splice(index, 1)
@@ -218,8 +224,8 @@ const handleSubmit = async () => {
     setTimeout(() => {
       router.push('/gallery')
     }, 1500)
-  } catch (err) {
-    error.value = err.response?.data?.message || '发布失败，请重试'
+  } catch (err: unknown) {
+    error.value = '发布失败，请重试'
   } finally {
     loading.value = false
   }

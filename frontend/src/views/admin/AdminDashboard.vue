@@ -141,13 +141,13 @@ import { useRoute } from 'vue-router'
 import Navbar from '@/components/Navbar.vue'
 import artworkApi from '@/api/artwork'
 import adminApi from '@/api/admin'
-import type { ArtworkResponse } from '@/types/gallery'
+import type { Artwork, AdminStats } from '@/types'
 
 const route = useRoute()
 
 const activeMenu = computed(() => route.path)
 
-const stats = ref({
+const stats = ref<AdminStats>({
   totalArtworks: 0,
   totalUsers: 0,
   totalViews: 0,
@@ -156,10 +156,11 @@ const stats = ref({
   enabledUsers: 0,
   featuredArtworks: 0,
   categoryStats: {},
-  roleStats: {}
+  roleStats: {},
+  totalComments: 0
 })
 
-const recentArtworks = ref<ArtworkResponse[]>([])
+const recentArtworks = ref<Artwork[]>([])
 const loading = ref(false)
 
 onMounted(async () => {
@@ -170,8 +171,8 @@ onMounted(async () => {
       artworkApi.getArtworks({ limit: 10, sortBy: 'latest' })
     ])
 
-    stats.value = statsResponse || {}
-    recentArtworks.value = artworksResponse.data || []
+    stats.value = statsResponse
+    recentArtworks.value = artworksResponse.data
   } catch (error) {
     console.error('获取数据失败:', error)
   } finally {

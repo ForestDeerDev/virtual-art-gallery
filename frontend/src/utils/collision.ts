@@ -161,10 +161,10 @@ export class Octree {
     const closestPoint = new THREE.Vector3()
     
     // 找到线段上距离三角形最近的点
-    triangle.closestPointToPoint(start, false, closestPoint)
+    triangle.closestPointToPoint(start, closestPoint)
     let minDist = start.distanceTo(closestPoint)
     
-    triangle.closestPointToPoint(end, false, closestPoint)
+    triangle.closestPointToPoint(end, closestPoint)
     minDist = Math.min(minDist, end.distanceTo(closestPoint))
     
     // 检查线段内部点
@@ -175,7 +175,7 @@ export class Octree {
     for (let i = 0; i <= 10; i++) {
       const t = i / 10
       const point = new THREE.Vector3().copy(start).addScaledVector(direction, t * length)
-      triangle.closestPointToPoint(point, false, closestPoint)
+      triangle.closestPointToPoint(point, closestPoint)
       minDist = Math.min(minDist, point.distanceTo(closestPoint))
     }
     

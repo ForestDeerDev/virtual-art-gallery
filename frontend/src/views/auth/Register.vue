@@ -109,11 +109,21 @@
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useUserStore } from '@/stores/user'
+import userApi from '@/api/user'
+import { isAxiosError } from 'axios'
+import type { RegisterRequest } from '@/types'
+
+// 本地表单类型，tags 设为必选以解决模板类型错误
+interface RegisterForm extends Omit<RegisterRequest, 'tags'> {
+  tags: string[]
+  confirmPassword: string
+  avatar: File | null
+}
 
 const router = useRouter()
 const userStore = useUserStore()
 
-const form = ref({
+const form = ref<RegisterForm>({
   username: '',
   email: '',
   password: '',
@@ -127,19 +137,20 @@ const avatarPreview = ref('')
 const loading = ref(false)
 const error = ref('')
 
-const handleAvatarChange = (event) => {
-  const file = event.target.files[0]
+const handleAvatarChange = (event: Event) => {
+  const target = event.target as HTMLInputElement | null
+  const file = target?.files?.[0]
   if (file) {
     form.value.avatar = file
     const reader = new FileReader()
     reader.onload = (e) => {
-      avatarPreview.value = e.target.result
+      avatarPreview.value = e.target?.result as string
     }
     reader.readAsDataURL(file)
   }
 }
 
-const toggleTag = (tag) => {
+const toggleTag = (tag: string) => {
   const index = form.value.tags.indexOf(tag)
   if (index > -1) {
     form.value.tags.splice(index, 1)
@@ -167,14 +178,19 @@ const handleRegister = async () => {
 
     await userStore.register(userData)
 
-    // 如果有头像，上传头像
+    // 如果有头像，先上传头像获取 URL
     if (form.value.avatar) {
-      await userStore.updateUserInfo({ avatar: form.value.avatar })
+      const avatarResponse = await userApi.uploadAvatar(form.value.avatar)
+      await userStore.updateUserInfo({ avatar: avatarResponse.url })
     }
 
     router.push('/home')
-  } catch (err) {
-    error.value = err.response?.data?.message || '注册失败，请重试'
+  } catch (err: unknown) {
+    if (isAxiosError<{ message?: string }>(err)) {
+      error.value = err.response?.data?.message ?? '注册失败，请重试'
+    } else {
+      error.value = '注册失败，请重试'
+    }
   } finally {
     loading.value = false
   }

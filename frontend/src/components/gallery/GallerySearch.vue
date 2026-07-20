@@ -19,14 +19,16 @@
 <script setup lang="ts">
 import { Search } from '@element-plus/icons-vue'
 
-defineProps({
-  modelValue: {
-    type: String,
-    default: ''
-  }
+withDefaults(defineProps<{
+  modelValue: string
+}>(), {
+  modelValue: ''
 })
 
-const emit = defineEmits(['update:modelValue', 'search'])
+const emit = defineEmits<{
+  'update:modelValue': [value: string]
+  'search': []
+}>()
 
 const handleSearch = () => {
   emit('search')

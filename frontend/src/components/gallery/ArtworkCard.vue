@@ -43,20 +43,18 @@
 import { ref, onMounted, computed } from 'vue'
 import { View, User } from '@element-plus/icons-vue'
 import { cleanTags } from '@/utils/tags'
+import type { Artwork } from '@/types'
 
-const props = defineProps({
-  artwork: {
-    type: Object,
-    required: true
-  }
-})
+const props = defineProps<{
+  artwork: Artwork
+}>()
 
-const cardRef = ref(null)
+const cardRef = ref<HTMLElement | null>(null)
 
 const hasTags = computed(() => {
   if (!props.artwork.tags) return false
   const tags = cleanTags(props.artwork.tags)
-  return Array.isArray(tags) ? tags.length > 0 : tags.trim().length > 0
+  return tags.length > 0
 })
 
 onMounted(() => {

@@ -173,7 +173,7 @@ export function createGallery(options: GalleryOptions): GalleryInstance {
       onLoadingStart?.()
     }
     
-    loadingManager.onProgress = (url: string, itemsLoaded: number, itemsTotal: number) => {
+    loadingManager.onProgress = (_url: string, itemsLoaded: number, itemsTotal: number) => {
       const progress = (itemsLoaded / itemsTotal) * 100
       onLoadingProgress?.(progress)
     }
@@ -231,7 +231,7 @@ export function createGallery(options: GalleryOptions): GalleryInstance {
         category: artwork.category,
         imageUrl: artwork.imageUrl
       }
-      scene.add(frame)
+      scene!.add(frame)
       artworkMeshes.push(frame)
 
       const canvasGeometry = new THREE.PlaneGeometry(2.6, 3.6)
@@ -239,7 +239,7 @@ export function createGallery(options: GalleryOptions): GalleryInstance {
         artwork.imageUrl,
         undefined,
         undefined,
-        (err) => {
+        (err: unknown) => {
           console.error('Texture loading error:', err)
         }
       )
@@ -292,7 +292,7 @@ export function createGallery(options: GalleryOptions): GalleryInstance {
       pedestal.position.set(pos.x, 0.5, pos.z)
       pedestal.castShadow = true
       pedestal.receiveShadow = true
-      scene.add(pedestal)
+      scene!.add(pedestal)
       if (octree) octree.add(pedestal)
 
       const sculptureGeometry = new THREE.IcosahedronGeometry(0.3, 0)
@@ -304,7 +304,7 @@ export function createGallery(options: GalleryOptions): GalleryInstance {
       const sculpture = new THREE.Mesh(sculptureGeometry, sculptureMaterial)
       sculpture.position.set(pos.x, 1.3, pos.z)
       sculpture.castShadow = true
-      scene.add(sculpture)
+      scene!.add(sculpture)
       if (octree) octree.add(sculpture)
     })
 

@@ -59,3 +59,10 @@ export interface ArtworkUpdateRequest {
  * 艺术品列表响应
  */
 export interface ArtworkListResponse extends PageResponse<Artwork> {}
+
+/**
+ * 图片上传响应
+ */
+export interface UploadResponse {
+  url: string
+}

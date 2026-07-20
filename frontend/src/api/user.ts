@@ -5,7 +5,8 @@ import type {
   OAuthRequest,
   UserUpdateRequest,
   AuthResponse,
-  User
+  User,
+  UploadAvatarResponse
 } from '@/types'
 
 export default {
@@ -24,7 +25,7 @@ export default {
       url: '/auth/register',
       method: 'post',
       data: userData
-    })
+    }) as Promise<AuthResponse>
   },
 
   // 第三方登录
@@ -33,7 +34,7 @@ export default {
       url: `/auth/oauth/${requestData.provider}`,
       method: 'post',
       data: { code: requestData.code }
-    })
+    }) as Promise<AuthResponse>
   },
 
   // 获取用户信息
@@ -56,13 +57,13 @@ export default {
   },
 
   // 上传头像
-  uploadAvatar(file: File) {
+  uploadAvatar(file: File): Promise<UploadAvatarResponse> {
     const formData = new FormData()
     formData.append('file', file)
     return request({
       url: '/upload/avatar',
       method: 'post',
       data: formData
-    })
+    }) as Promise<UploadAvatarResponse>
   }
 }

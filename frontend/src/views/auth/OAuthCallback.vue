@@ -63,10 +63,10 @@ onMounted(async () => {
       redirectToHome()
     }, 1500)
     
-  } catch (err: any) {
+  } catch (err: unknown) {
     console.error('OAuth登录失败:', err)
     error.value = true
-    message.value = err.response?.data?.message || '登录失败，请稍后重试'
+    message.value = '登录失败，请稍后重试'
   } finally {
     loading.value = false
   }

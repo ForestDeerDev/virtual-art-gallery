@@ -115,16 +115,17 @@ import { useRoute } from 'vue-router'
 import Navbar from '@/components/Navbar.vue'
 import adminApi from '@/api/admin'
 import { ElMessage, ElMessageBox } from 'element-plus'
+import type { User, UserRole } from '@/types'
 
 const route = useRoute()
 
 const activeMenu = computed(() => route.path)
 
-const users = ref([])
+const users = ref<User[]>([])
 const loading = ref(true)
 const showEditRoleModal = ref(false)
-const editingUser = ref(null)
-const newRole = ref('USER')
+const editingUser = ref<User | null>(null)
+const newRole = ref<UserRole>('USER')
 const submitting = ref(false)
 
 onMounted(() => {
@@ -136,14 +137,14 @@ const loadUsers = async () => {
   try {
     const response = await adminApi.getAllUsers()
     users.value = response || []
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('获取用户列表失败:', error)
   } finally {
     loading.value = false
   }
 }
 
-const handleEditRole = (user) => {
+const handleEditRole = (user: User) => {
   editingUser.value = user
   newRole.value = user.role
   showEditRoleModal.value = true
@@ -152,23 +153,23 @@ const handleEditRole = (user) => {
 const handleUpdateRole = async () => {
   submitting.value = true
   try {
-    await adminApi.updateUserRole(editingUser.value.id, newRole.value)
+    await adminApi.updateUserRole(editingUser.value!.id, newRole.value)
     
-    const user = users.value.find(u => u.id === editingUser.value.id)
+    const user = users.value.find(u => u.id === editingUser.value!.id)
     if (user) {
       user.role = newRole.value
     }
     
     showEditRoleModal.value = false
     ElMessage.success('角色更新成功')
-  } catch (error) {
-    ElMessage.error('更新失败：' + (error.response?.data?.message || error.message))
+  } catch (error: unknown) {
+    ElMessage.error('更新失败：' + '更新失败，请重试')
   } finally {
     submitting.value = false
   }
 }
 
-const handleDeleteUser = async (user) => {
+const handleDeleteUser = async (user: User) => {
   try {
     await ElMessageBox.confirm(
       `确定要删除用户 "${user.username}" 吗？此操作不可恢复。`,
@@ -183,9 +184,9 @@ const handleDeleteUser = async (user) => {
     await adminApi.deleteUser(user.id)
     users.value = users.value.filter(u => u.id !== user.id)
     ElMessage.success('用户删除成功')
-  } catch (error) {
+  } catch (error: unknown) {
     if (error !== 'cancel') {
-      ElMessage.error('删除失败：' + (error.response?.data?.message || error.message))
+      ElMessage.error('删除失败：' + '删除失败，请重试')
     }
   }
 }

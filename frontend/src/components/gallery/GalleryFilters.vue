@@ -5,6 +5,7 @@
         <h3 class="filters-title">筛选条件</h3>
       </template>
       <div class="filters-grid">
+        <!-- Vue 事件机制通过事件名匹配，而不是函数名或参数名。只要事件名相同，无论 emit 来自哪个函数，都会被同一个监听器接收。 -->
         <div class="filter-item">
           <label class="form-label">分类</label>
           <el-select 
@@ -58,30 +59,28 @@
 import { ref, onMounted } from 'vue'
 import { RefreshLeft } from '@element-plus/icons-vue'
 import artworkApi from '@/api/artwork'
+import type { GalleryFilterState } from '@/types/gallery'
 
-const props = defineProps({
-  filters: {
-    type: Object,
-    default: () => ({
-      category: '',
-      sortBy: 'latest',
-      tags: '',
-      keyword: ''
-    })
-  }
-})
+// 父组件 → 子组件：通过 props 传值
+const props = defineProps<{
+  filters: GalleryFilterState
+}>()
 
-const emit = defineEmits(['update:filters', 'reset'])
+// 子组件 → 父组件：通过 emit 传值
+const emit = defineEmits<{
+  'update:filters': [value: GalleryFilterState]
+  'reset': []
+}>()
 
-const categories = ref([])
+const categories = ref<string[]>([])
 const loading = ref(false)
 
 const fetchCategories = async () => {
   loading.value = true
   try {
     const response = await artworkApi.getCategories()
-    categories.value = response.data || response
-  } catch (error) {
+    categories.value = response
+  } catch (error: unknown) {
     console.error('获取分类列表失败:', error)
   } finally {
     loading.value = false
@@ -92,6 +91,7 @@ onMounted(() => {
   fetchCategories()
 })
 
+// 函数都 emit 同一个事件名：'update:filters'，只是传递的数据内容不同。
 const handleCategoryChange = (value: string) => {
   emit('update:filters', { ...props.filters, category: value })
 }

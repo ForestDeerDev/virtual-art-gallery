@@ -193,8 +193,10 @@ import { ref, onMounted, computed } from 'vue'
 import { useRoute } from 'vue-router'
 import Navbar from '@/components/Navbar.vue'
 import { useArtworkStore } from '@/stores/artwork'
+import artworkApi from '@/api/artwork'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { parseCommaSeparated } from '@/utils/tags'
+import type { Artwork, ArtworkCreateRequest, ArtworkUpdateRequest } from '@/types'
 
 const route = useRoute()
 const artworkStore = useArtworkStore()
@@ -202,28 +204,25 @@ const artworkStore = useArtworkStore()
 const activeMenu = computed(() => route.path)
 
 
-const selectedArtworks = ref([])
+const selectedArtworks = ref<number[]>([])
 const showCreateModal = ref(false)
 const showBatchUpdateModal = ref(false)
-const editingArtwork = ref(null)
+const editingArtwork = ref<Artwork | null>(null)
 const submitting = ref(false)
 
-const form = ref({
+const form = ref<ArtworkCreateRequest & { tagsInput: string; artist?: string }>({
   title: '',
   artist: '',
   category: '',
   description: '',
   imageUrl: '',
   videoUrl: '',
+  tags: [],
   tagsInput: ''
 })
 
-const batchUpdateForm = ref({
+const batchUpdateForm = ref<{ category?: string }>({
   category: ''
-})
-
-const allSelected = computed(() => {
-  return artworkStore.artworks.length > 0 && selectedArtworks.value.length === artworkStore.artworks.length
 })
 
 onMounted(() => {
@@ -233,24 +232,16 @@ onMounted(() => {
 const loadArtworks = async () => {
   try {
     await artworkStore.fetchArtworks({ pageSize: 100 })
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('获取作品列表失败:', error)
   }
 }
 
-const handleSelectionChange = (selection) => {
+const handleSelectionChange = (selection: Artwork[]) => {
   selectedArtworks.value = selection.map(item => item.id)
 }
 
-const toggleSelectAll = () => {
-  if (allSelected.value) {
-    selectedArtworks.value = []
-  } else {
-    selectedArtworks.value = artworks.value.map(a => a.id)
-  }
-}
-
-const handleEdit = (artwork) => {
+const handleEdit = (artwork: Artwork) => {
   editingArtwork.value = artwork
   form.value = {
     title: artwork.title || '',
@@ -259,12 +250,13 @@ const handleEdit = (artwork) => {
     description: artwork.description || '',
     imageUrl: artwork.imageUrl || '',
     videoUrl: artwork.videoUrl || '',
+    tags: artwork.tags || [],
     tagsInput: (artwork.tags || []).join(',')
   }
   showCreateModal.value = true
 }
 
-const handleDelete = async (id) => {
+const handleDelete = async (id: number) => {
   try {
     await ElMessageBox.confirm('确定要删除这件作品吗？', '确认删除', {
       confirmButtonText: '确定',
@@ -274,9 +266,9 @@ const handleDelete = async (id) => {
 
     await artworkStore.deleteArtwork(id)
     ElMessage.success('删除成功')
-  } catch (error) {
+  } catch (error: unknown) {
     if (error !== 'cancel') {
-      ElMessage.error('删除失败：' + (error.response?.data?.message || error.message))
+      ElMessage.error('删除失败：' + '删除失败，请重试')
     }
   }
 }
@@ -296,9 +288,9 @@ const handleBatchDelete = async () => {
     await artworkStore.batchDeleteArtworks(selectedArtworks.value)
     selectedArtworks.value = []
     ElMessage.success('批量删除成功')
-  } catch (error) {
+  } catch (error: unknown) {
     if (error !== 'cancel') {
-      ElMessage.error('批量删除失败：' + (error.response?.data?.message || error.message))
+      ElMessage.error('批量删除失败：' + '删除失败，请重试')
     }
   }
 }
@@ -308,17 +300,17 @@ const handleBatchUpdate = async () => {
 
   submitting.value = true
   try {
-    const updates = selectedArtworks.value.map(id => ({
+    const updates: { id: number; category?: string }[] = selectedArtworks.value.map(id => ({
       id,
       category: batchUpdateForm.value.category || undefined
     })).filter(u => u.category)
 
     if (updates.length > 0) {
-      await artworkApi.batchUpdateArtworks(updates)
+      await artworkApi.batchUpdateArtworks({ updates: updates.map(u => ({ id: u.id, data: { category: u.category } as ArtworkUpdateRequest })) })
       // 更新本地数据
       updates.forEach(update => {
-        const artwork = artworks.value.find(a => a.id === update.id)
-        if (artwork) {
+        const artwork = artworkStore.artworks.find(a => a.id === update.id)
+        if (artwork && update.category) {
           artwork.category = update.category
         }
       })
@@ -327,8 +319,8 @@ const handleBatchUpdate = async () => {
       batchUpdateForm.value = { category: '' }
       ElMessage.success('批量更新成功')
     }
-  } catch (error) {
-    ElMessage.error('批量更新失败：' + (error.response?.data?.message || error.message))
+  } catch (error: unknown) {
+    ElMessage.error('批量更新失败：' + '更新失败，请重试')
   } finally {
     submitting.value = false
   }
@@ -337,11 +329,10 @@ const handleBatchUpdate = async () => {
 const handleSubmit = async () => {
   submitting.value = true
   try {
-    const artworkData = {
+    const artworkData: ArtworkCreateRequest = {
       ...form.value,
       tags: parseCommaSeparated(form.value.tagsInput)
     }
-    delete artworkData.tagsInput
 
     if (editingArtwork.value) {
       // 更新模式：调用 updateArtwork，传入 ID 和数据
@@ -354,8 +345,8 @@ const handleSubmit = async () => {
     }
 
     closeModal()
-  } catch (error) {
-    ElMessage.error((editingArtwork.value ? '更新' : '创建') + '失败：' + (error.response?.data?.message || error.message))
+  } catch (error: unknown) {
+    ElMessage.error((editingArtwork.value ? '更新' : '创建') + '失败：' + '操作失败，请重试')
   } finally {
     submitting.value = false
   }
@@ -371,6 +362,7 @@ const closeModal = () => {
     description: '',
     imageUrl: '',
     videoUrl: '',
+    tags: [],
     tagsInput: ''
   }
 }

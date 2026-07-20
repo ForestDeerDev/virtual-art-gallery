@@ -46,3 +46,10 @@ export interface GalleryInstance {
   dispose: () => void
   resetCamera: () => void
 }
+
+export interface GalleryFilterState {
+  category: string
+  sortBy: string
+  tags: string
+  keyword: string
+}

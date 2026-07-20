@@ -26,8 +26,8 @@ export const useInteractionStore = defineStore('interaction', () => {
       ])
       
       likeStatus.value = {
-        likeCount: countResponse.likeCount || 0,
-        isLiked: statusResponse.isLiked || false
+        likeCount: countResponse.likeCount,
+        isLiked: statusResponse.isLiked
       }
       
       return likeStatus.value
@@ -54,7 +54,7 @@ export const useInteractionStore = defineStore('interaction', () => {
       }
       
       likeStatus.value = {
-        likeCount: response.likeCount || 0,
+        likeCount: response.likeCount,
         isLiked: !likeStatus.value.isLiked
       }
       

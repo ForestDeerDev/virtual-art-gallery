@@ -7,7 +7,7 @@ function isValidTag(tag: string): boolean {
 }
 
 export function parseCommaSeparated(
-  str: string | string[],
+  str: string | string[] | undefined,
   separator = ','
 ): string[] {
   if (str == null) return []
@@ -21,7 +21,7 @@ export function parseCommaSeparated(
     .filter(isValidTag)
 }
 
-export function cleanTags(tags: string | string[]): string[] {
+export function cleanTags(tags: string | string[] | undefined): string[] {
   if (tags == null) return []
   return parseCommaSeparated(tags)
 }

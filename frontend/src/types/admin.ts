@@ -9,6 +9,12 @@ export interface AdminStats {
   totalArtworks: number
   totalComments: number
   totalLikes: number
+  totalViews: number
+  enabledArtworks: number
+  enabledUsers: number
+  featuredArtworks: number
+  categoryStats: Record<string, number>
+  roleStats: Record<string, number>
 }
 
 /**
