@@ -16,7 +16,7 @@ export const useInteractionStore = defineStore('interaction', () => {
   const hasComments = computed(() => comments.value.length > 0)
   const commentCount = computed(() => comments.value.length)
 
-  async function fetchLikeStatus(artworkId: number) {
+  async function fetchLikeStatus(artworkId: number): Promise<LikeStatus> {
     loading.value = true
     error.value = null
     try {
@@ -41,14 +41,14 @@ export const useInteractionStore = defineStore('interaction', () => {
     }
   }
 
-  async function toggleLike(artworkId: number) {
+  async function toggleLike(artworkId: number): Promise<LikeStatus> {
     loading.value = true
     error.value = null
     try {
-      let response
+      let response: LikeStatus
       if (likeStatus.value.isLiked) {
         await interactionApi.unlikeArtwork(artworkId)
-        response = { likeCount: likeStatus.value.likeCount - 1 }
+        response = { likeCount: likeStatus.value.likeCount - 1, isLiked: false }
       } else {
         response = await interactionApi.likeArtwork(artworkId)
       }
@@ -68,7 +68,7 @@ export const useInteractionStore = defineStore('interaction', () => {
     }
   }
 
-  async function fetchComments(artworkId: number) {
+  async function fetchComments(artworkId: number): Promise<Comment[]> {
     loading.value = true
     error.value = null
     try {
@@ -100,7 +100,7 @@ export const useInteractionStore = defineStore('interaction', () => {
     }
   }
 
-  async function submitComment(artworkId: number, content: string, parentId: number | null = null) {
+  async function submitComment(artworkId: number, content: string, parentId: number | null = null): Promise<void> {
     loading.value = true
     error.value = null
     try {
@@ -111,8 +111,6 @@ export const useInteractionStore = defineStore('interaction', () => {
       
       await fetchComments(artworkId)
       await fetchLikeStatus(artworkId)
-      
-      return true
     } catch (err: unknown) {
       error.value = err instanceof Error ? err.message : '提交评论失败'
       console.error('submitComment error:', err)
@@ -122,7 +120,7 @@ export const useInteractionStore = defineStore('interaction', () => {
     }
   }
 
-  async function deleteComment(commentId: number, _artworkId: number) {
+  async function deleteComment(commentId: number, _artworkId: number): Promise<void> {
     loading.value = true
     error.value = null
     try {
@@ -130,7 +128,6 @@ export const useInteractionStore = defineStore('interaction', () => {
       // filter 方法在内部遍历时，会依次把每个评论对象传入给 c 回调函数
       // 删除 id 等于 commentId 的评论，保留所有不匹配的评论
       comments.value = comments.value.filter(c => c.id !== commentId)
-      return true
     } catch (err: unknown) {
       error.value = err instanceof Error ? err.message : '删除评论失败'
       console.error('deleteComment error:', err)
@@ -140,19 +137,19 @@ export const useInteractionStore = defineStore('interaction', () => {
     }
   }
 
-  async function submitReply(artworkId: number, content: string, commentId: number) {
+  async function submitReply(artworkId: number, content: string, commentId: number): Promise<void> {
     return submitComment(artworkId, content, commentId)
   }
 
-  function resetLikeStatus() {
+  function resetLikeStatus(): void {
     likeStatus.value = { isLiked: false, likeCount: 0 }
   }
 
-  function clearComments() {
+  function clearComments(): void {
     comments.value = []
   }
 
-  function clearError() {
+  function clearError(): void {
     error.value = null
   }
 

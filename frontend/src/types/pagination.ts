@@ -24,3 +24,13 @@ export interface PageQuery {
   limit?: number
   featured?: boolean
 }
+
+/**
+ * 分页状态 - 前端 store 使用
+ */
+export interface PaginationState {
+  currentPage: number
+  pageSize: number
+  totalPages: number
+  totalElements: number
+}

@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import artworkApi from '@/api/artwork'
-import type { Artwork, ArtworkCreateRequest, ArtworkUpdateRequest, PageQuery, GalleryFilterState } from '@/types'
+import type { Artwork, ArtworkCreateRequest, ArtworkUpdateRequest, PageQuery, GalleryFilterState, PaginationState, ArtworkListResponse } from '@/types'
 
 export const useArtworkStore = defineStore('artwork', () => {
   const artworks = ref<Artwork[]>([])
@@ -11,7 +11,7 @@ export const useArtworkStore = defineStore('artwork', () => {
   const loading = ref(false)
   const error = ref<string | null>(null)
   
-  const pagination = ref({
+  const pagination = ref<PaginationState>({
     currentPage: 1,
     pageSize: 12,
     totalPages: 1,
@@ -28,12 +28,12 @@ export const useArtworkStore = defineStore('artwork', () => {
   const hasArtworks = computed(() => artworks.value.length > 0)
   const isEmpty = computed(() => !loading.value && artworks.value.length === 0)
 
-  async function fetchArtworks(params: Partial<PageQuery> = {}) {
+  async function fetchArtworks(params: Partial<PageQuery> = {}): Promise<ArtworkListResponse> {
     loading.value = true
     error.value = null
     try {
       // requestParams 构建请求参数 作为查询条件发送给后端
-      const requestParams = {
+      const requestParams: PageQuery = {
         page: pagination.value.currentPage - 1,
         pageSize: pagination.value.pageSize,
         category: filters.value.category,
@@ -62,7 +62,7 @@ export const useArtworkStore = defineStore('artwork', () => {
     }
   }
 
-  async function fetchFeaturedArtworks(pageSize: number = 12) {
+  async function fetchFeaturedArtworks(pageSize: number = 12): Promise<Artwork[]> {
     loading.value = true
     error.value = null
     try {
@@ -78,7 +78,7 @@ export const useArtworkStore = defineStore('artwork', () => {
     }
   }
 
-  async function fetchArtworkById(id: number) {
+  async function fetchArtworkById(id: number): Promise<Artwork | null> {
     loading.value = true
     error.value = null
     try {
@@ -99,7 +99,7 @@ export const useArtworkStore = defineStore('artwork', () => {
     }
   }
 
-  async function fetchRelatedArtworks(category: string, excludeId: number, limit: number = 4) {
+  async function fetchRelatedArtworks(category: string, excludeId: number, limit: number = 4): Promise<Artwork[]> {
     try {
       const response = await artworkApi.getArtworks({ category, limit: 8 })
       relatedArtworks.value = response.data
@@ -113,7 +113,7 @@ export const useArtworkStore = defineStore('artwork', () => {
     }
   }
 
-  async function searchArtworks(keyword: string) {
+  async function searchArtworks(keyword: string): Promise<ArtworkListResponse> {
     // 搜索关键词为空时，返回所有作品
     if (!keyword?.trim()) {
       return fetchArtworks()
@@ -137,7 +137,7 @@ export const useArtworkStore = defineStore('artwork', () => {
     }
   }
 
-  async function createArtwork(artworkData: ArtworkCreateRequest) {
+  async function createArtwork(artworkData: ArtworkCreateRequest): Promise<Artwork> {
     loading.value = true
     error.value = null
     try {
@@ -154,7 +154,7 @@ export const useArtworkStore = defineStore('artwork', () => {
     }
   }
 
-  async function updateArtwork(id: number, artworkData: ArtworkUpdateRequest) {
+  async function updateArtwork(id: number, artworkData: ArtworkUpdateRequest): Promise<Artwork> {
     loading.value = true
     error.value = null
     try {
@@ -176,7 +176,7 @@ export const useArtworkStore = defineStore('artwork', () => {
     }
   }
 
-  async function deleteArtwork(id: number) {
+  async function deleteArtwork(id: number): Promise<void> {
     loading.value = true
     error.value = null
     try {
@@ -187,7 +187,6 @@ export const useArtworkStore = defineStore('artwork', () => {
       if (currentArtwork.value?.id === id) {
         currentArtwork.value = null
       }
-      return true
     } catch (err: unknown) {
       error.value = err instanceof Error ? err.message : '删除作品失败'
       console.error('deleteArtwork error:', err)
@@ -197,7 +196,7 @@ export const useArtworkStore = defineStore('artwork', () => {
     }
   }
 
-  async function batchDeleteArtworks(ids: number[]) {
+  async function batchDeleteArtworks(ids: number[]): Promise<void> {
     loading.value = true
     error.value = null
     try {
@@ -206,7 +205,6 @@ export const useArtworkStore = defineStore('artwork', () => {
       artworks.value = artworks.value.filter(a => !ids.includes(a.id))
       // 用新的筛选条件覆盖旧的，同时保留没改的条件
       pagination.value.totalElements -= ids.length
-      return true
     } catch (err: unknown) {
       error.value = err instanceof Error ? err.message : '批量删除失败'
       console.error('batchDeleteArtworks error:', err)
@@ -218,11 +216,11 @@ export const useArtworkStore = defineStore('artwork', () => {
 
   // 新值覆盖旧值，保留未修改的字段
   // emit('update:filters', { ...props.filters, category: value }) 传入 newFilters 的初始值
-  function setFilters(newFilters: Partial<typeof filters.value>) {
+  function setFilters(newFilters: Partial<GalleryFilterState>): void {
     filters.value = { ...filters.value, ...newFilters }
   }
 
-  function resetFilters() {
+  function resetFilters(): void {
     filters.value = {
       category: '',
       sortBy: 'latest',
@@ -231,16 +229,16 @@ export const useArtworkStore = defineStore('artwork', () => {
     }
   }
 
-  function setPage(page: number) {
+  function setPage(page: number): void {
     pagination.value.currentPage = page
   }
 
-  function clearCurrentArtwork() {
+  function clearCurrentArtwork(): void {
     currentArtwork.value = null
     relatedArtworks.value = []
   }
 
-  function clearError() {
+  function clearError(): void {
     error.value = null
   }
 
