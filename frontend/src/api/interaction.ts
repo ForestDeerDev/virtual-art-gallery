@@ -2,7 +2,9 @@ import request from '@/utils/request'
 import type {
   Comment,
   CommentCreateRequest,
-  LikeStatus
+  LikeStatus,
+  LikeCountResponse,
+  CommentCountResponse
 } from '@/types'
 
 export default {
@@ -31,11 +33,11 @@ export default {
   },
 
   // 获取作品点赞数量
-  getLikeCount(artworkId: number): Promise<{ likeCount: number }> {
+  getLikeCount(artworkId: number): Promise<LikeCountResponse> {
     return request({
       url: `/interactions/artworks/${artworkId}/like/count`,
       method: 'get'
-    }) as Promise<{ likeCount: number }>
+    }) as Promise<LikeCountResponse>
   },
 
   // 创建评论
@@ -75,10 +77,10 @@ export default {
   },
 
   // 获取作品评论数量
-  getCommentCount(artworkId: number): Promise<{ count: number }> {
+  getCommentCount(artworkId: number): Promise<CommentCountResponse> {
     return request({
       url: `/interactions/artworks/${artworkId}/comments/count`,
       method: 'get'
-    }) as Promise<{ count: number }>
+    }) as Promise<CommentCountResponse>
   }
 }

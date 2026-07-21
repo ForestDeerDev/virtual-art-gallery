@@ -28,3 +28,17 @@ export interface LikeStatus {
   isLiked: boolean
   likeCount: number
 }
+
+/**
+ * 点赞数量响应
+ */
+export interface LikeCountResponse {
+  likeCount: number
+}
+
+/**
+ * 评论数量响应
+ */
+export interface CommentCountResponse {
+  count: number
+}
