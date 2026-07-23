@@ -115,8 +115,7 @@ onMounted(() => {
   if (userStore.userInfo) {
     form.value.username = userStore.userInfo.username || ''
     form.value.email = userStore.userInfo.email || ''
-    const tags = userStore.userInfo.tags || []
-    form.value.tags = parseCommaSeparated(tags)
+    form.value.tags = parseCommaSeparated(userStore.userInfo.tags)
   }
 })
 

@@ -36,7 +36,7 @@ import Navbar from '@/components/Navbar.vue'
 import GalleryControls from '@/components/GalleryControls.vue'
 import artworkApi from '@/api/artwork'
 import { useThreeGallery } from '@/composables/useThreeGallery'
-import type { Artwork, GalleryArtwork, GalleryControlState, GalleryConfig, GalleryInstance } from '@/types'
+import type { GalleryArtwork, GalleryControlState, GalleryConfig, GalleryInstance } from '@/types'
 
 const router = useRouter()
 const canvasContainer = ref<HTMLElement | null>(null)
@@ -64,7 +64,7 @@ const loadArtworks = async () => {
   try {
     const response = await artworkApi.getArtworks({ page: 0, pageSize: 20 })
     const artworksData = response.data
-    artworkImages.value = artworksData.map((artwork: Artwork) => ({
+    artworkImages.value = artworksData.map((artwork) => ({
       id: artwork.id,
       title: artwork.title,
       artist: artwork.artist,

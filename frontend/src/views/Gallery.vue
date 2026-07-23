@@ -54,26 +54,23 @@ import GalleryPagination from '@/components/gallery/GalleryPagination.vue'
 import ArtworkCard from '@/components/gallery/ArtworkCard.vue'
 import { useArtworkStore } from '@/stores/artwork'
 import type { GalleryFilterState } from '@/types/gallery'
+import { getQueryString } from '@/utils/route'
 
 const route = useRoute()
 const artworkStore = useArtworkStore()
 const searchKeyword = ref('')
 
-const getQueryString = (value: string | (string | null)[] | null | undefined): string => {
-  if (typeof value === 'string') return value
-  if (Array.isArray(value)) return value[0] || ''
-  return ''
-}
+
 
 onMounted(async () => {
   if (route.query.category) {
-    artworkStore.setFilters({ category: getQueryString(route.query.category) })
+    artworkStore.setFilters({ category: getQueryString(route.query.category) ?? '' })
   }
   await artworkStore.fetchArtworks()
 })
 
 watch(() => route.query.category, async (newCategory) => {
-  artworkStore.setFilters({ category: getQueryString(newCategory) })
+  artworkStore.setFilters({ category: getQueryString(newCategory) ?? '' })
   await artworkStore.fetchArtworks()
 })
 

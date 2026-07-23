@@ -40,6 +40,13 @@ export interface ArtworkCreateRequest {
 }
 
 /**
+ * 管理后台艺术品创建请求 - 继承 ArtworkCreateRequest，增加 artist 字段
+ */
+export interface AdminArtworkCreateRequest extends ArtworkCreateRequest {
+  artist?: string
+}
+
+/**
  * 艺术品更新请求 - 匹配后端 ArtworkUpdateRequest
  */
 export interface ArtworkUpdateRequest {

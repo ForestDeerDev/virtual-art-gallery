@@ -68,7 +68,7 @@
               <p class="card-text text-muted small mb-2">
                 <el-icon><PriceTag /></el-icon> {{ artwork.category }}
               </p>
-              <div v-if="artwork.matchingTags && artwork.matchingTags.length > 0" class="mb-2">
+              <div v-if="artwork.matchingTags.length > 0" class="mb-2">
                 <small class="text-muted">匹配标签：</small>
                 <el-tag
                   v-for="tag in artwork.matchingTags"
@@ -83,7 +83,7 @@
               <div class="mt-2">
                 <el-tag type="warning">
                   <el-icon class="me-1"><StarFilled /></el-icon>
-                  推荐度: {{ artwork.relevanceScore || '高' }}
+                  推荐度: {{ artwork.relevanceScore }}
                 </el-tag>
               </div>
             </div>
@@ -117,8 +117,8 @@ import type { Artwork } from '@/types'
 const userStore = useUserStore()
 
 interface Recommendation extends Artwork {
-  matchingTags?: string[]
-  relevanceScore?: string
+  matchingTags: string[]
+  relevanceScore: string
   randomScore?: number
 }
 
@@ -130,6 +130,22 @@ const userTags = computed(() => {
   console.log('User tags raw data:', tags)
   return cleanTags(tags)
 })
+
+/**
+ * 将 Artwork 转换为 Recommendation，计算匹配标签和推荐度
+ */
+const toRecommendation = (artwork: Artwork): Recommendation => {
+  const artworkTags = parseCommaSeparated(artwork.tags)
+  const matchingTags = artworkTags.filter(tag =>
+    userTags.value.includes(tag)
+  )
+
+  return {
+    ...artwork,
+    matchingTags,
+    relevanceScore: matchingTags.length > 0 ? '高' : '中'
+  }
+}
 
 onMounted(async () => {
   // 清除localStorage中的旧数据，确保只使用最新的用户信息
@@ -150,42 +166,36 @@ const loadRecommendations = async () => {
   loading.value = true
   try {
     const response = await artworkApi.getRecommendations()
-    recommendations.value = response
     
     // 如果没有推荐，基于用户标签生成推荐
-    if (recommendations.value.length === 0 && userTags.value.length > 0) {
+    if (response.length === 0 && userTags.value.length > 0) {
       const allArtworks = await artworkApi.getArtworks({ pageSize: 50 })
       const all = allArtworks.data
       
       // 根据标签匹配推荐
-      recommendations.value = all
-        .map((artwork: Artwork) => {
-          const artworkTags = parseCommaSeparated(artwork.tags)
-          const matchingTags = artworkTags.filter(tag =>
-            userTags.value.includes(tag)
-          )
-          return {
-            ...artwork,
-            matchingTags,
-            relevanceScore: matchingTags.length > 0 ? '高' : '中',
-            randomScore: Math.random()
-          } as Recommendation
-        })
-        .filter(artwork => (artwork.matchingTags?.length || 0) > 0)
+              recommendations.value = all
+                .map((artwork) => ({
+          ...toRecommendation(artwork),
+          randomScore: Math.random()
+        }))
+        .filter(artwork => artwork.matchingTags.length > 0)
         .sort((a, b) => {
           // 先按匹配标签数量排序
-          if ((b.matchingTags?.length || 0) !== (a.matchingTags?.length || 0)) {
-            return (b.matchingTags?.length || 0) - (a.matchingTags?.length || 0)
+          if (b.matchingTags.length !== a.matchingTags.length) {
+            return b.matchingTags.length - a.matchingTags.length
           }
           // 匹配标签数量相同时，按随机分数排序，增加随机性
-          return (b.randomScore || 0) - (a.randomScore || 0)
+          return (b.randomScore ?? 0) - (a.randomScore ?? 0)
         })
         .slice(0, 12)
+    } else {
+      // API 返回有数据时，统一转换为 Recommendation 类型
+      recommendations.value = response.map(toRecommendation)
     }
   } catch (error: unknown) {
     console.error('获取推荐失败:', error)
     // 使用模拟数据
-    recommendations.value = Array.from({ length: 8 }, (_, i) => ({
+    recommendations.value = Array.from({ length: 8 }, (_, i): Recommendation => ({
       id: i + 1,
       title: `推荐作品 ${i + 1}`,
       artist: `艺术家 ${i + 1}`,
@@ -201,7 +211,7 @@ const loadRecommendations = async () => {
       updateTime: new Date().toISOString(),
       matchingTags: userTags.value.slice(0, 2),
       relevanceScore: '高'
-    } as Recommendation))
+    }))
   } finally {
     loading.value = false
   }

@@ -196,7 +196,7 @@ import { useArtworkStore } from '@/stores/artwork'
 import artworkApi from '@/api/artwork'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { parseCommaSeparated } from '@/utils/tags'
-import type { Artwork, ArtworkCreateRequest, ArtworkUpdateRequest } from '@/types'
+import type { Artwork, AdminArtworkCreateRequest, ArtworkUpdateRequest, BatchUpdateRequest } from '@/types'
 
 const route = useRoute()
 const artworkStore = useArtworkStore()
@@ -210,7 +210,7 @@ const showBatchUpdateModal = ref(false)
 const editingArtwork = ref<Artwork | null>(null)
 const submitting = ref(false)
 
-const form = ref<ArtworkCreateRequest & { tagsInput: string; artist?: string }>({
+const form = ref<AdminArtworkCreateRequest & { tagsInput: string }>({
   title: '',
   artist: '',
   category: '',
@@ -250,8 +250,8 @@ const handleEdit = (artwork: Artwork) => {
     description: artwork.description || '',
     imageUrl: artwork.imageUrl || '',
     videoUrl: artwork.videoUrl || '',
-    tags: artwork.tags || [],
-    tagsInput: (artwork.tags || []).join(',')
+    tags: artwork.tags ?? [],
+    tagsInput: artwork.tags?.join(',') ?? ''
   }
   showCreateModal.value = true
 }
@@ -300,18 +300,22 @@ const handleBatchUpdate = async () => {
 
   submitting.value = true
   try {
-    const updates: { id: number; category?: string }[] = selectedArtworks.value.map(id => ({
-      id,
-      category: batchUpdateForm.value.category || undefined
-    })).filter(u => u.category)
+    const batchUpdateRequest: BatchUpdateRequest = {
+      updates: selectedArtworks.value
+        .map(id => ({
+          id,
+          data: { category: batchUpdateForm.value.category || undefined } as ArtworkUpdateRequest
+        }))
+        .filter(u => u.data.category)
+    }
 
-    if (updates.length > 0) {
-      await artworkApi.batchUpdateArtworks({ updates: updates.map(u => ({ id: u.id, data: { category: u.category } as ArtworkUpdateRequest })) })
+    if (batchUpdateRequest.updates.length > 0) {
+      await artworkApi.batchUpdateArtworks(batchUpdateRequest)
       // 更新本地数据
-      updates.forEach(update => {
+      batchUpdateRequest.updates.forEach(update => {
         const artwork = artworkStore.artworks.find(a => a.id === update.id)
-        if (artwork && update.category) {
-          artwork.category = update.category
+        if (artwork && update.data.category) {
+          artwork.category = update.data.category
         }
       })
       showBatchUpdateModal.value = false
@@ -329,7 +333,7 @@ const handleBatchUpdate = async () => {
 const handleSubmit = async () => {
   submitting.value = true
   try {
-    const artworkData: ArtworkCreateRequest = {
+    const artworkData: AdminArtworkCreateRequest = {
       ...form.value,
       tags: parseCommaSeparated(form.value.tagsInput)
     }

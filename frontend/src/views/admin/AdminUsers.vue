@@ -136,7 +136,7 @@ const loadUsers = async () => {
   loading.value = true
   try {
     const response = await adminApi.getAllUsers()
-    users.value = response || []
+    users.value = response
   } catch (error: unknown) {
     console.error('获取用户列表失败:', error)
   } finally {

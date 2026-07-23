@@ -86,6 +86,7 @@ import { useRouter, useRoute } from 'vue-router'
 import { useUserStore } from '@/stores/user'
 import { isAxiosError } from 'axios'
 import type { LoginRequest } from '@/types'
+import { getQueryString } from '@/utils/route'
 
 const router = useRouter()
 const route = useRoute()
@@ -106,7 +107,7 @@ const handleLogin = async () => {
   
   try {
     await userStore.login(form.value)
-    const redirect = (route.query.redirect as string) ?? '/home'
+    const redirect = getQueryString(route.query.redirect) ?? '/home'
     router.push(redirect)
   } catch (err: unknown) {
     if (isAxiosError<{ message?: string }>(err)) {

@@ -32,6 +32,7 @@ import { ref, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useUserStore } from '@/stores/user'
 import { Loading, CircleCheckFilled, CircleCloseFilled } from '@element-plus/icons-vue'
+import { getQueryString } from '@/utils/route'
 
 const route = useRoute()
 const router = useRouter()
@@ -42,10 +43,12 @@ const success = ref(false)
 const error = ref(false)
 const message = ref('')
 
+
+
 onMounted(async () => {
   try {
     // 从URL中获取授权码和提供商
-    const code = route.query.code as string
+    const code = getQueryString(route.query.code)
     const provider = (route.params.provider as string) || 'github'
 
     if (!code) {
