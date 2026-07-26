@@ -1,4 +1,4 @@
-import axios, { type AxiosInstance, type InternalAxiosRequestConfig, type AxiosResponse, type AxiosError } from 'axios'
+import axios, { type AxiosInstance, type InternalAxiosRequestConfig, type AxiosResponse, type AxiosError, type AxiosRequestConfig } from 'axios'
 import { ElMessage } from 'element-plus'
 import { useUserStore } from '@/stores/user'
 import { isTokenExpired } from '@/utils/jwt'
@@ -8,14 +8,14 @@ interface SilentError extends Error {
   silent?: boolean
 }
 
-const request: AxiosInstance = axios.create({
+const instance: AxiosInstance = axios.create({
   baseURL: '/api',
   timeout: 10000
 })
 
 
 // 请求拦截器
-request.interceptors.request.use(
+instance.interceptors.request.use(
   (config: InternalAxiosRequestConfig) => {
     const userStore = useUserStore()
     if (userStore.token) {
@@ -29,7 +29,7 @@ request.interceptors.request.use(
         return Promise.reject(error)
       }
       
-      config.headers.Authorization = `Bearer ${userStore.token}`
+      config.headers.set('Authorization', `Bearer ${userStore.token}`)
       console.log('Request with token:', config.url, userStore.token.substring(0, 20) + '...')
     } else {
       console.log('Request without token:', config.url)
@@ -42,7 +42,7 @@ request.interceptors.request.use(
 )
 
 // 响应拦截器
-request.interceptors.response.use(
+instance.interceptors.response.use(
   (response: AxiosResponse) => {
     return response.data
   },
@@ -79,5 +79,15 @@ request.interceptors.response.use(
     return Promise.reject(error)
   }
 )
+
+/**
+ * 泛型化的 HTTP 请求封装
+ * 由于响应拦截器已解包 response.data，直接返回业务数据
+ * @param config Axios 请求配置
+ * @returns 业务数据的 Promise
+ */
+function request<T = unknown>(config: AxiosRequestConfig): Promise<T> {
+  return instance(config) as Promise<T>
+}
 
 export default request

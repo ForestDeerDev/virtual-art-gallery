@@ -3,31 +3,31 @@ import type { AdminStats, UserManagement, UserRole } from '@/types'
 
 export default {
   getStats(): Promise<AdminStats> {
-    return request({
+    return request<AdminStats>({
       url: '/admin/stats',
       method: 'get'
-    }) as Promise<AdminStats>
+    })
   },
 
   getAllUsers(): Promise<UserManagement[]> {
-    return request({
+    return request<UserManagement[]>({
       url: '/admin/users',
       method: 'get'
-    }) as Promise<UserManagement[]>
+    })
   },
 
   updateUserRole(userId: number, role: UserRole): Promise<void> {
-    return request({
+    return request<void>({
       url: `/admin/users/${userId}/role`,
       method: 'put',
       data: { role }
-    }) as Promise<void>
+    })
   },
 
   deleteUser(userId: number): Promise<void> {
-    return request({
+    return request<void>({
       url: `/admin/users/${userId}`,
       method: 'delete'
-    }) as Promise<void>
+    })
   }
 }
