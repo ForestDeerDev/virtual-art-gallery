@@ -18,6 +18,8 @@ export const useArtworkStore = defineStore('artwork', () => {
   const relatedArtworks = ref<Artwork[]>([])
   const loading = ref(false)
   const error = ref<string | null>(null)
+  const categories = ref<string[]>([])
+  const categoriesLoading = ref(false)
   
   const pagination = ref<PaginationState>({
     currentPage: 1,
@@ -36,18 +38,23 @@ export const useArtworkStore = defineStore('artwork', () => {
   const hasArtworks = computed(() => artworks.value.length > 0)
   const isEmpty = computed(() => !loading.value && artworks.value.length === 0)
 
-  async function fetchArtworks(params: Partial<PageQuery> = {}): Promise<ArtworkListResponse> {
+  async function fetchArtworks(): Promise<ArtworkListResponse> {
     loading.value = true
     error.value = null
     try {
       // requestParams 构建请求参数 作为查询条件发送给后端
+      // 只在参数有实际值时才添加，避免空字符串导致后端查询失败
       const requestParams: PageQuery = {
         page: pagination.value.currentPage - 1,
         pageSize: pagination.value.pageSize,
-        category: filters.value.category,
-        sortBy: filters.value.sortBy,
-        tags: filters.value.tags,
-        ...params
+        sortBy: filters.value.sortBy
+      }
+      
+      if (filters.value.category) {
+        requestParams.category = filters.value.category
+      }
+      if (filters.value.tags) {
+        requestParams.tags = filters.value.tags
       }
       
       // response 处理响应数据 作为查询结果返回给前端，然后存入 store 的状态中
@@ -108,6 +115,7 @@ export const useArtworkStore = defineStore('artwork', () => {
   }
 
   async function fetchRelatedArtworks(category: string, excludeId: number, limit: number = 4): Promise<Artwork[]> {
+    error.value = null
     try {
       const response = await artworkApi.getArtworks({ category, limit: 8 })
       relatedArtworks.value = response.data.map(normalizeArtwork)
@@ -115,26 +123,36 @@ export const useArtworkStore = defineStore('artwork', () => {
         .slice(0, limit)
       return relatedArtworks.value
     } catch (err: unknown) {
+      error.value = err instanceof Error ? err.message : '获取相关作品失败'
       console.error('fetchRelatedArtworks error:', err)
       relatedArtworks.value = []
-      return []
+      throw err
     }
   }
 
   async function searchArtworks(keyword: string): Promise<ArtworkListResponse> {
+    const trimmedKeyword = keyword?.trim() ?? ''
+    
+    // 使用 setFilters 更新关键词，自动重置页码
+    setFilters({ keyword: trimmedKeyword })
+    
     // 搜索关键词为空时，返回所有作品
-    if (!keyword?.trim()) {
+    if (!trimmedKeyword) {
       return fetchArtworks()
     }
     
     loading.value = true
     error.value = null
     try {
-      const response = await artworkApi.searchArtworks(keyword)
+      // 传递分页参数，后端已支持分页
+      const response = await artworkApi.searchArtworks(
+        trimmedKeyword,
+        pagination.value.currentPage - 1,
+        pagination.value.pageSize
+      )
       artworks.value = response.data.map(normalizeArtwork)
-      pagination.value.totalPages = 1
-      pagination.value.totalElements = artworks.value.length
-      filters.value.keyword = keyword
+      pagination.value.totalPages = response.totalPages
+      pagination.value.totalElements = response.total
       return response
     } catch (err: unknown) {
       error.value = err instanceof Error ? err.message : '搜索作品失败'
@@ -227,6 +245,7 @@ export const useArtworkStore = defineStore('artwork', () => {
   // emit('update:filters', { ...props.filters, category: value }) 传入 newFilters 的初始值
   function setFilters(newFilters: Partial<GalleryFilterState>): void {
     filters.value = { ...filters.value, ...newFilters }
+    pagination.value.currentPage = 1
   }
 
   function resetFilters(): void {
@@ -236,10 +255,16 @@ export const useArtworkStore = defineStore('artwork', () => {
       tags: '',
       keyword: ''
     }
+    pagination.value.currentPage = 1
   }
 
   function setPage(page: number): void {
     pagination.value.currentPage = page
+  }
+
+  function setPageSize(pageSize: number): void {
+    pagination.value.pageSize = pageSize
+    pagination.value.currentPage = 1
   }
 
   function clearCurrentArtwork(): void {
@@ -251,6 +276,23 @@ export const useArtworkStore = defineStore('artwork', () => {
     error.value = null
   }
 
+  async function fetchCategories(): Promise<string[]> {
+    categoriesLoading.value = true
+    error.value = null
+    try {
+      const response = await artworkApi.getCategories()
+      categories.value = response
+      return response
+    } catch (err: unknown) {
+      error.value = err instanceof Error ? err.message : '获取分类列表失败'
+      console.error('fetchCategories error:', err)
+      categories.value = []
+      throw err
+    } finally {
+      categoriesLoading.value = false
+    }
+  }
+
   return {
     artworks,
     featuredArtworks,
@@ -258,6 +300,8 @@ export const useArtworkStore = defineStore('artwork', () => {
     relatedArtworks,
     loading,
     error,
+    categories,
+    categoriesLoading,
     pagination,
     filters,
     hasArtworks,
@@ -274,8 +318,10 @@ export const useArtworkStore = defineStore('artwork', () => {
     setFilters,
     resetFilters,
     setPage,
+    setPageSize,
     clearCurrentArtwork,
-    clearError
+    clearError,
+    fetchCategories
   }
 }, {
   persist: {

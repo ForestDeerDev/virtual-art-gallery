@@ -211,7 +211,7 @@
               <p class="info-item">
                 <el-icon><Calendar /></el-icon>
                 <strong>创作时间：</strong>
-                {{ artworkStore.currentArtwork.createTime || '未知' }}
+                {{ artworkStore.currentArtwork.createTime }}
               </p>
               <p class="info-item">
                 <el-icon><Ruler /></el-icon>

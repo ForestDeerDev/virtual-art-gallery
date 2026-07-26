@@ -2,6 +2,15 @@ import type { User } from './user'
 import type { ArtworkUpdateRequest } from './artwork'
 
 /**
+ * 批量修改表单
+ * 用于管理后台选择多个作品后修改属性
+ * 注意：enabled 等状态类字段直接使用 boolean，与后端 ArtworkUpdateRequest 对齐
+ */
+export interface ArtworkBatchUpdateForm {
+  category?: string
+}
+
+/**
  * 管理统计 - 匹配后端 StatsDTO
  */
 export interface AdminStats {
@@ -32,11 +41,16 @@ export interface BatchDeleteRequest {
 }
 
 /**
+ * 批量更新单项 - 匹配后端 BatchUpdateItem
+ */
+export interface BatchUpdateItem {
+  id: number
+  data: ArtworkUpdateRequest
+}
+
+/**
  * 批量更新请求 - 匹配后端 BatchUpdateRequest
  */
 export interface BatchUpdateRequest {
-  updates: Array<{
-    id: number
-    data: ArtworkUpdateRequest
-  }>
+  updates: BatchUpdateItem[]
 }

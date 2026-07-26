@@ -112,15 +112,9 @@ import { useUserStore } from '@/stores/user'
 import artworkApi from '@/api/artwork'
 import userApi from '@/api/user'
 import { cleanTags, parseCommaSeparated } from '@/utils/tags'
-import type { Artwork } from '@/types'
+import type { Artwork, Recommendation } from '@/types'
 
 const userStore = useUserStore()
-
-interface Recommendation extends Artwork {
-  matchingTags: string[]
-  relevanceScore: string
-  randomScore?: number
-}
 
 const recommendations = ref<Recommendation[]>([])
 const loading = ref(true)

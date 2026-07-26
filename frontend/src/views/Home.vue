@@ -216,7 +216,13 @@ const categoriesHeader = ref<HTMLElement | null>(null)
 const categoryItems = ref<(HTMLElement | null)[]>([])
 const ctaContent = ref<HTMLElement | null>(null)
 
-const categories = [
+interface ArtworkCategory {
+  name: string
+  icon: string
+  count: number
+}
+
+const categories: ArtworkCategory[] = [
   { name: '油画', icon: 'Brush', count: 120 },
   { name: '水彩', icon: 'Droplet', count: 85 },
   { name: '素描', icon: 'Edit', count: 95 },
@@ -228,26 +234,33 @@ const categories = [
 
 
 // 获取DOM元素（处理Vue组件实例情况）
-const getElement = (el: unknown): HTMLElement | null => {
+interface VueComponentInstance {
+  $el: HTMLElement
+}
+
+const isVueComponent = (el: unknown): el is VueComponentInstance => {
+  return typeof el === 'object' && el !== null && '$el' in el
+}
+
+const getElement = (el: HTMLElement | VueComponentInstance | null): HTMLElement | null => {
   if (!el) return null
-  // 如果是Vue组件实例，获取其根DOM元素
-  if ('$el' in (el as object)) {
-    return (el as { $el: HTMLElement }).$el
+  if (isVueComponent(el)) {
+    return el.$el
   }
-  return el as HTMLElement
+  return el
 }
 
 // 图片懒加载和进入视口检测
 const checkVisibility = () => {
-  const elements: unknown[] = [
+  const elements: (HTMLElement | null)[] = [
     heroContent.value,
     heroImage.value,
     featuredHeader.value,
     viewMore.value,
     categoriesHeader.value,
     ctaContent.value,
-    ...featuredItems.value.filter(Boolean),
-    ...categoryItems.value.filter(Boolean)
+    ...featuredItems.value,
+    ...categoryItems.value
   ]
   
   elements.forEach(el => {
@@ -271,7 +284,7 @@ onMounted(async () => {
   try {
     await artworkStore.fetchFeaturedArtworks(12)
     heroArtworks.value = getRandomArtworks(artworkStore.featuredArtworks, 3)
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('获取精选作品失败:', error)
     const mockArtworks: Artwork[] = [
       { id: 1, title: '抽象风景', artist: '张三', category: '油画', imageUrl: 'https://via.placeholder.com/300x400', artistId: 1, viewCount: 0, likeCount: 0, featured: true, enabled: true, createTime: new Date().toISOString(), updateTime: new Date().toISOString(), tags: ['抽象', '风景'] },

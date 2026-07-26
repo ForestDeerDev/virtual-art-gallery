@@ -72,12 +72,12 @@ export default {
     })
   },
 
-  // 搜索艺术作品
-  searchArtworks(keyword: string): Promise<ArtworkListResponse> {
+  // 搜索艺术作品（支持分页）
+  searchArtworks(keyword: string, page?: number, pageSize?: number): Promise<ArtworkListResponse> {
     return request({
       url: '/artworks/search',
       method: 'get',
-      params: { keyword }
+      params: { keyword, page, pageSize }
     }) as Promise<ArtworkListResponse>
   },
 

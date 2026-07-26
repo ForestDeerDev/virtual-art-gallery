@@ -12,7 +12,7 @@
             :model-value="filters.category" 
             @update:model-value="handleCategoryChange"
             class="filter-select"
-            :loading="loading"
+            :loading="categoriesLoading"
           >
             <el-option label="全部" value="" />
             <el-option 
@@ -40,7 +40,6 @@
           <el-input
             :model-value="filters.tags"
             placeholder="输入标签..."
-            @keyup.enter="handleTagsSearch"
             @update:model-value="handleTagsChange"
             class="filter-input"
           />
@@ -56,40 +55,23 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
 import { RefreshLeft } from '@element-plus/icons-vue'
-import artworkApi from '@/api/artwork'
 import type { GalleryFilterState } from '@/types/gallery'
 
-// 父组件 → 子组件：通过 props 传值
+// 父组件 → 子组件：通过 props 传数据
 const props = defineProps<{
   filters: GalleryFilterState
+  categories: string[]
+  categoriesLoading: boolean
 }>()
 
-// 子组件 → 父组件：通过 emit 传值
+// 子组件 → 父组件：通过 emit 发消息（事件）
 const emit = defineEmits<{
   'update:filters': [value: GalleryFilterState]
   'reset': []
 }>()
 
-const categories = ref<string[]>([])
-const loading = ref(false)
 
-const fetchCategories = async () => {
-  loading.value = true
-  try {
-    const response = await artworkApi.getCategories()
-    categories.value = response
-  } catch (error: unknown) {
-    console.error('获取分类列表失败:', error)
-  } finally {
-    loading.value = false
-  }
-}
-
-onMounted(() => {
-  fetchCategories()
-})
 
 // 函数都 emit 同一个事件名：'update:filters'，只是传递的数据内容不同。
 const handleCategoryChange = (value: string) => {
@@ -102,10 +84,6 @@ const handleSortByChange = (value: string) => {
 
 const handleTagsChange = (value: string) => {
   emit('update:filters', { ...props.filters, tags: value })
-}
-
-const handleTagsSearch = () => {
-  emit('update:filters', { ...props.filters })
 }
 
 const handleReset = () => {

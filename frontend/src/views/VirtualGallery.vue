@@ -71,7 +71,7 @@ const loadArtworks = async () => {
       category: artwork.category,
       imageUrl: artwork.imageUrl
     }))
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('获取艺术作品失败:', error)
     artworkImages.value = [
       { id: 1, title: '艺术作品 1', artist: '艺术家 1', category: '油画', imageUrl: 'https://images.unsplash.com/photo-1541961017774-22349e4a1262?w=800&h=1000&fit=crop' },

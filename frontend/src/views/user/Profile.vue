@@ -113,8 +113,8 @@ const success = ref('')
 
 onMounted(() => {
   if (userStore.userInfo) {
-    form.value.username = userStore.userInfo.username || ''
-    form.value.email = userStore.userInfo.email || ''
+    form.value.username = userStore.userInfo.username
+    form.value.email = userStore.userInfo.email
     form.value.tags = parseCommaSeparated(userStore.userInfo.tags)
   }
 })

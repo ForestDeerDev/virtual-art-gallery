@@ -120,7 +120,9 @@ const handleLogin = async () => {
   }
 }
 
-const handleOAuthLogin = (provider: string) => {
+type OAuthProvider = 'github' | 'wechat'
+
+const handleOAuthLogin = (provider: OAuthProvider) => {
   if (provider === 'github') {
     // GitHub OAuth登录：重定向到GitHub授权页面
     const clientId = import.meta.env.VITE_GITHUB_CLIENT_ID

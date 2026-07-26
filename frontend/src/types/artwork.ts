@@ -2,6 +2,7 @@ import type { PageResponse } from './pagination'
 
 /**
  * 艺术品实体 - 匹配后端 ArtworkDTO
+ * 注意：后端 enabled 字段为 Boolean 类型，而非枚举状态
  */
 export interface Artwork {
   id: number
@@ -72,4 +73,13 @@ export interface ArtworkListResponse extends PageResponse<Artwork> {}
  */
 export interface UploadResponse {
   url: string
+}
+
+/**
+ * 推荐结果 - 由推荐系统返回的业务领域数据
+ */
+export interface Recommendation extends Artwork {
+  matchingTags: string[]
+  relevanceScore: string
+  randomScore?: number
 }

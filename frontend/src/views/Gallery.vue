@@ -12,6 +12,8 @@
         <!-- 监听 update:filters 事件 -->
         <GalleryFilters 
           :filters="artworkStore.filters"
+          :categories="artworkStore.categories"
+          :categories-loading="artworkStore.categoriesLoading"
           @update:filters="handleFilterChange"
           @reset="resetFilters"
         />
@@ -63,10 +65,14 @@ const searchKeyword = ref('')
 
 
 onMounted(async () => {
+  artworkStore.setPageSize(12)
   if (route.query.category) {
     artworkStore.setFilters({ category: getQueryString(route.query.category) ?? '' })
   }
-  await artworkStore.fetchArtworks()
+  await Promise.all([
+    artworkStore.fetchCategories(),
+    artworkStore.fetchArtworks()
+  ])
 })
 
 watch(() => route.query.category, async (newCategory) => {

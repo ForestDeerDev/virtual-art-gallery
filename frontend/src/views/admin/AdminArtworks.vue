@@ -196,7 +196,7 @@ import { useArtworkStore } from '@/stores/artwork'
 import artworkApi from '@/api/artwork'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { parseCommaSeparated } from '@/utils/tags'
-import type { Artwork, AdminArtworkCreateRequest, ArtworkUpdateRequest, BatchUpdateRequest } from '@/types'
+import type { Artwork, AdminArtworkCreateRequest, ArtworkUpdateRequest, BatchUpdateRequest, ArtworkBatchUpdateForm } from '@/types'
 
 const route = useRoute()
 const artworkStore = useArtworkStore()
@@ -221,7 +221,7 @@ const form = ref<AdminArtworkCreateRequest & { tagsInput: string }>({
   tagsInput: ''
 })
 
-const batchUpdateForm = ref<{ category?: string }>({
+const batchUpdateForm = ref<ArtworkBatchUpdateForm>({
   category: ''
 })
 
@@ -231,7 +231,8 @@ onMounted(() => {
 
 const loadArtworks = async () => {
   try {
-    await artworkStore.fetchArtworks({ pageSize: 100 })
+    artworkStore.setPageSize(100)
+    await artworkStore.fetchArtworks()
   } catch (error: unknown) {
     console.error('获取作品列表失败:', error)
   }
@@ -244,12 +245,12 @@ const handleSelectionChange = (selection: Artwork[]) => {
 const handleEdit = (artwork: Artwork) => {
   editingArtwork.value = artwork
   form.value = {
-    title: artwork.title || '',
-    artist: artwork.artist || '',
-    category: artwork.category || '',
-    description: artwork.description || '',
-    imageUrl: artwork.imageUrl || '',
-    videoUrl: artwork.videoUrl || '',
+    title: artwork.title,
+    artist: artwork.artist,
+    category: artwork.category,
+    description: artwork.description ?? '',
+    imageUrl: artwork.imageUrl,
+    videoUrl: artwork.videoUrl ?? '',
     tags: artwork.tags ?? [],
     tagsInput: artwork.tags?.join(',') ?? ''
   }
@@ -302,10 +303,13 @@ const handleBatchUpdate = async () => {
   try {
     const batchUpdateRequest: BatchUpdateRequest = {
       updates: selectedArtworks.value
-        .map(id => ({
-          id,
-          data: { category: batchUpdateForm.value.category || undefined } as ArtworkUpdateRequest
-        }))
+        .map(id => {
+          const data: ArtworkUpdateRequest = {}
+          if (batchUpdateForm.value.category) {
+            data.category = batchUpdateForm.value.category
+          }
+          return { id, data }
+        })
         .filter(u => u.data.category)
     }
 
