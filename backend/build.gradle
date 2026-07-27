@@ -70,6 +70,11 @@ tasks.withType(JavaCompile) {
     options.encoding = 'UTF-8'
     // 保留参数名信息，用于反射获取参数名（Spring MVC、Jackson、Lombok等需要）
     options.compilerArgs += '-parameters'
+    // MapStruct 全局配置：使用构造器注入
+    options.compilerArgs += [
+        '-Amapstruct.defaultComponentModel=spring',
+        '-Amapstruct.defaultInjectionStrategy=constructor'
+    ]
 }
 
 // 打包配置

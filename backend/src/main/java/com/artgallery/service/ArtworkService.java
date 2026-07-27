@@ -3,6 +3,7 @@ package com.artgallery.service;
 import com.artgallery.dto.ArtworkCreateRequest;
 import com.artgallery.dto.ArtworkDTO;
 import com.artgallery.dto.ArtworkUpdateRequest;
+import com.artgallery.dto.BatchUpdateItem;
 import com.artgallery.dto.PageResponse;
 
 import java.util.List;
@@ -78,7 +79,7 @@ public interface ArtworkService {
      * @param updates 更新列表，每个元素包含作品ID和要更新的字段
      * @param userId 当前用户ID
      */
-    void batchUpdateArtworks(List<ArtworkUpdateRequest> updates, Long userId);
+    void batchUpdateArtworks(List<BatchUpdateItem> updates, Long userId);
 
     /**
      * 搜索艺术作品

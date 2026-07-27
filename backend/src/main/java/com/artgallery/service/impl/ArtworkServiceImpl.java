@@ -341,18 +341,33 @@ public class ArtworkServiceImpl implements ArtworkService {
     /**
      * 批量更新艺术作品
      * 支持一次更新多个作品，通常用于管理员批量操作
-     * 注意：当前实现为占位符，需要根据实际需求完善
+     * 对每个作品都进行权限验证和更新
      * 
      * @param updates 更新列表，每个元素包含作品ID和要更新的字段
      * @param userId 当前用户ID
      * @throws BusinessException 当作品不存在或无权限时抛出
      */
-    @SuppressWarnings("unused")
-    public void batchUpdateArtworks(List<ArtworkUpdateRequest> updates, Long userId) {
-        for (ArtworkUpdateRequest update : updates) {
-            // TODO: 完善批量更新逻辑
-            // 这里简化处理，实际应该从update中获取id并调用updateArtwork方法
-            // 需要修改DTO结构来支持批量更新，确保包含作品ID
+    public void batchUpdateArtworks(List<BatchUpdateItem> updates, Long userId) {
+        // 批量更新列表不能为空
+        if (updates == null || updates.isEmpty()) {
+            throw new BusinessException("BATCH_UPDATE_EMPTY", "批量更新列表不能为空");
+        }
+
+        for (BatchUpdateItem update : updates) {
+            // 参数校验：更新项本身不能为空
+            if (update == null) {
+                throw new BusinessException("BATCH_UPDATE_INVALID", "批量更新项不能为空");
+            }
+
+            // 参数校验：id 和 data 都不能为空
+            if (update.getId() == null) {
+                throw new BusinessException("BATCH_UPDATE_INVALID", "批量更新项缺少作品ID");
+            }
+            if (update.getData() == null) {
+                throw new BusinessException("BATCH_UPDATE_INVALID", "批量更新项缺少更新数据");
+            }
+
+            updateArtwork(update.getId(), update.getData(), userId);
         }
     }
 

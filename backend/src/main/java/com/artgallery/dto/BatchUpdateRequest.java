@@ -11,5 +11,5 @@ import java.util.List;
  */
 @Data
 public class BatchUpdateRequest {
-    private List<ArtworkUpdateRequest> updates;
+    private List<BatchUpdateItem> updates;
 }
