@@ -89,6 +89,7 @@ import { useUserStore } from '@/stores/user'
 import userApi from '@/api/user'
 import { parseCommaSeparated } from '@/utils/tags'
 import type { UserUpdateRequest } from '@/types'
+import type { UploadFile } from 'element-plus'
 
 const userStore = useUserStore()
 
@@ -119,17 +120,18 @@ onMounted(() => {
   }
 })
 
-const handleAvatarChange = (event: Event) => {
-  const target = event.target as HTMLInputElement
-  const file = target.files?.[0]
-  if (file) {
-    form.value.avatar = file
-    const reader = new FileReader()
-    reader.onload = (e) => {
-      avatarPreview.value = e.target?.result as string
-    }
-    reader.readAsDataURL(file)
+const handleAvatarChange = (file: UploadFile) => {
+  const fileObj = file.raw
+  if (!fileObj) return
+
+  form.value.avatar = fileObj
+
+  const reader = new FileReader()
+  reader.onload = (e) => {
+    avatarPreview.value = e.target?.result as string
   }
+  
+  reader.readAsDataURL(fileObj)
 }
 
 const toggleTag = (tag: string) => {
