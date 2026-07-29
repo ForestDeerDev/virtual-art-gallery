@@ -7,7 +7,8 @@ import type {
   UploadResponse,
   PageQuery,
   BatchDeleteRequest,
-  BatchUpdateRequest
+  BatchUpdateRequest,
+  CategoryStats
 } from '@/types'
 
 export default {
@@ -93,6 +94,14 @@ export default {
   getCategories(): Promise<string[]> {
     return request<string[]>({
       url: '/artworks/categories',
+      method: 'get'
+    })
+  },
+
+  // 获取所有分类的作品数量统计
+  getCategoryStats(): Promise<CategoryStats[]> {
+    return request<CategoryStats[]>({
+      url: '/artworks/category-stats',
       method: 'get'
     })
   },

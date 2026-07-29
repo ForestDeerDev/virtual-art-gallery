@@ -21,6 +21,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import java.util.stream.Collectors;
+import java.util.ArrayList;
 
 /**
  * 艺术作品服务实现类
@@ -75,6 +76,7 @@ public class ArtworkServiceImpl implements ArtworkService {
      * @param featured 是否推荐作品筛选（可选）
      * @return 分页响应，包含作品列表和分页信息
      */
+    @Override
     public PageResponse<ArtworkDTO> getArtworks(Integer page, Integer pageSize, 
                                                 String category, String sortBy, String tags, Boolean featured) {
         // 设置默认分页参数
@@ -135,6 +137,7 @@ public class ArtworkServiceImpl implements ArtworkService {
      * @return 作品DTO
      * @throws BusinessException 当作品不存在时抛出
      */
+    @Override
     public ArtworkDTO getArtworkById(Long id) {
         // 查询作品，如果不存在则抛出业务异常
         Artwork artwork = artworkRepository.findById(id)
@@ -156,6 +159,7 @@ public class ArtworkServiceImpl implements ArtworkService {
      * @return 创建成功的作品DTO
      * @throws BusinessException 当用户不存在时抛出
      */
+    @Override
     public ArtworkDTO createArtwork(ArtworkCreateRequest request, Long artistId) {
         // 验证艺术家用户是否存在
         User artist = userRepository.findById(artistId)
@@ -201,6 +205,7 @@ public class ArtworkServiceImpl implements ArtworkService {
      * @return 更新后的作品DTO
      * @throws BusinessException 当作品不存在或无权限时抛出
      */
+    @Override
     public ArtworkDTO updateArtwork(Long id, ArtworkUpdateRequest request, Long userId) {
         // 查询要更新的作品
         Artwork artwork = artworkRepository.findById(id)
@@ -254,6 +259,7 @@ public class ArtworkServiceImpl implements ArtworkService {
      * @param userId 当前用户ID
      * @throws BusinessException 当作品不存在或无权限时抛出
      */
+    @Override
     public void deleteArtwork(Long id, Long userId) {
         // 查询要删除的作品
         Artwork artwork = artworkRepository.findById(id)
@@ -281,6 +287,7 @@ public class ArtworkServiceImpl implements ArtworkService {
      * @param userId 当前用户ID
      * @throws BusinessException 当作品不存在或无权限时抛出
      */
+    @Override
     public void batchDeleteArtworks(List<Long> ids, Long userId) {
         // 批量查询要删除的作品
         List<Artwork> artworks = artworkRepository.findByIdIn(ids);
@@ -347,6 +354,7 @@ public class ArtworkServiceImpl implements ArtworkService {
      * @param userId 当前用户ID
      * @throws BusinessException 当作品不存在或无权限时抛出
      */
+    @Override
     public void batchUpdateArtworks(List<BatchUpdateItem> updates, Long userId) {
         // 批量更新列表不能为空
         if (updates == null || updates.isEmpty()) {
@@ -380,6 +388,7 @@ public class ArtworkServiceImpl implements ArtworkService {
      * @param pageSize 每页大小
      * @return 分页响应，包含匹配的作品列表
      */
+    @Override
     public PageResponse<ArtworkDTO> searchArtworks(String keyword, Integer page, Integer pageSize) {
         // 设置默认分页参数
         if (page == null || page < 0) page = 0;
@@ -417,6 +426,7 @@ public class ArtworkServiceImpl implements ArtworkService {
      * @return 推荐作品列表
      * @throws BusinessException 当用户不存在时抛出
      */
+    @Override
     public List<ArtworkDTO> getRecommendations(Long userId) {
         // 查询用户信息
         User user = userRepository.findById(userId)
@@ -456,8 +466,29 @@ public class ArtworkServiceImpl implements ArtworkService {
      * 
      * @return 所有分类名称列表，按字母顺序排序
      */
+    @Override
     public List<String> getCategories() {
         return artworkRepository.findAllCategories();
+    }
+
+    /**
+     * 获取所有分类的作品数量统计
+     * 用于前端显示每个分类的作品数量
+     * 
+     * @return 分类统计列表，每个元素包含分类名称和作品数量
+     */
+    @Override
+    public List<CategoryStatsDTO> getCategoryStats() {
+        List<Object[]> results = artworkRepository.countByCategory();
+        List<CategoryStatsDTO> stats = new ArrayList<>();
+        
+        for (Object[] result : results) {
+            String category = result[0] != null ? result[0].toString() : null;
+            Long count = result[1] != null ? ((Number) result[1]).longValue() : 0L;
+            stats.add(new CategoryStatsDTO(category, count));
+        }
+        
+        return stats;
     }
 }
 

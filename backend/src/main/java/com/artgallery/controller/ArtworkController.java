@@ -204,6 +204,19 @@ public class ArtworkController {
         return ResponseEntity.ok(categories);
     }
 
+    /**
+     * 获取所有分类的作品数量统计
+     * 
+     * GET /api/artworks/category-stats
+     * 
+     * @return 分类统计列表
+     */
+    @GetMapping("/category-stats")
+    public ResponseEntity<List<CategoryStatsDTO>> getCategoryStats() {
+        List<CategoryStatsDTO> stats = artworkService.getCategoryStats();
+        return ResponseEntity.ok(stats);
+    }
+
 
 }
 

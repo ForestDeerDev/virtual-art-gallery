@@ -4,6 +4,7 @@ import com.artgallery.dto.ArtworkCreateRequest;
 import com.artgallery.dto.ArtworkDTO;
 import com.artgallery.dto.ArtworkUpdateRequest;
 import com.artgallery.dto.BatchUpdateItem;
+import com.artgallery.dto.CategoryStatsDTO;
 import com.artgallery.dto.PageResponse;
 
 import java.util.List;
@@ -105,4 +106,11 @@ public interface ArtworkService {
      * @return 所有分类名称列表，按字母顺序排序
      */
     List<String> getCategories();
+
+    /**
+     * 获取所有分类的作品数量统计
+     * 
+     * @return 分类统计列表，每个元素包含分类名称和作品数量
+     */
+    List<CategoryStatsDTO> getCategoryStats();
 }

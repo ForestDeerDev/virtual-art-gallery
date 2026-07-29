@@ -83,3 +83,11 @@ export interface Recommendation extends Artwork {
   relevanceScore: string
   randomScore?: number
 }
+
+/**
+ * 分类统计 - 匹配后端 CategoryStatsDTO
+ */
+export interface CategoryStats {
+  category: string
+  count: number
+}

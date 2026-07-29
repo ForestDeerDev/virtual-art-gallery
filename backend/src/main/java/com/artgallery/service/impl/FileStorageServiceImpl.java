@@ -66,6 +66,7 @@ public class FileStorageServiceImpl implements FileStorageService {
      * @return 文件的访问URL路径
      * @throws RuntimeException 当文件上传失败时抛出
      */
+    @Override
     public String storeArtworkFile(MultipartFile file) {
         return storeFile(file, artworkUploadPath);
     }
@@ -78,6 +79,7 @@ public class FileStorageServiceImpl implements FileStorageService {
      * @return 文件的访问URL路径
      * @throws RuntimeException 当文件上传失败时抛出
      */
+    @Override
     public String storeAvatarFile(MultipartFile file) {
         return storeFile(file, avatarUploadPath);
     }
@@ -125,6 +127,7 @@ public class FileStorageServiceImpl implements FileStorageService {
      * @param fileUrl 文件的访问URL
      * @throws RuntimeException 当文件删除失败时抛出
      */
+    @Override
     public void deleteFile(String fileUrl) {
         try {
             // 从URL中提取文件名

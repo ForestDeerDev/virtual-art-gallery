@@ -140,7 +140,15 @@
           </p>
         </div>
         
-        <div class="categories-grid">
+        <div v-if="categoriesLoading" class="text-center" style="padding: 3rem;">
+          <el-icon :size="48" class="text-muted is-loading"><Loading /></el-icon>
+          <p class="text-muted mt-3">加载中...</p>
+        </div>
+        <div v-else-if="categories.length === 0" class="text-center" style="padding: 3rem;">
+          <el-icon :size="48" class="text-muted"><DocumentRemove /></el-icon>
+          <p class="text-muted mt-3">暂无数据</p>
+        </div>
+        <div v-else class="categories-grid">
           <div
             v-for="(category, index) in categories"
             :key="category.name"
@@ -201,6 +209,7 @@ import Navbar from '@/components/Navbar.vue'
 import Footer from '@/components/Footer.vue'
 import { useArtworkStore } from '@/stores/artwork'
 import type { Artwork } from '@/types'
+import artworkApi from '@/api/artwork'
 
 const artworkStore = useArtworkStore()
 
@@ -222,16 +231,37 @@ interface ArtworkCategory {
   count: number
 }
 
-const categories: ArtworkCategory[] = [
-  { name: '油画', icon: 'Brush', count: 120 },
-  { name: '水彩', icon: 'Droplet', count: 85 },
-  { name: '素描', icon: 'Edit', count: 95 },
-  { name: '雕塑', icon: 'Box', count: 60 },
-  { name: '摄影', icon: 'Camera', count: 150 },
-  { name: '数字艺术', icon: 'Monitor', count: 200 }
-]
+const categories = ref<ArtworkCategory[]>([])
+const categoriesLoading = ref(false)
 
+// 分类图标映射
+const categoryIconMap: Record<string, string> = {
+  '油画': 'Brush',
+  '水彩': 'Collection',
+  '素描': 'Edit',
+  '雕塑': 'Box',
+  '摄影': 'Camera',
+  '数字艺术': 'Monitor',
+}
 
+// 从 API 获取分类统计数据
+const fetchCategoryStats = async () => {
+  categoriesLoading.value = true
+  try {
+    const stats = await artworkApi.getCategoryStats()
+    categories.value = stats.map(stat => ({
+      name: stat.category,
+      icon: categoryIconMap[stat.category] || 'Picture',
+      count: stat.count
+    }))
+  } catch (error) {
+    console.error('获取分类统计失败:', error)
+    // 失败时清空分类，显示"暂无数据"
+    categories.value = []
+  } finally {
+    categoriesLoading.value = false
+  }
+}
 
 // 获取DOM元素（处理Vue组件实例情况）
 interface VueComponentInstance {
@@ -297,6 +327,9 @@ onMounted(async () => {
     artworkStore.featuredArtworks = mockArtworks
     heroArtworks.value = getRandomArtworks(mockArtworks, 3)
   }
+
+  // 获取分类统计数据（不阻塞动画）
+  fetchCategoryStats()
   
   setTimeout(() => {
     checkVisibility()

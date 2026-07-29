@@ -1,15 +1,18 @@
 package com.artgallery.service.impl;
 
+import com.artgallery.dto.CategoryStatsDTO;
 import com.artgallery.dto.StatsDTO;
 import com.artgallery.repository.ArtworkRepository;
 import com.artgallery.repository.UserRepository;
 import com.artgallery.service.AdminService;
+import com.artgallery.service.ArtworkService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * 管理员服务实现类
@@ -34,9 +37,16 @@ public class AdminServiceImpl implements AdminService {
      */
     private final UserRepository userRepository;
 
-    public AdminServiceImpl(ArtworkRepository artworkRepository, UserRepository userRepository) {
+    /**
+     * 艺术作品服务
+     * 用于获取作品分类统计数据
+     */
+    private final ArtworkService artworkService;
+
+    public AdminServiceImpl(ArtworkRepository artworkRepository, UserRepository userRepository, ArtworkService artworkService) {
         this.artworkRepository = artworkRepository;
         this.userRepository = userRepository;
+        this.artworkService = artworkService;
     }
 
     /**
@@ -45,6 +55,7 @@ public class AdminServiceImpl implements AdminService {
      * 
      * @return 统计信息DTO，包含所有系统统计数据
      */
+    @Override
     public StatsDTO getStats() {
         StatsDTO stats = new StatsDTO();
 
@@ -71,35 +82,19 @@ public class AdminServiceImpl implements AdminService {
         // 获取推荐且启用状态的作品数量
         stats.setFeaturedArtworks(artworkRepository.countByFeaturedAndEnabled(true, true));
 
-        // 获取按分类统计的作品数据
-        stats.setCategoryStats(getCategoryStats());
-        
+        // 获取按分类统计的作品数据（复用 ArtworkService 的方法）
+        List<CategoryStatsDTO> categoryStatsList = artworkService.getCategoryStats();
+        Map<String, Long> categoryStats = categoryStatsList.stream()
+            .collect(Collectors.toMap(
+                CategoryStatsDTO::getCategory,
+                CategoryStatsDTO::getCount
+            ));
+        stats.setCategoryStats(categoryStats);
+
         // 获取按角色统计的用户数据
         stats.setRoleStats(getRoleStats());
 
         return stats;
-    }
-
-    /**
-     * 获取按分类统计的作品数量
-     * 查询各个分类下的作品数量，用于数据分析和展示
-     * 
-     * @return 分类统计Map，key为分类名称，value为该分类下的作品数量
-     */
-    private Map<String, Long> getCategoryStats() {
-        Map<String, Long> categoryStats = new HashMap<>();
-        
-        // 从数据库查询各分类的作品数量统计
-        List<Object[]> results = artworkRepository.countByCategory();
-        
-        // 处理查询结果，将数据转换为Map格式
-        for (Object[] result : results) {
-            String category = (String) result[0];  // 分类名称
-            Long count = (Long) result[1];         // 作品数量
-            categoryStats.put(category, count);
-        }
-        
-        return categoryStats;
     }
 
     /**
@@ -116,8 +111,8 @@ public class AdminServiceImpl implements AdminService {
         
         // 处理查询结果，将数据转换为Map格式
         for (Object[] result : results) {
-            String role = result[0].toString();  // 角色名称
-            Long count = (Long) result[1];       // 用户数量
+            String role = result[0] != null ? result[0].toString() : null;
+            Long count = result[1] != null ? ((Number) result[1]).longValue() : 0L;
             roleStats.put(role, count);
         }
         

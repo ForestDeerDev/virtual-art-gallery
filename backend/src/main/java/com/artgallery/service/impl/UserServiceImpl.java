@@ -43,6 +43,7 @@ public class UserServiceImpl implements UserService {
      * @param request 注册请求
      * @return 认证响应（包含token和用户信息）
      */
+    @Override
     public AuthResponse register(RegisterRequest request) {
         // 检查用户名是否已存在
         // 方法(另一个方法()) 👉 内层方法返回值 → 作为外层方法参数
@@ -90,6 +91,7 @@ public class UserServiceImpl implements UserService {
      * @param request 登录请求
      * @return 认证响应（包含token和用户信息）
      */
+    @Override
     public AuthResponse login(LoginRequest request) {
         // 查找用户
         User user = userRepository.findByUsername(request.getUsername())
@@ -122,6 +124,7 @@ public class UserServiceImpl implements UserService {
      * @param userInfo OAuth用户信息
      * @return 认证响应（包含token和用户信息）
      */
+    @Override
     public AuthResponse oauthLogin(OAuthUserInfo userInfo) {
         // 根据提供商和提供商ID查找用户
         User user = userRepository.findByProviderAndProviderId(
@@ -174,6 +177,7 @@ public class UserServiceImpl implements UserService {
      * @param userId 用户ID
      * @return 用户DTO
      */
+    @Override
     public UserDTO getUserInfo(Long userId) {
         User user = userRepository.findById(userId)
             .orElseThrow(() -> new BusinessException("USER_NOT_FOUND", "用户不存在"));
@@ -187,6 +191,7 @@ public class UserServiceImpl implements UserService {
      * @param userDTO 用户DTO
      * @return 更新后的用户DTO
      */
+    @Override
     public UserDTO updateUserInfo(Long userId, UserDTO userDTO) {
         User user = userRepository.findById(userId)
             .orElseThrow(() -> new BusinessException("USER_NOT_FOUND", "用户不存在"));
@@ -227,6 +232,7 @@ public class UserServiceImpl implements UserService {
      * 
      * @return 用户列表
      */
+    @Override
     public List<UserDTO> getAllUsers() {
         return userRepository.findAll().stream()
             .map(userMapper::toDto)
@@ -240,6 +246,7 @@ public class UserServiceImpl implements UserService {
      * @param role 新角色
      * @return 更新后的用户DTO
      */
+    @Override
     public UserDTO updateUserRole(Long userId, UserRole role) {
         User user = userRepository.findById(userId)
             .orElseThrow(() -> new BusinessException("USER_NOT_FOUND", "用户不存在"));
@@ -254,6 +261,7 @@ public class UserServiceImpl implements UserService {
      * 
      * @param userId 用户ID
      */
+    @Override
     public void deleteUser(Long userId) {
         User user = userRepository.findById(userId)
             .orElseThrow(() -> new BusinessException("USER_NOT_FOUND", "用户不存在"));

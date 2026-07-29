@@ -39,6 +39,7 @@ public class OAuthServiceImpl implements OAuthService {
      * @return 包含 JWT 令牌和用户信息的认证响应
      * @throws OAuthException 如果 OAuth 流程失败
      */
+    @Override
     public AuthResponse oauthLogin(String provider, String code) throws OAuthException {
         // 获取对应的 OAuth 提供商
         OAuthProvider oauthProvider = providerRegistry.getProvider(provider);
