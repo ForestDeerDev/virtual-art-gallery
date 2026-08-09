@@ -1,6 +1,8 @@
 package com.artgallery.config;
 
+import org.apache.tika.Tika;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.lang.NonNull;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
@@ -21,6 +23,17 @@ public class WebMvcConfig implements WebMvcConfigurer {
      */
     @Value("${file.upload.path}")
     private String uploadPath;
+
+    /**
+     * 配置 Apache Tika Bean
+     * 用于检测文件的真实 MIME 类型
+     * 
+     * @return Tika 实例
+     */
+    @Bean
+    public Tika tika() {
+        return new Tika();
+    }
 
     /**
      * 配置静态资源处理器

@@ -1,6 +1,8 @@
 package com.artgallery.exception;
 
 import jakarta.persistence.EntityNotFoundException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.FieldError;
@@ -27,15 +29,33 @@ import java.util.Map;
 @SuppressWarnings("nullness")
 public class GlobalExceptionHandler {
 
+    private static final Logger logger = LoggerFactory.getLogger(GlobalExceptionHandler.class);
+
+    /**
+     * 处理文件上传异常
+     * 捕获并处理文件上传过程中的异常，返回友好的错误信息
+     * 详细错误信息记录到日志，不暴露给前端
+     *
+     * @param e 文件上传异常对象
+     * @return 包含错误代码和友好消息的响应实体
+     */
+    @ExceptionHandler(FileUploadException.class)
+    public ResponseEntity<ErrorResponse> handleFileUploadException(FileUploadException e) {
+        logger.warn("文件上传异常: code={}, message={}", e.getCode(), e.getMessage());
+        ErrorResponse error = new ErrorResponse(e.getCode(), e.getMessage());
+        return ResponseEntity.status(e.getHttpStatus()).body(error);
+    }
+
     /**
      * 处理业务异常
      * 捕获并处理自定义的业务异常，返回对应的HTTP状态码和错误信息
-     * 
+     *
      * @param e 业务异常对象
      * @return 包含错误代码和消息的响应实体
      */
     @ExceptionHandler(BusinessException.class)
     public ResponseEntity<ErrorResponse> handleBusinessException(BusinessException e) {
+        logger.warn("业务异常: code={}, message={}", e.getCode(), e.getMessage());
         ErrorResponse error = new ErrorResponse(e.getCode(), e.getMessage());
         return ResponseEntity.status(e.getHttpStatus()).body(error);
     }
@@ -93,13 +113,15 @@ public class GlobalExceptionHandler {
     /**
      * 处理其他未捕获的异常
      * 作为最后的异常处理兜底，防止系统异常信息泄露给前端
+     * 详细错误信息记录到日志，前端只显示通用错误消息
      * 
      * @param e 异常对象
      * @return 通用错误响应
      */
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorResponse> handleException(Exception e) {
-        ErrorResponse error = new ErrorResponse("INTERNAL_ERROR", "服务器内部错误: " + e.getMessage());
+        logger.error("未捕获的异常", e);
+        ErrorResponse error = new ErrorResponse("INTERNAL_ERROR", "服务器内部错误，请稍后重试");
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(error);
     }
 }

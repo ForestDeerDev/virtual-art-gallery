@@ -53,6 +53,12 @@ dependencies {
     implementation 'org.mapstruct:mapstruct:1.5.5.Final'
     annotationProcessor 'org.mapstruct:mapstruct-processor:1.5.5.Final'
     
+    // Apache Tika Core (for file type detection)
+    implementation 'org.apache.tika:tika-core:3.2.0'
+    
+    // TwelveMonkeys ImageIO (for WebP support)
+    implementation 'com.twelvemonkeys.imageio:imageio-webp:3.13.1'
+    
     // Spring Boot DevTools
     developmentOnly 'org.springframework.boot:spring-boot-devtools'
     
