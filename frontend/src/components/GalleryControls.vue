@@ -4,23 +4,23 @@
       <h5>控制面板</h5>
       <div class="control-item">
         <label>移动速度</label>
-        <el-slider 
-          :model-value="controls.moveSpeed" 
+        <el-slider
+          :model-value="controls.moveSpeed"
+          :min="0.1"
+          :max="2"
+          :step="0.1"
           @update:model-value="$emit('update:moveSpeed', $event)"
-          :min="0.1" 
-          :max="2" 
-          :step="0.1" 
         />
         <span>{{ controls.moveSpeed }}</span>
       </div>
       <div class="control-item">
         <label>鼠标灵敏度</label>
-        <el-slider 
-          :model-value="controls.mouseSensitivity" 
+        <el-slider
+          :model-value="controls.mouseSensitivity"
+          :min="0.1"
+          :max="1"
+          :step="0.1"
           @update:model-value="$emit('update:mouseSensitivity', $event)"
-          :min="0.1" 
-          :max="1" 
-          :step="0.1" 
         />
         <span>{{ controls.mouseSensitivity }}</span>
       </div>
@@ -37,10 +37,18 @@
     </div>
     <div class="instructions">
       <h6>操作说明</h6>
-      <p><el-icon><Mouse /></el-icon> 鼠标移动：旋转视角</p>
-      <p><el-icon><Key /></el-icon> W/A/S/D：前后左右移动</p>
-      <p><el-icon><Top /></el-icon> 空格/Shift：上升/下降</p>
-      <p><el-icon><Pointer /></el-icon> 点击画框：查看详情</p>
+      <p>
+        <el-icon><Mouse /></el-icon> 鼠标移动：旋转视角
+      </p>
+      <p>
+        <el-icon><Key /></el-icon> W/A/S/D：前后左右移动
+      </p>
+      <p>
+        <el-icon><Top /></el-icon> 空格/Shift：上升/下降
+      </p>
+      <p>
+        <el-icon><Pointer /></el-icon> 点击画框：查看详情
+      </p>
     </div>
   </div>
 </template>
@@ -55,7 +63,7 @@ defineProps<{
 defineEmits<{
   'update:moveSpeed': [value: number]
   'update:mouseSensitivity': [value: number]
-  'reset': []
+  reset: []
   'toggle-rotate': []
 }>()
 </script>

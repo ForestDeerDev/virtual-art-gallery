@@ -3,10 +3,10 @@
     <Navbar />
     <div class="virtual-gallery-container">
       <div ref="canvasContainer" class="canvas-container"></div>
-      <GalleryControls 
+      <GalleryControls
         :controls="controls"
-        @update:moveSpeed="controls.moveSpeed = $event"
-        @update:mouseSensitivity="controls.mouseSensitivity = $event"
+        @update:move-speed="controls.moveSpeed = $event"
+        @update:mouse-sensitivity="controls.mouseSensitivity = $event"
         @reset="resetCamera"
         @toggle-rotate="toggleAutoRotate"
       />
@@ -45,7 +45,7 @@ const canvasContainer = ref<HTMLElement | null>(null)
 const controls = reactive<GalleryControlState>({
   moveSpeed: 0.5,
   mouseSensitivity: 0.3,
-  autoRotate: false
+  autoRotate: false,
 })
 
 // 配置（初始化参数，可选）
@@ -53,7 +53,7 @@ const config: GalleryConfig = {
   roomWidth: 20,
   roomHeight: 5,
   roomDepth: 15,
-  cameraHeight: 1.7
+  cameraHeight: 1.7,
 }
 
 const artworkImages = ref<GalleryArtwork[]>([])
@@ -69,19 +69,73 @@ const loadArtworks = async () => {
       title: artwork.title,
       artist: artwork.artist,
       category: artwork.category,
-      imageUrl: artwork.imageUrl
+      imageUrl: artwork.imageUrl,
     }))
   } catch (error: unknown) {
     console.error('获取艺术作品失败:', error)
     artworkImages.value = [
-      { id: 1, title: '艺术作品 1', artist: '艺术家 1', category: '油画', imageUrl: 'https://images.unsplash.com/photo-1541961017774-22349e4a1262?w=800&h=1000&fit=crop' },
-      { id: 2, title: '艺术作品 2', artist: '艺术家 2', category: '水彩', imageUrl: 'https://images.unsplash.com/photo-1579783902614-a3fb3927b6a5?w=800&h=1000&fit=crop' },
-      { id: 3, title: '艺术作品 3', artist: '艺术家 3', category: '素描', imageUrl: 'https://images.unsplash.com/photo-1549490349-8643362247b5?w=800&h=1000&fit=crop' },
-      { id: 4, title: '艺术作品 4', artist: '艺术家 4', category: '雕塑', imageUrl: 'https://images.unsplash.com/photo-1578301978693-85fa9c0320b9?w=800&h=1000&fit=crop' },
-      { id: 5, title: '艺术作品 5', artist: '艺术家 5', category: '摄影', imageUrl: 'https://images.unsplash.com/photo-1580136608260-4eb11f4b64fe?w=800&h=1000&fit=crop' },
-      { id: 6, title: '艺术作品 6', artist: '艺术家 6', category: '数字艺术', imageUrl: 'https://images.unsplash.com/photo-1547891654-e66ed7ebb968?w=800&h=1000&fit=crop' },
-      { id: 7, title: '艺术作品 7', artist: '艺术家 7', category: '油画', imageUrl: 'https://images.unsplash.com/photo-1577720643272-265f09367456?w=800&h=1000&fit=crop' },
-      { id: 8, title: '艺术作品 8', artist: '艺术家 8', category: '水彩', imageUrl: 'https://images.unsplash.com/photo-1579783483458-83d02f59ed8c?w=800&h=1000&fit=crop' }
+      {
+        id: 1,
+        title: '艺术作品 1',
+        artist: '艺术家 1',
+        category: '油画',
+        imageUrl:
+          'https://images.unsplash.com/photo-1541961017774-22349e4a1262?w=800&h=1000&fit=crop',
+      },
+      {
+        id: 2,
+        title: '艺术作品 2',
+        artist: '艺术家 2',
+        category: '水彩',
+        imageUrl:
+          'https://images.unsplash.com/photo-1579783902614-a3fb3927b6a5?w=800&h=1000&fit=crop',
+      },
+      {
+        id: 3,
+        title: '艺术作品 3',
+        artist: '艺术家 3',
+        category: '素描',
+        imageUrl: 'https://images.unsplash.com/photo-1549490349-8643362247b5?w=800&h=1000&fit=crop',
+      },
+      {
+        id: 4,
+        title: '艺术作品 4',
+        artist: '艺术家 4',
+        category: '雕塑',
+        imageUrl:
+          'https://images.unsplash.com/photo-1578301978693-85fa9c0320b9?w=800&h=1000&fit=crop',
+      },
+      {
+        id: 5,
+        title: '艺术作品 5',
+        artist: '艺术家 5',
+        category: '摄影',
+        imageUrl:
+          'https://images.unsplash.com/photo-1580136608260-4eb11f4b64fe?w=800&h=1000&fit=crop',
+      },
+      {
+        id: 6,
+        title: '艺术作品 6',
+        artist: '艺术家 6',
+        category: '数字艺术',
+        imageUrl: 'https://images.unsplash.com/photo-1547891654-e66ed7ebb968?w=800&h=1000&fit=crop',
+      },
+      {
+        id: 7,
+        title: '艺术作品 7',
+        artist: '艺术家 7',
+        category: '油画',
+        imageUrl:
+          'https://images.unsplash.com/photo-1577720643272-265f09367456?w=800&h=1000&fit=crop',
+      },
+      {
+        id: 8,
+        title: '艺术作品 8',
+        artist: '艺术家 8',
+        category: '水彩',
+        imageUrl:
+          'https://images.unsplash.com/photo-1579783483458-83d02f59ed8c?w=800&h=1000&fit=crop',
+      },
     ]
   }
 }
@@ -90,7 +144,7 @@ let gallery: GalleryInstance | null = null
 
 onMounted(async () => {
   await loadArtworks()
-  
+
   if (canvasContainer.value) {
     gallery = useThreeGallery({
       container: canvasContainer.value,
@@ -107,9 +161,9 @@ onMounted(async () => {
       },
       onLoadingComplete: () => {
         isLoading.value = false
-      }
+      },
     })
-    
+
     gallery.mount()
   }
 })

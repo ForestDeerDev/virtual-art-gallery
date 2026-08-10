@@ -29,7 +29,7 @@
                 <h5>个人资料</h5>
               </div>
             </template>
-            <el-form @submit.prevent="handleUpdate" label-width="100px">
+            <el-form label-width="100px" @submit.prevent="handleUpdate">
               <el-form-item label="头像">
                 <el-upload
                   class="avatar-uploader"
@@ -58,8 +58,8 @@
                     :key="tag"
                     :type="form.tags.includes(tag) ? 'primary' : 'info'"
                     class="tag-item"
+                    style="cursor: pointer"
                     @click="toggleTag(tag)"
-                    style="cursor: pointer;"
                   >
                     {{ tag }}
                   </el-tag>
@@ -103,10 +103,21 @@ const form = ref<ProfileForm>({
   username: '',
   email: '',
   tags: [],
-  avatar: null
+  avatar: null,
 })
 
-const availableTags = ['油画', '水彩', '素描', '雕塑', '摄影', '数字艺术', '抽象', '写实', '现代', '古典']
+const availableTags = [
+  '油画',
+  '水彩',
+  '素描',
+  '雕塑',
+  '摄影',
+  '数字艺术',
+  '抽象',
+  '写实',
+  '现代',
+  '古典',
+]
 const avatarPreview = ref('')
 const loading = ref(false)
 const error = ref('')
@@ -130,7 +141,7 @@ const handleAvatarChange = (file: UploadFile) => {
   reader.onload = (e) => {
     avatarPreview.value = e.target?.result as string
   }
-  
+
   reader.readAsDataURL(fileObj)
 }
 
@@ -156,14 +167,14 @@ const handleUpdate = async () => {
         username: form.value.username,
         email: form.value.email,
         tags: form.value.tags,
-        avatar: avatarResponse.url
+        avatar: avatarResponse.url,
       }
       await userStore.updateUserInfo(userData)
     } else {
       const userData: UserUpdateRequest = {
         username: form.value.username,
         email: form.value.email,
-        tags: form.value.tags
+        tags: form.value.tags,
       }
       await userStore.updateUserInfo(userData)
     }
@@ -273,4 +284,3 @@ const handleUpdate = async () => {
   }
 }
 </style>
-

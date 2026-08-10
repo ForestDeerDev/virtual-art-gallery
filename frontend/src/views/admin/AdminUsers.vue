@@ -8,11 +8,7 @@
             <template #header>
               <h5>管理菜单</h5>
             </template>
-            <el-menu
-              :default-active="activeMenu"
-              router
-              class="admin-menu"
-            >
+            <el-menu :default-active="activeMenu" router class="admin-menu">
               <el-menu-item index="/admin">
                 <el-icon><Odometer /></el-icon>
                 <span>仪表盘</span>
@@ -36,19 +32,12 @@
             <div v-if="loading" class="loading-spinner">
               <el-icon class="is-loading" :size="50"><Loading /></el-icon>
             </div>
-            <div v-else-if="users.length === 0" class="text-center py-5 text-muted">
-              暂无用户
-            </div>
+            <div v-else-if="users.length === 0" class="text-center py-5 text-muted">暂无用户</div>
             <el-table v-else :data="users" stripe>
               <el-table-column prop="id" label="ID" width="80" />
               <el-table-column label="头像" width="80">
                 <template #default="{ row }">
-                  <img
-                    v-if="row.avatar"
-                    :src="row.avatar"
-                    alt="头像"
-                    class="user-avatar"
-                  />
+                  <img v-if="row.avatar" :src="row.avatar" alt="头像" class="user-avatar" />
                   <el-icon v-else :size="40" color="#ccc"><User /></el-icon>
                 </template>
               </el-table-column>
@@ -64,19 +53,10 @@
               <el-table-column prop="createTime" label="注册时间" width="180" />
               <el-table-column label="操作" width="200">
                 <template #default="{ row }">
-                  <el-button
-                    type="primary"
-                    size="small"
-                    @click="handleEditRole(row)"
-                    class="me-2"
-                  >
+                  <el-button type="primary" size="small" class="me-2" @click="handleEditRole(row)">
                     <el-icon><Setting /></el-icon> 修改角色
                   </el-button>
-                  <el-button
-                    type="danger"
-                    size="small"
-                    @click="handleDeleteUser(row)"
-                  >
+                  <el-button type="danger" size="small" @click="handleDeleteUser(row)">
                     <el-icon><Delete /></el-icon> 删除
                   </el-button>
                 </template>
@@ -101,9 +81,7 @@
       </div>
       <template #footer>
         <el-button @click="showEditRoleModal = false">取消</el-button>
-        <el-button type="primary" @click="handleUpdateRole" :loading="submitting">
-          更新
-        </el-button>
+        <el-button type="primary" :loading="submitting" @click="handleUpdateRole"> 更新 </el-button>
       </template>
     </el-dialog>
   </div>
@@ -154,12 +132,12 @@ const handleUpdateRole = async () => {
   submitting.value = true
   try {
     await adminApi.updateUserRole(editingUser.value!.id, newRole.value)
-    
-    const user = users.value.find(u => u.id === editingUser.value!.id)
+
+    const user = users.value.find((u) => u.id === editingUser.value!.id)
     if (user) {
       user.role = newRole.value
     }
-    
+
     showEditRoleModal.value = false
     ElMessage.success('角色更新成功')
   } catch (error: unknown) {
@@ -177,12 +155,12 @@ const handleDeleteUser = async (user: User) => {
       {
         confirmButtonText: '确定',
         cancelButtonText: '取消',
-        type: 'warning'
-      }
+        type: 'warning',
+      },
     )
 
     await adminApi.deleteUser(user.id)
-    users.value = users.value.filter(u => u.id !== user.id)
+    users.value = users.value.filter((u) => u.id !== user.id)
     ElMessage.success('用户删除成功')
   } catch (error: unknown) {
     if (error !== 'cancel') {
@@ -273,4 +251,3 @@ const handleDeleteUser = async (user: User) => {
   }
 }
 </style>
-

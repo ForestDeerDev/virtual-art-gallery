@@ -8,7 +8,7 @@ import type {
   PageQuery,
   BatchDeleteRequest,
   BatchUpdateRequest,
-  CategoryStats
+  CategoryStats,
 } from '@/types'
 
 export default {
@@ -17,7 +17,7 @@ export default {
     return request<ArtworkListResponse>({
       url: '/artworks',
       method: 'get',
-      params
+      params,
     })
   },
 
@@ -25,7 +25,7 @@ export default {
   getArtworkById(id: number): Promise<Artwork> {
     return request<Artwork>({
       url: `/artworks/${id}`,
-      method: 'get'
+      method: 'get',
     })
   },
 
@@ -34,7 +34,7 @@ export default {
     return request<Artwork>({
       url: '/artworks',
       method: 'post',
-      data: artworkData
+      data: artworkData,
     })
   },
 
@@ -43,7 +43,7 @@ export default {
     return request<Artwork>({
       url: `/artworks/${id}`,
       method: 'put',
-      data: artworkData
+      data: artworkData,
     })
   },
 
@@ -51,7 +51,7 @@ export default {
   deleteArtwork(id: number): Promise<void> {
     return request<void>({
       url: `/artworks/${id}`,
-      method: 'delete'
+      method: 'delete',
     })
   },
 
@@ -60,7 +60,7 @@ export default {
     return request<void>({
       url: '/artworks/batch',
       method: 'delete',
-      data: requestData
+      data: requestData,
     })
   },
 
@@ -69,7 +69,7 @@ export default {
     return request<void>({
       url: '/artworks/batch',
       method: 'put',
-      data: requestData
+      data: requestData,
     })
   },
 
@@ -78,7 +78,7 @@ export default {
     return request<ArtworkListResponse>({
       url: '/artworks/search',
       method: 'get',
-      params: { keyword, page, pageSize }
+      params: { keyword, page, pageSize },
     })
   },
 
@@ -86,7 +86,7 @@ export default {
   getRecommendations(): Promise<Artwork[]> {
     return request<Artwork[]>({
       url: '/artworks/recommendations',
-      method: 'get'
+      method: 'get',
     })
   },
 
@@ -94,7 +94,7 @@ export default {
   getCategories(): Promise<string[]> {
     return request<string[]>({
       url: '/artworks/categories',
-      method: 'get'
+      method: 'get',
     })
   },
 
@@ -102,7 +102,7 @@ export default {
   getCategoryStats(): Promise<CategoryStats[]> {
     return request<CategoryStats[]>({
       url: '/artworks/category-stats',
-      method: 'get'
+      method: 'get',
     })
   },
 
@@ -113,7 +113,7 @@ export default {
     return request({
       url: '/upload/artwork',
       method: 'post',
-      data: formData
+      data: formData,
     }) as Promise<UploadResponse>
-  }
+  },
 }

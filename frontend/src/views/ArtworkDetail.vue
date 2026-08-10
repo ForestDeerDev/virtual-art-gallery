@@ -1,8 +1,11 @@
 <template>
   <div>
     <Navbar />
-    
-    <div class="container detail-container" v-if="!artworkStore.loading && artworkStore.currentArtwork">
+
+    <div
+      v-if="!artworkStore.loading && artworkStore.currentArtwork"
+      class="container detail-container"
+    >
       <div class="detail-row">
         <div class="detail-main">
           <el-card class="mb-4">
@@ -36,7 +39,10 @@
               <h5>作品描述</h5>
             </template>
             <p class="card-text">{{ artworkStore.currentArtwork.description || '暂无描述' }}</p>
-            <div v-if="artworkStore.currentArtwork.tags && artworkStore.currentArtwork.tags.length > 0" class="mt-3">
+            <div
+              v-if="artworkStore.currentArtwork.tags && artworkStore.currentArtwork.tags.length > 0"
+              class="mt-3"
+            >
               <strong>标签：</strong>
               <el-tag
                 v-for="tag in parseCommaSeparated(artworkStore.currentArtwork.tags)"
@@ -59,7 +65,9 @@
                   :plain="!interactionStore.likeStatus.isLiked"
                   @click="toggleLike"
                 >
-                  <el-icon><component :is="interactionStore.likeStatus.isLiked ? 'StarFilled' : 'Star'" /></el-icon>
+                  <el-icon
+                    ><component :is="interactionStore.likeStatus.isLiked ? 'StarFilled' : 'Star'"
+                  /></el-icon>
                   <span class="ms-1">{{ interactionStore.likeStatus.likeCount }}</span>
                 </el-button>
               </div>
@@ -76,9 +84,9 @@
               />
               <el-button
                 type="primary"
-                @click="submitComment"
                 :disabled="!commentContent.trim()"
                 class="mt-2"
+                @click="submitComment"
               >
                 发布评论
               </el-button>
@@ -112,7 +120,9 @@
                     </div>
                   </div>
                   <el-button
-                    v-if="userStore.userInfo && userStore.userInfo.username === comment.user.username"
+                    v-if="
+                      userStore.userInfo && userStore.userInfo.username === comment.user.username
+                    "
                     type="danger"
                     size="small"
                     circle
@@ -123,12 +133,7 @@
                 </div>
                 <p class="comment-content">{{ comment.content }}</p>
                 <div class="comment-actions">
-                  <el-button
-                    type="primary"
-                    size="small"
-                    text
-                    @click="toggleReply(comment)"
-                  >
+                  <el-button type="primary" size="small" text @click="toggleReply(comment)">
                     <el-icon><ChatDotRound /></el-icon> 回复 ({{ comment.replyCount }})
                   </el-button>
                 </div>
@@ -146,8 +151,8 @@
                     <el-button
                       type="primary"
                       size="small"
-                      @click="submitReply(comment.id)"
                       :disabled="!replyContent.trim()"
+                      @click="submitReply(comment.id)"
                     >
                       发布回复
                     </el-button>
@@ -156,11 +161,7 @@
 
                 <!-- Replies -->
                 <div v-if="comment.replies && comment.replies.length > 0" class="replies-list">
-                  <div
-                    v-for="reply in comment.replies"
-                    :key="reply.id"
-                    class="reply-item"
-                  >
+                  <div v-for="reply in comment.replies" :key="reply.id" class="reply-item">
                     <div class="comment-header">
                       <div class="user-info">
                         <img
@@ -174,7 +175,9 @@
                         </div>
                       </div>
                       <el-button
-                        v-if="userStore.userInfo && userStore.userInfo.username === reply.user.username"
+                        v-if="
+                          userStore.userInfo && userStore.userInfo.username === reply.user.username
+                        "
                         type="danger"
                         size="small"
                         circle
@@ -566,4 +569,3 @@ function formatDate(dateString: string) {
   }
 }
 </style>
-

@@ -56,4 +56,3 @@ img {
   height: auto;
 }
 </style>
-

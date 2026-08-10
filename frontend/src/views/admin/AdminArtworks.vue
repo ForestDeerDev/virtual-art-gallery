@@ -8,11 +8,7 @@
             <template #header>
               <h5>管理菜单</h5>
             </template>
-            <el-menu
-              :default-active="activeMenu"
-              router
-              class="admin-menu"
-            >
+            <el-menu :default-active="activeMenu" router class="admin-menu">
               <el-menu-item index="/admin">
                 <el-icon><Odometer /></el-icon>
                 <span>仪表盘</span>
@@ -42,19 +38,10 @@
             <div class="batch-actions">
               <span>已选择 {{ selectedArtworks.length }} 件作品</span>
               <div>
-                <el-button
-                  type="danger"
-                  size="small"
-                  @click="handleBatchDelete"
-                  class="me-2"
-                >
+                <el-button type="danger" size="small" class="me-2" @click="handleBatchDelete">
                   <el-icon><Delete /></el-icon> 批量删除
                 </el-button>
-                <el-button
-                  type="primary"
-                  size="small"
-                  @click="showBatchUpdateModal = true"
-                >
+                <el-button type="primary" size="small" @click="showBatchUpdateModal = true">
                   <el-icon><Edit /></el-icon> 批量修改
                 </el-button>
               </div>
@@ -69,7 +56,12 @@
             <div v-else-if="artworkStore.artworks.length === 0" class="text-center py-5 text-muted">
               暂无作品
             </div>
-            <el-table v-else :data="artworkStore.artworks" stripe @selection-change="handleSelectionChange">
+            <el-table
+              v-else
+              :data="artworkStore.artworks"
+              stripe
+              @selection-change="handleSelectionChange"
+            >
               <el-table-column type="selection" width="55" />
               <el-table-column label="预览" width="100">
                 <template #default="{ row }">
@@ -90,19 +82,10 @@
               <el-table-column prop="createTime" label="创建时间" width="180" />
               <el-table-column label="操作" width="150">
                 <template #default="{ row }">
-                  <el-button
-                    type="primary"
-                    size="small"
-                    @click="handleEdit(row)"
-                    class="me-2"
-                  >
+                  <el-button type="primary" size="small" class="me-2" @click="handleEdit(row)">
                     <el-icon><Edit /></el-icon>
                   </el-button>
-                  <el-button
-                    type="danger"
-                    size="small"
-                    @click="handleDelete(row.id)"
-                  >
+                  <el-button type="danger" size="small" @click="handleDelete(row.id)">
                     <el-icon><Delete /></el-icon>
                   </el-button>
                 </template>
@@ -120,7 +103,7 @@
       width="700px"
       @close="closeModal"
     >
-      <el-form @submit.prevent="handleSubmit" label-width="100px">
+      <el-form label-width="100px" @submit.prevent="handleSubmit">
         <el-form-item label="标题" required>
           <el-input v-model="form.title" />
         </el-form-item>
@@ -153,18 +136,14 @@
       </el-form>
       <template #footer>
         <el-button @click="closeModal">取消</el-button>
-        <el-button type="primary" @click="handleSubmit" :loading="submitting">
+        <el-button type="primary" :loading="submitting" @click="handleSubmit">
           {{ editingArtwork ? '更新' : '创建' }}
         </el-button>
       </template>
     </el-dialog>
 
     <!-- Batch Update Dialog -->
-    <el-dialog
-      v-model="showBatchUpdateModal"
-      title="批量修改"
-      width="500px"
-    >
+    <el-dialog v-model="showBatchUpdateModal" title="批量修改" width="500px">
       <el-form label-width="100px">
         <el-form-item label="分类">
           <el-select v-model="batchUpdateForm.category" style="width: 100%">
@@ -180,7 +159,7 @@
       </el-form>
       <template #footer>
         <el-button @click="showBatchUpdateModal = false">取消</el-button>
-        <el-button type="primary" @click="handleBatchUpdate" :loading="submitting">
+        <el-button type="primary" :loading="submitting" @click="handleBatchUpdate">
           更新
         </el-button>
       </template>
@@ -196,13 +175,18 @@ import { useArtworkStore } from '@/stores/artwork'
 import artworkApi from '@/api/artwork'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { parseCommaSeparated } from '@/utils/tags'
-import type { Artwork, AdminArtworkCreateRequest, ArtworkUpdateRequest, BatchUpdateRequest, ArtworkBatchUpdateForm } from '@/types'
+import type {
+  Artwork,
+  AdminArtworkCreateRequest,
+  ArtworkUpdateRequest,
+  BatchUpdateRequest,
+  ArtworkBatchUpdateForm,
+} from '@/types'
 
 const route = useRoute()
 const artworkStore = useArtworkStore()
 
 const activeMenu = computed(() => route.path)
-
 
 const selectedArtworks = ref<number[]>([])
 const showCreateModal = ref(false)
@@ -218,11 +202,11 @@ const form = ref<AdminArtworkCreateRequest & { tagsInput: string }>({
   imageUrl: '',
   videoUrl: '',
   tags: [],
-  tagsInput: ''
+  tagsInput: '',
 })
 
 const batchUpdateForm = ref<ArtworkBatchUpdateForm>({
-  category: ''
+  category: '',
 })
 
 onMounted(() => {
@@ -239,7 +223,7 @@ const loadArtworks = async () => {
 }
 
 const handleSelectionChange = (selection: Artwork[]) => {
-  selectedArtworks.value = selection.map(item => item.id)
+  selectedArtworks.value = selection.map((item) => item.id)
 }
 
 const handleEdit = (artwork: Artwork) => {
@@ -252,7 +236,7 @@ const handleEdit = (artwork: Artwork) => {
     imageUrl: artwork.imageUrl,
     videoUrl: artwork.videoUrl ?? '',
     tags: artwork.tags ?? [],
-    tagsInput: artwork.tags?.join(',') ?? ''
+    tagsInput: artwork.tags?.join(',') ?? '',
   }
   showCreateModal.value = true
 }
@@ -262,7 +246,7 @@ const handleDelete = async (id: number) => {
     await ElMessageBox.confirm('确定要删除这件作品吗？', '确认删除', {
       confirmButtonText: '确定',
       cancelButtonText: '取消',
-      type: 'warning'
+      type: 'warning',
     })
 
     await artworkStore.deleteArtwork(id)
@@ -282,8 +266,8 @@ const handleBatchDelete = async () => {
       {
         confirmButtonText: '确定',
         cancelButtonText: '取消',
-        type: 'warning'
-      }
+        type: 'warning',
+      },
     )
 
     await artworkStore.batchDeleteArtworks(selectedArtworks.value)
@@ -303,21 +287,21 @@ const handleBatchUpdate = async () => {
   try {
     const batchUpdateRequest: BatchUpdateRequest = {
       updates: selectedArtworks.value
-        .map(id => {
+        .map((id) => {
           const data: ArtworkUpdateRequest = {}
           if (batchUpdateForm.value.category) {
             data.category = batchUpdateForm.value.category
           }
           return { id, data }
         })
-        .filter(u => u.data.category)
+        .filter((u) => u.data.category),
     }
 
     if (batchUpdateRequest.updates.length > 0) {
       await artworkApi.batchUpdateArtworks(batchUpdateRequest)
       // 更新本地数据
-      batchUpdateRequest.updates.forEach(update => {
-        const artwork = artworkStore.artworks.find(a => a.id === update.id)
+      batchUpdateRequest.updates.forEach((update) => {
+        const artwork = artworkStore.artworks.find((a) => a.id === update.id)
         if (artwork && update.data.category) {
           artwork.category = update.data.category
         }
@@ -339,7 +323,7 @@ const handleSubmit = async () => {
   try {
     const artworkData: AdminArtworkCreateRequest = {
       ...form.value,
-      tags: parseCommaSeparated(form.value.tagsInput)
+      tags: parseCommaSeparated(form.value.tagsInput),
     }
 
     if (editingArtwork.value) {
@@ -371,7 +355,7 @@ const closeModal = () => {
     imageUrl: '',
     videoUrl: '',
     tags: [],
-    tagsInput: ''
+    tagsInput: '',
   }
 }
 </script>
@@ -471,4 +455,3 @@ const closeModal = () => {
   }
 }
 </style>
-

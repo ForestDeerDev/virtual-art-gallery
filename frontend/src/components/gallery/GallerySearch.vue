@@ -3,9 +3,9 @@
     <el-input
       :model-value="modelValue"
       placeholder="搜索艺术作品、艺术家或标签..."
+      class="search-input-group"
       @keyup.enter="handleSearch"
       @update:model-value="$emit('update:modelValue', $event)"
-      class="search-input-group"
     >
       <template #append>
         <el-button @click="handleSearch">
@@ -19,15 +19,18 @@
 <script setup lang="ts">
 import { Search } from '@element-plus/icons-vue'
 
-withDefaults(defineProps<{
-  modelValue: string
-}>(), {
-  modelValue: ''
-})
+withDefaults(
+  defineProps<{
+    modelValue: string
+  }>(),
+  {
+    modelValue: '',
+  },
+)
 
 const emit = defineEmits<{
   'update:modelValue': [value: string]
-  'search': []
+  search: []
 }>()
 
 const handleSearch = () => {

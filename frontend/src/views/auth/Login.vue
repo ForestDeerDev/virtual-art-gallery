@@ -5,14 +5,10 @@
         <div class="login-container">
           <el-card class="login-card" shadow="always">
             <h2 class="login-title">登录</h2>
-            
-            <el-form @submit.prevent="handleLogin" :model="form" label-position="top">
+
+            <el-form :model="form" label-position="top" @submit.prevent="handleLogin">
               <el-form-item label="用户名">
-                <el-input
-                  v-model="form.username"
-                  placeholder="请输入用户名"
-                  required
-                />
+                <el-input v-model="form.username" placeholder="请输入用户名" required />
               </el-form-item>
 
               <el-form-item label="密码">
@@ -30,12 +26,7 @@
               </el-form-item>
 
               <el-form-item>
-                <el-button
-                  type="primary"
-                  class="w-100"
-                  :loading="loading"
-                  @click="handleLogin"
-                >
+                <el-button type="primary" class="w-100" :loading="loading" @click="handleLogin">
                   登录
                 </el-button>
               </el-form-item>
@@ -44,19 +35,10 @@
             <el-divider>或使用第三方账号登录</el-divider>
 
             <div class="oauth-buttons">
-              <el-button
-                type="primary"
-                plain
-                @click="handleOAuthLogin('github')"
-              >
+              <el-button type="primary" plain @click="handleOAuthLogin('github')">
                 <el-icon><Promotion /></el-icon> GitHub
               </el-button>
-              <el-button
-                type="primary"
-                plain
-                @click="handleOAuthLogin('wechat')"
-                disabled
-              >
+              <el-button type="primary" plain disabled @click="handleOAuthLogin('wechat')">
                 <el-icon><ChatDotRound /></el-icon> 微信
               </el-button>
             </div>
@@ -66,13 +48,7 @@
               <router-link to="/register">立即注册</router-link>
             </div>
 
-            <el-alert
-              v-if="error"
-              type="error"
-              :title="error"
-              :closable="false"
-              class="mt-3"
-            />
+            <el-alert v-if="error" type="error" :title="error" :closable="false" class="mt-3" />
           </el-card>
         </div>
       </el-main>
@@ -95,7 +71,7 @@ const userStore = useUserStore()
 const form = ref<LoginRequest & { remember: boolean }>({
   username: '',
   password: '',
-  remember: false
+  remember: false,
 })
 
 const loading = ref(false)
@@ -104,7 +80,7 @@ const error = ref('')
 const handleLogin = async () => {
   loading.value = true
   error.value = ''
-  
+
   try {
     await userStore.login(form.value)
     const redirect = getQueryString(route.query.redirect) ?? '/home'
@@ -183,4 +159,3 @@ const handleOAuthLogin = (provider: OAuthProvider) => {
   margin-top: 12px;
 }
 </style>
-

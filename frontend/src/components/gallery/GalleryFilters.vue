@@ -8,27 +8,27 @@
         <!-- Vue 事件机制通过事件名匹配，而不是函数名或参数名。只要事件名相同，无论 emit 来自哪个函数，都会被同一个监听器接收。 -->
         <div class="filter-item">
           <label class="form-label">分类</label>
-          <el-select 
-            :model-value="filters.category" 
-            @update:model-value="handleCategoryChange"
+          <el-select
+            :model-value="filters.category"
             class="filter-select"
             :loading="categoriesLoading"
+            @update:model-value="handleCategoryChange"
           >
             <el-option label="全部" value="" />
-            <el-option 
-              v-for="category in categories" 
-              :key="category" 
-              :label="category" 
-              :value="category" 
+            <el-option
+              v-for="category in categories"
+              :key="category"
+              :label="category"
+              :value="category"
             />
           </el-select>
         </div>
         <div class="filter-item">
           <label class="form-label">排序</label>
-          <el-select 
-            :model-value="filters.sortBy" 
-            @update:model-value="handleSortByChange"
+          <el-select
+            :model-value="filters.sortBy"
             class="filter-select"
+            @update:model-value="handleSortByChange"
           >
             <el-option label="最新" value="latest" />
             <el-option label="最受欢迎" value="popular" />
@@ -40,12 +40,12 @@
           <el-input
             :model-value="filters.tags"
             placeholder="输入标签..."
-            @update:model-value="handleTagsChange"
             class="filter-input"
+            @update:model-value="handleTagsChange"
           />
         </div>
         <div class="filter-item filter-reset">
-          <el-button @click="handleReset" class="w-100 filter-btn">
+          <el-button class="w-100 filter-btn" @click="handleReset">
             <el-icon><RefreshLeft /></el-icon> 重置
           </el-button>
         </div>
@@ -68,10 +68,8 @@ const props = defineProps<{
 // 子组件 → 父组件：通过 emit 发消息（事件）
 const emit = defineEmits<{
   'update:filters': [value: GalleryFilterState]
-  'reset': []
+  reset: []
 }>()
-
-
 
 // 函数都 emit 同一个事件名：'update:filters'，只是传递的数据内容不同。
 const handleCategoryChange = (value: string) => {

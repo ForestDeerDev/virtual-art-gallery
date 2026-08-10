@@ -8,11 +8,7 @@
             <template #header>
               <h5>管理菜单</h5>
             </template>
-            <el-menu
-              :default-active="activeMenu"
-              router
-              class="admin-menu"
-            >
+            <el-menu :default-active="activeMenu" router class="admin-menu">
               <el-menu-item index="/admin">
                 <el-icon><Odometer /></el-icon>
                 <span>仪表盘</span>
@@ -31,12 +27,12 @@
 
         <div class="dashboard-content">
           <h2 class="mb-4">管理仪表盘</h2>
-          
+
           <div v-if="loading" class="loading-state">
             <el-icon class="is-loading" :size="50"><Loading /></el-icon>
             <p class="mt-2">加载统计数据中...</p>
           </div>
-          
+
           <div v-else>
             <div class="stats-grid mb-4">
               <el-card class="stat-card text-center">
@@ -81,7 +77,11 @@
                   暂无数据
                 </div>
                 <div v-else>
-                  <div v-for="(count, category) in stats.categoryStats" :key="category" class="stat-item">
+                  <div
+                    v-for="(count, category) in stats.categoryStats"
+                    :key="category"
+                    class="stat-item"
+                  >
                     <span>{{ category }}</span>
                     <el-tag type="primary">{{ count }}件</el-tag>
                   </div>
@@ -107,9 +107,7 @@
               <template #header>
                 <h5>最近添加的作品</h5>
               </template>
-              <div v-if="recentArtworks.length === 0" class="text-muted">
-                暂无作品
-              </div>
+              <div v-if="recentArtworks.length === 0" class="text-muted">暂无作品</div>
               <el-table v-else :data="recentArtworks" stripe>
                 <el-table-column prop="title" label="标题" />
                 <el-table-column prop="artist" label="艺术家" />
@@ -157,7 +155,7 @@ const stats = ref<AdminStats>({
   featuredArtworks: 0,
   categoryStats: {},
   roleStats: {},
-  totalComments: 0
+  totalComments: 0,
 })
 
 const recentArtworks = ref<Artwork[]>([])
@@ -168,7 +166,7 @@ onMounted(async () => {
   try {
     const [statsResponse, artworksResponse] = await Promise.all([
       adminApi.getStats(),
-      artworkApi.getArtworks({ limit: 10, sortBy: 'latest' })
+      artworkApi.getArtworks({ limit: 10, sortBy: 'latest' }),
     ])
 
     stats.value = statsResponse
@@ -259,11 +257,11 @@ onMounted(async () => {
 }
 
 .text-success {
-  color: #67C23A;
+  color: #67c23a;
 }
 
 .text-warning {
-  color: #E6A23C;
+  color: #e6a23c;
 }
 
 .mb-4 {
@@ -292,4 +290,3 @@ onMounted(async () => {
   }
 }
 </style>
-

@@ -24,15 +24,15 @@ export function handleTokenExpired() {
   isHandlingTokenExpired = true
 
   const userStore = useUserStore()
-  
+
   console.log('Token expired, handling logout')
   userStore.logout()
-  
+
   // 如果当前不在登录页，则跳转到登录页
   if (router.currentRoute.value.name !== 'Login') {
     router.replace({ name: 'Login' }).catch(() => {})
   }
-  
+
   ElMessage.error('登录已过期，请重新登录')
 }
 
@@ -50,7 +50,7 @@ export function resetTokenExpiredFlag() {
  */
 export function initializeAuth() {
   const userStore = useUserStore()
-  
+
   // 检查 token 是否过期
   if (userStore.token && isTokenExpired(userStore.token)) {
     console.log('Token expired on app initialization')

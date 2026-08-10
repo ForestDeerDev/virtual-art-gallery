@@ -1,20 +1,18 @@
 <template>
   <div>
     <Navbar />
-    
+
     <!-- Hero Section -->
     <section class="hero-section">
       <!-- 背景装饰 -->
       <div class="hero-bg"></div>
       <div class="hero-pattern"></div>
-      
+
       <div class="container hero-container">
         <div class="hero-row">
-          <div class="hero-content fade-in" ref="heroContent">
+          <div ref="heroContent" class="hero-content fade-in">
             <el-tag class="hero-badge" type="primary">艺术无界，创意无限</el-tag>
-            <h1 class="hero-title">
-              欢迎来到 <span class="gradient-text">虚拟艺术画廊</span>
-            </h1>
+            <h1 class="hero-title">欢迎来到 <span class="gradient-text">虚拟艺术画廊</span></h1>
             <p class="hero-subtitle">
               探索数字艺术的无限可能，发现来自世界各地的精美艺术作品。
               在这里，每一件作品都讲述着独特的故事，等待您的发现。
@@ -31,7 +29,7 @@
                 </el-button>
               </router-link>
             </div>
-            
+
             <!-- 统计数据 -->
             <div class="hero-stats">
               <div class="stat-item">
@@ -48,10 +46,15 @@
               </div>
             </div>
           </div>
-          <div class="hero-image fade-in" ref="heroImage">
+          <div ref="heroImage" class="hero-image fade-in">
             <div class="hero-image-wrapper">
               <div class="artwork-showcase">
-                <div class="artwork-item" v-for="(artwork, index) in heroArtworks" :key="artwork.id" :class="`artwork-${index + 1}`">
+                <div
+                  v-for="(artwork, index) in heroArtworks"
+                  :key="artwork.id"
+                  class="artwork-item"
+                  :class="`artwork-${index + 1}`"
+                >
                   <img
                     :src="artwork.imageUrl || 'https://via.placeholder.com/300x400'"
                     :alt="artwork.title"
@@ -69,14 +72,14 @@
     <!-- Featured Artworks -->
     <section class="featured-section">
       <div class="container">
-        <div class="text-center fade-in" ref="featuredHeader">
+        <div ref="featuredHeader" class="text-center fade-in">
           <h2 class="section-title">精选作品</h2>
           <div class="divider"></div>
           <p class="section-subtitle">
             我们精心挑选了一些最具代表性的艺术作品，展示来自世界各地艺术家的创作才华和独特视角。
           </p>
         </div>
-        
+
         <div v-if="artworkStore.loading" class="loading-spinner">
           <el-icon class="is-loading" :size="40"><Loading /></el-icon>
           <p>加载中...</p>
@@ -85,18 +88,22 @@
           <div
             v-for="(artwork, index) in artworkStore.featuredArtworks"
             :key="artwork.id"
+            :ref="
+              (el) => {
+                featuredItems[index] = el as HTMLElement
+              }
+            "
             class="artwork-item fade-in"
-            :ref="(el) => { featuredItems[index] = el as HTMLElement }"
           >
             <el-card class="artwork-card hover-lift" shadow="hover">
               <div class="artwork-image-container">
                 <router-link :to="`/artwork/${artwork.id}`" class="artwork-link">
                   <img
-                  :src="artwork.imageUrl || 'https://via.placeholder.com/300x300'"
-                  :alt="artwork.title"
-                  class="artwork-image loaded"
-                  style="opacity: 1 !important"
-                />
+                    :src="artwork.imageUrl || 'https://via.placeholder.com/300x300'"
+                    :alt="artwork.title"
+                    class="artwork-image loaded"
+                    style="opacity: 1 !important"
+                  />
                   <div class="artwork-overlay">
                     <div class="artwork-overlay-content">
                       <el-icon :size="24"><View /></el-icon>
@@ -110,16 +117,14 @@
               </div>
               <div class="card-body">
                 <h5 class="card-title text-truncate">{{ artwork.title }}</h5>
-                <p class="card-text text-muted small">
-                  艺术家：{{ artwork.artist }}
-                </p>
+                <p class="card-text text-muted small">艺术家：{{ artwork.artist }}</p>
               </div>
             </el-card>
           </div>
         </div>
-        
+
         <!-- 查看更多按钮 -->
-        <div class="text-center mt-12 fade-in" ref="viewMore">
+        <div ref="viewMore" class="text-center mt-12 fade-in">
           <router-link to="/gallery">
             <el-button type="primary" size="large">
               查看全部作品 <el-icon class="ms-2"><ArrowRight /></el-icon>
@@ -132,19 +137,17 @@
     <!-- Categories -->
     <section class="categories-section">
       <div class="container">
-        <div class="text-center fade-in" ref="categoriesHeader">
+        <div ref="categoriesHeader" class="text-center fade-in">
           <h2 class="section-title">艺术分类</h2>
           <div class="divider"></div>
-          <p class="section-subtitle">
-            探索不同类型的艺术作品，找到您喜欢的风格和主题。
-          </p>
+          <p class="section-subtitle">探索不同类型的艺术作品，找到您喜欢的风格和主题。</p>
         </div>
-        
-        <div v-if="categoriesLoading" class="text-center" style="padding: 3rem;">
+
+        <div v-if="categoriesLoading" class="text-center" style="padding: 3rem">
           <el-icon :size="48" class="text-muted is-loading"><Loading /></el-icon>
           <p class="text-muted mt-3">加载中...</p>
         </div>
-        <div v-else-if="categories.length === 0" class="text-center" style="padding: 3rem;">
+        <div v-else-if="categories.length === 0" class="text-center" style="padding: 3rem">
           <el-icon :size="48" class="text-muted"><DocumentRemove /></el-icon>
           <p class="text-muted mt-3">暂无数据</p>
         </div>
@@ -152,15 +155,21 @@
           <div
             v-for="(category, index) in categories"
             :key="category.name"
+            :ref="
+              (el) => {
+                categoryItems[index] = el as HTMLElement
+              }
+            "
             class="category-item fade-in"
-            :ref="(el) => { categoryItems[index] = el as HTMLElement }"
           >
-            <router-link 
-              :to="`/gallery?category=${category.name}`" 
+            <router-link
+              :to="`/gallery?category=${category.name}`"
               class="category-card hover-lift"
             >
               <div class="category-icon-wrapper">
-                <el-icon :size="40" class="category-icon"><component :is="category.icon" /></el-icon>
+                <el-icon :size="40" class="category-icon"
+                  ><component :is="category.icon"
+                /></el-icon>
               </div>
               <h3 class="category-title">{{ category.name }}</h3>
               <p class="category-count text-muted">{{ category.count }} 件作品</p>
@@ -177,7 +186,7 @@
     <section class="cta-section">
       <div class="cta-bg"></div>
       <div class="container relative z-10">
-        <div class="text-center fade-in" ref="ctaContent">
+        <div ref="ctaContent" class="text-center fade-in">
           <h2 class="section-title">加入我们的艺术社区</h2>
           <p class="section-subtitle">
             无论您是艺术家还是艺术爱好者，都可以在这里找到属于自己的艺术天地。
@@ -236,12 +245,12 @@ const categoriesLoading = ref(false)
 
 // 分类图标映射
 const categoryIconMap: Record<string, string> = {
-  '油画': 'Brush',
-  '水彩': 'Collection',
-  '素描': 'Edit',
-  '雕塑': 'Box',
-  '摄影': 'Camera',
-  '数字艺术': 'Monitor',
+  油画: 'Brush',
+  水彩: 'Collection',
+  素描: 'Edit',
+  雕塑: 'Box',
+  摄影: 'Camera',
+  数字艺术: 'Monitor',
 }
 
 // 从 API 获取分类统计数据
@@ -249,10 +258,10 @@ const fetchCategoryStats = async () => {
   categoriesLoading.value = true
   try {
     const stats = await artworkApi.getCategoryStats()
-    categories.value = stats.map(stat => ({
+    categories.value = stats.map((stat) => ({
       name: stat.category,
       icon: categoryIconMap[stat.category] || 'Picture',
-      count: stat.count
+      count: stat.count,
     }))
   } catch (error) {
     console.error('获取分类统计失败:', error)
@@ -290,10 +299,10 @@ const checkVisibility = () => {
     categoriesHeader.value,
     ctaContent.value,
     ...featuredItems.value,
-    ...categoryItems.value
+    ...categoryItems.value,
   ]
-  
-  elements.forEach(el => {
+
+  elements.forEach((el) => {
     const element = getElement(el)
     if (element) {
       const rect = element.getBoundingClientRect()
@@ -317,12 +326,96 @@ onMounted(async () => {
   } catch (error: unknown) {
     console.error('获取精选作品失败:', error)
     const mockArtworks: Artwork[] = [
-      { id: 1, title: '抽象风景', artist: '张三', category: '油画', imageUrl: 'https://via.placeholder.com/300x400', artistId: 1, viewCount: 0, likeCount: 0, featured: true, enabled: true, createTime: new Date().toISOString(), updateTime: new Date().toISOString(), tags: ['抽象', '风景'] },
-      { id: 2, title: '城市印象', artist: '李四', category: '水彩', imageUrl: 'https://via.placeholder.com/300x300', artistId: 2, viewCount: 0, likeCount: 0, featured: true, enabled: true, createTime: new Date().toISOString(), updateTime: new Date().toISOString(), tags: ['城市', '印象'] },
-      { id: 3, title: '人物肖像', artist: '王五', category: '素描', imageUrl: 'https://via.placeholder.com/250x350', artistId: 3, viewCount: 0, likeCount: 0, featured: true, enabled: true, createTime: new Date().toISOString(), updateTime: new Date().toISOString(), tags: ['人物', '肖像'] },
-      { id: 4, title: '现代雕塑', artist: '赵六', category: '雕塑', imageUrl: 'https://via.placeholder.com/300x400', artistId: 4, viewCount: 0, likeCount: 0, featured: true, enabled: true, createTime: new Date().toISOString(), updateTime: new Date().toISOString(), tags: ['雕塑', '现代'] },
-      { id: 5, title: '自然风光', artist: '孙七', category: '摄影', imageUrl: 'https://via.placeholder.com/300x300', artistId: 5, viewCount: 0, likeCount: 0, featured: true, enabled: true, createTime: new Date().toISOString(), updateTime: new Date().toISOString(), tags: ['自然', '风光'] },
-      { id: 6, title: '数字梦境', artist: '周八', category: '数字艺术', imageUrl: 'https://via.placeholder.com/250x350', artistId: 6, viewCount: 0, likeCount: 0, featured: true, enabled: true, createTime: new Date().toISOString(), updateTime: new Date().toISOString(), tags: ['数字', '梦境'] }
+      {
+        id: 1,
+        title: '抽象风景',
+        artist: '张三',
+        category: '油画',
+        imageUrl: 'https://via.placeholder.com/300x400',
+        artistId: 1,
+        viewCount: 0,
+        likeCount: 0,
+        featured: true,
+        enabled: true,
+        createTime: new Date().toISOString(),
+        updateTime: new Date().toISOString(),
+        tags: ['抽象', '风景'],
+      },
+      {
+        id: 2,
+        title: '城市印象',
+        artist: '李四',
+        category: '水彩',
+        imageUrl: 'https://via.placeholder.com/300x300',
+        artistId: 2,
+        viewCount: 0,
+        likeCount: 0,
+        featured: true,
+        enabled: true,
+        createTime: new Date().toISOString(),
+        updateTime: new Date().toISOString(),
+        tags: ['城市', '印象'],
+      },
+      {
+        id: 3,
+        title: '人物肖像',
+        artist: '王五',
+        category: '素描',
+        imageUrl: 'https://via.placeholder.com/250x350',
+        artistId: 3,
+        viewCount: 0,
+        likeCount: 0,
+        featured: true,
+        enabled: true,
+        createTime: new Date().toISOString(),
+        updateTime: new Date().toISOString(),
+        tags: ['人物', '肖像'],
+      },
+      {
+        id: 4,
+        title: '现代雕塑',
+        artist: '赵六',
+        category: '雕塑',
+        imageUrl: 'https://via.placeholder.com/300x400',
+        artistId: 4,
+        viewCount: 0,
+        likeCount: 0,
+        featured: true,
+        enabled: true,
+        createTime: new Date().toISOString(),
+        updateTime: new Date().toISOString(),
+        tags: ['雕塑', '现代'],
+      },
+      {
+        id: 5,
+        title: '自然风光',
+        artist: '孙七',
+        category: '摄影',
+        imageUrl: 'https://via.placeholder.com/300x300',
+        artistId: 5,
+        viewCount: 0,
+        likeCount: 0,
+        featured: true,
+        enabled: true,
+        createTime: new Date().toISOString(),
+        updateTime: new Date().toISOString(),
+        tags: ['自然', '风光'],
+      },
+      {
+        id: 6,
+        title: '数字梦境',
+        artist: '周八',
+        category: '数字艺术',
+        imageUrl: 'https://via.placeholder.com/250x350',
+        artistId: 6,
+        viewCount: 0,
+        likeCount: 0,
+        featured: true,
+        enabled: true,
+        createTime: new Date().toISOString(),
+        updateTime: new Date().toISOString(),
+        tags: ['数字', '梦境'],
+      },
     ]
     artworkStore.featuredArtworks = mockArtworks
     heroArtworks.value = getRandomArtworks(mockArtworks, 3)
@@ -330,7 +423,7 @@ onMounted(async () => {
 
   // 获取分类统计数据（不阻塞动画）
   fetchCategoryStats()
-  
+
   setTimeout(() => {
     checkVisibility()
     window.addEventListener('scroll', checkVisibility)
@@ -343,7 +436,7 @@ watch(
     setTimeout(() => {
       checkVisibility()
     }, 100)
-  }
+  },
 )
 </script>
 
@@ -491,16 +584,16 @@ watch(
   .hero-row {
     flex-direction: column;
   }
-  
+
   .hero-image {
     display: none;
   }
-  
+
   .artworks-grid {
     grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
     gap: 1rem;
   }
-  
+
   .categories-grid {
     grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
     gap: 1rem;
@@ -892,7 +985,9 @@ watch(
 }
 
 .hover-lift {
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  transition:
+    transform 0.3s ease,
+    box-shadow 0.3s ease;
 }
 
 .hover-lift:hover {
@@ -933,16 +1028,16 @@ watch(
   .hero-section {
     padding: 12rem 0 8rem;
   }
-  
+
   .hero-stats {
     margin-top: 2rem;
   }
-  
+
   .hero-image-wrapper {
     height: 400px;
     margin-top: 3rem;
   }
-  
+
   /* 首页卡片 */
   .artwork-1 {
     width: 250px;
@@ -950,14 +1045,14 @@ watch(
     top: 10%;
     left: 5%;
   }
-  
+
   .artwork-2 {
     width: 200px;
     height: 300px;
     bottom: 5%;
     left: 35%;
   }
-  
+
   .artwork-3 {
     width: 150px;
     height: 250px;
@@ -970,25 +1065,25 @@ watch(
   .hero-section {
     padding: 10rem 0 6rem;
   }
-  
+
   .section-title {
     font-size: 2rem;
   }
-  
+
   .hero-title {
     font-size: 2.5rem;
   }
-  
+
   .hero-stats {
     flex-direction: column;
     gap: 2rem;
     text-align: center;
   }
-  
+
   .artwork-showcase {
     display: none;
   }
-  
+
   .hero-image-wrapper {
     background: rgba(255, 255, 255, 0.1);
     border-radius: var(--radius-xl);
@@ -997,17 +1092,17 @@ watch(
     align-items: center;
     justify-content: center;
   }
-  
+
   .hero-image-wrapper::after {
     content: '🎨';
     font-size: 8rem;
     opacity: 0.5;
   }
-  
+
   .artworks-grid {
     grid-template-columns: repeat(2, 1fr);
   }
-  
+
   .categories-grid {
     grid-template-columns: repeat(2, 1fr);
   }
@@ -1017,27 +1112,26 @@ watch(
   .hero-section {
     padding: 8rem 0 4rem;
   }
-  
+
   .hero-title {
     font-size: 2rem;
   }
-  
+
   .section-title {
     font-size: 1.75rem;
   }
-  
+
   .artworks-grid {
     grid-template-columns: 1fr;
   }
-  
+
   .categories-grid {
     grid-template-columns: 1fr;
   }
-  
+
   .hero-buttons {
     flex-direction: column;
     align-items: stretch;
   }
 }
 </style>
-

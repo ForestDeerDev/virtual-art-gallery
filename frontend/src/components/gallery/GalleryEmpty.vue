@@ -3,9 +3,7 @@
     <template #image>
       <el-icon :size="60"><Box /></el-icon>
     </template>
-    <p class="empty-text">
-      没有找到符合条件的艺术作品，请尝试调整筛选条件或搜索关键词。
-    </p>
+    <p class="empty-text">没有找到符合条件的艺术作品，请尝试调整筛选条件或搜索关键词。</p>
     <el-button type="primary" @click="handleReset">
       <el-icon><RefreshLeft /></el-icon> 重置所有筛选
     </el-button>
@@ -16,7 +14,7 @@
 import { Box, RefreshLeft } from '@element-plus/icons-vue'
 
 const emit = defineEmits<{
-  'reset': []
+  reset: []
 }>()
 
 const handleReset = () => {

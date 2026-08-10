@@ -14,74 +14,78 @@
         </router-link>
       </el-menu-item>
 
-    <el-menu-item index="/home" @click="router.push('/home')">
-      <el-icon><House /></el-icon>
-      <span>首页</span>
-    </el-menu-item>
+      <el-menu-item index="/home" @click="router.push('/home')">
+        <el-icon><House /></el-icon>
+        <span>首页</span>
+      </el-menu-item>
 
-    <el-menu-item index="/gallery" @click="router.push('/gallery')">
-      <el-icon><Grid /></el-icon>
-      <span>画廊</span>
-    </el-menu-item>
+      <el-menu-item index="/gallery" @click="router.push('/gallery')">
+        <el-icon><Grid /></el-icon>
+        <span>画廊</span>
+      </el-menu-item>
 
-    <el-menu-item v-if="userStore.isAuthenticated" index="/recommendations" @click="router.push('/recommendations')">
-      <el-icon><Star /></el-icon>
-      <span>推荐</span>
-    </el-menu-item>
+      <el-menu-item
+        v-if="userStore.isAuthenticated"
+        index="/recommendations"
+        @click="router.push('/recommendations')"
+      >
+        <el-icon><Star /></el-icon>
+        <span>推荐</span>
+      </el-menu-item>
 
-    <el-menu-item v-if="userStore.isAuthenticated" index="/upload" @click="router.push('/upload')">
-      <el-icon><Upload /></el-icon>
-      <span>上传作品</span>
-    </el-menu-item>
+      <el-menu-item
+        v-if="userStore.isAuthenticated"
+        index="/upload"
+        @click="router.push('/upload')"
+      >
+        <el-icon><Upload /></el-icon>
+        <span>上传作品</span>
+      </el-menu-item>
 
-    <el-menu-item v-if="userStore.isAdmin" index="/admin" @click="router.push('/admin')">
-      <el-icon><Setting /></el-icon>
-      <span>管理</span>
-    </el-menu-item>
+      <el-menu-item v-if="userStore.isAdmin" index="/admin" @click="router.push('/admin')">
+        <el-icon><Setting /></el-icon>
+        <span>管理</span>
+      </el-menu-item>
 
       <div class="flex-grow" />
 
-    <div v-if="!userStore.isAuthenticated" class="auth-buttons">
-      <el-menu-item index="/login" @click="router.push('/login')">
-        <el-icon><Right /></el-icon>
-        <span>登录</span>
-      </el-menu-item>
-      <el-menu-item index="/register" @click="router.push('/register')">
-        <el-icon><UserFilled /></el-icon>
-        <span>注册</span>
-      </el-menu-item>
-    </div>
+      <div v-if="!userStore.isAuthenticated" class="auth-buttons">
+        <el-menu-item index="/login" @click="router.push('/login')">
+          <el-icon><Right /></el-icon>
+          <span>登录</span>
+        </el-menu-item>
+        <el-menu-item index="/register" @click="router.push('/register')">
+          <el-icon><UserFilled /></el-icon>
+          <span>注册</span>
+        </el-menu-item>
+      </div>
 
-    <el-dropdown v-if="userStore.isAuthenticated" class="user-dropdown" trigger="click">
-      <span class="user-dropdown-link">
-        <div class="user-avatar">
-          <img
-            v-if="userStore.userInfo?.avatar"
-            :src="userStore.userInfo.avatar"
-            alt="头像"
-          />
-          <el-icon v-else :size="20"><User /></el-icon>
-        </div>
-        <span class="user-name">{{ userStore.userInfo?.username || '用户' }}</span>
-        <el-icon class="el-icon--right"><arrow-down /></el-icon>
-      </span>
-      <template #dropdown>
-        <el-dropdown-menu>
-          <el-dropdown-item @click="router.push('/profile')">
-            <el-icon><User /></el-icon>
-            <span>个人资料</span>
-          </el-dropdown-item>
-          <el-dropdown-item v-if="userStore.isAdmin" @click="router.push('/admin')">
-            <el-icon><Setting /></el-icon>
-            <span>管理后台</span>
-          </el-dropdown-item>
-          <el-dropdown-item divided @click="handleLogout">
-            <el-icon><SwitchButton /></el-icon>
-            <span>退出登录</span>
-          </el-dropdown-item>
-        </el-dropdown-menu>
-      </template>
-    </el-dropdown>
+      <el-dropdown v-if="userStore.isAuthenticated" class="user-dropdown" trigger="click">
+        <span class="user-dropdown-link">
+          <div class="user-avatar">
+            <img v-if="userStore.userInfo?.avatar" :src="userStore.userInfo.avatar" alt="头像" />
+            <el-icon v-else :size="20"><User /></el-icon>
+          </div>
+          <span class="user-name">{{ userStore.userInfo?.username || '用户' }}</span>
+          <el-icon class="el-icon--right"><arrow-down /></el-icon>
+        </span>
+        <template #dropdown>
+          <el-dropdown-menu>
+            <el-dropdown-item @click="router.push('/profile')">
+              <el-icon><User /></el-icon>
+              <span>个人资料</span>
+            </el-dropdown-item>
+            <el-dropdown-item v-if="userStore.isAdmin" @click="router.push('/admin')">
+              <el-icon><Setting /></el-icon>
+              <span>管理后台</span>
+            </el-dropdown-item>
+            <el-dropdown-item divided @click="handleLogout">
+              <el-icon><SwitchButton /></el-icon>
+              <span>退出登录</span>
+            </el-dropdown-item>
+          </el-dropdown-menu>
+        </template>
+      </el-dropdown>
     </div>
   </el-menu>
 </template>
@@ -344,4 +348,3 @@ onUnmounted(() => {
   }
 }
 </style>
-

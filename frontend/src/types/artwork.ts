@@ -7,8 +7,8 @@ import type { PageResponse } from './pagination'
 export interface Artwork {
   id: number
   title: string
-  artist: string        // 艺术家用户名
-  artistId: number      // 艺术家ID
+  artist: string // 艺术家用户名
+  artistId: number // 艺术家ID
   category: string
   description?: string
   imageUrl: string

@@ -1,5 +1,5 @@
 <template>
-  <div class="artwork-item fade-in" ref="cardRef">
+  <div ref="cardRef" class="artwork-item fade-in">
     <div class="card artwork-card h-100 hover-lift">
       <div class="artwork-image-container">
         <router-link :to="`/artwork/${artwork.id}`" class="artwork-link">

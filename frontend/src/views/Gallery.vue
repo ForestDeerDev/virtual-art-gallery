@@ -1,16 +1,13 @@
 <template>
   <div class="gallery-page">
     <Navbar />
-    
+
     <main class="gallery-main">
       <div class="container">
         <GalleryHeader />
-        <GallerySearch 
-          v-model="searchKeyword" 
-          @search="handleSearch" 
-        />
+        <GallerySearch v-model="searchKeyword" @search="handleSearch" />
         <!-- 监听 update:filters 事件 -->
-        <GalleryFilters 
+        <GalleryFilters
           :filters="artworkStore.filters"
           :categories="artworkStore.categories"
           :categories-loading="artworkStore.categoriesLoading"
@@ -18,10 +15,7 @@
           @reset="resetFilters"
         />
         <GalleryLoading v-if="artworkStore.loading" />
-        <GalleryEmpty 
-          v-else-if="artworkStore.isEmpty" 
-          @reset="resetFilters" 
-        />
+        <GalleryEmpty v-else-if="artworkStore.isEmpty" @reset="resetFilters" />
         <div v-else class="artworks-grid">
           <ArtworkCard
             v-for="artwork in artworkStore.artworks"
@@ -29,7 +23,7 @@
             :artwork="artwork"
           />
         </div>
-        <GalleryPagination 
+        <GalleryPagination
           v-if="artworkStore.pagination.totalPages > 1"
           :current-page="artworkStore.pagination.currentPage"
           :total-pages="artworkStore.pagination.totalPages"
@@ -62,23 +56,21 @@ const route = useRoute()
 const artworkStore = useArtworkStore()
 const searchKeyword = ref('')
 
-
-
 onMounted(async () => {
   artworkStore.setPageSize(12)
   if (route.query.category) {
     artworkStore.setFilters({ category: getQueryString(route.query.category) ?? '' })
   }
-  await Promise.all([
-    artworkStore.fetchCategories(),
-    artworkStore.fetchArtworks()
-  ])
+  await Promise.all([artworkStore.fetchCategories(), artworkStore.fetchArtworks()])
 })
 
-watch(() => route.query.category, async (newCategory) => {
-  artworkStore.setFilters({ category: getQueryString(newCategory) ?? '' })
-  await artworkStore.fetchArtworks()
-})
+watch(
+  () => route.query.category,
+  async (newCategory) => {
+    artworkStore.setFilters({ category: getQueryString(newCategory) ?? '' })
+    await artworkStore.fetchArtworks()
+  },
+)
 
 const handleSearch = () => {
   if (searchKeyword.value.trim()) {
@@ -112,4 +104,3 @@ const changePage = (page: number) => {
 <style>
 @import '@/styles/gallery.css';
 </style>
-

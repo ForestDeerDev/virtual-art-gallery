@@ -27,15 +27,15 @@ export function parseJwtPayload(token: string): JwtPayload | null {
     if (!base64Url) {
       return null
     }
-    
+
     const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/')
     const jsonPayload = decodeURIComponent(
       atob(base64)
         .split('')
-        .map(c => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2))
-        .join('')
+        .map((c) => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2))
+        .join(''),
     )
-    
+
     const payload = JSON.parse(jsonPayload)
 
     if (typeof payload !== 'object' || payload === null) {
@@ -78,9 +78,9 @@ export function isTokenExpired(token: string, bufferSeconds: number = 60): boole
 
   const currentTime = Math.floor(Date.now() / 1000)
   const expirationTime = payload.exp
-  
+
   // 检查是否过期（考虑缓冲时间）
-  return currentTime >= (expirationTime - bufferSeconds)
+  return currentTime >= expirationTime - bufferSeconds
 }
 
 /**
@@ -103,9 +103,9 @@ export function getTokenRemainingTime(token: string): number {
   if (!expirationTime) {
     return 0
   }
-  
+
   const currentTime = Math.floor(Date.now() / 1000)
   const remaining = expirationTime - currentTime
-  
+
   return Math.max(0, remaining)
 }

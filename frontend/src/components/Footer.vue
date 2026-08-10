@@ -76,12 +76,7 @@
           <div class="subscribe-section">
             <h5 class="subscribe-title">订阅艺术资讯</h5>
             <form class="subscribe-form">
-              <input
-                type="email"
-                placeholder="您的邮箱地址"
-                class="subscribe-input"
-                required
-              >
+              <input type="email" placeholder="您的邮箱地址" class="subscribe-input" required />
               <button type="submit" class="subscribe-btn">
                 <el-icon><Promotion /></el-icon>
               </button>
@@ -108,8 +103,7 @@
   </footer>
 </template>
 
-<script setup lang="ts">
-</script>
+<script setup lang="ts"></script>
 
 <style scoped>
 .footer {
@@ -128,8 +122,9 @@
   left: 0;
   right: 0;
   height: 100%;
-  background: radial-gradient(circle at 20% 80%, rgba(108, 92, 231, 0.1) 0%, transparent 50%),
-              radial-gradient(circle at 80% 20%, rgba(0, 184, 148, 0.1) 0%, transparent 50%);
+  background:
+    radial-gradient(circle at 20% 80%, rgba(108, 92, 231, 0.1) 0%, transparent 50%),
+    radial-gradient(circle at 80% 20%, rgba(0, 184, 148, 0.1) 0%, transparent 50%);
   z-index: 0;
 }
 
@@ -244,7 +239,9 @@
   content: '→';
   color: var(--primary-color);
   opacity: 0;
-  transition: opacity 0.3s ease, transform 0.3s ease;
+  transition:
+    opacity 0.3s ease,
+    transform 0.3s ease;
   transform: translateX(-5px);
 }
 
@@ -391,30 +388,30 @@
   .footer {
     padding: 3rem 0 2rem;
   }
-  
+
   .footer-content {
     grid-template-columns: 1fr;
     gap: 2.5rem;
   }
-  
+
   .footer-section.brand {
     max-width: 100%;
   }
-  
+
   .footer-bottom {
     flex-direction: column;
     text-align: center;
     gap: 1rem;
   }
-  
+
   .legal-links {
     justify-content: center;
   }
-  
+
   .subscribe-form {
     flex-direction: column;
   }
-  
+
   .subscribe-btn {
     width: 100%;
     height: auto;
@@ -426,18 +423,17 @@
   .footer {
     padding: 2rem 0 1.5rem;
   }
-  
+
   .footer-content {
     gap: 2rem;
   }
-  
+
   .section-title {
     font-size: 1.1rem;
   }
-  
+
   .brand-name {
     font-size: 1.3rem;
   }
 }
 </style>
-

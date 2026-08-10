@@ -4,7 +4,7 @@ export function useScrollAnimation() {
   const elements = ref<HTMLElement[]>([])
 
   const checkVisibility = () => {
-    elements.value.forEach(el => {
+    elements.value.forEach((el) => {
       if (el) {
         const rect = el.getBoundingClientRect()
         if (rect.top < window.innerHeight * 0.85) {
@@ -33,6 +33,6 @@ export function useScrollAnimation() {
 
   return {
     addElement,
-    checkVisibility
+    checkVisibility,
   }
 }

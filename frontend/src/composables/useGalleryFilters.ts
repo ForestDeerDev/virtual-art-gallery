@@ -18,6 +18,6 @@ export function useGalleryFilters() {
   return {
     searchKeyword,
     handleSearch,
-    resetSearch
+    resetSearch,
   }
 }

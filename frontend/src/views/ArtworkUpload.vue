@@ -7,7 +7,7 @@
           <template #header>
             <h4>上传作品</h4>
           </template>
-          <el-form @submit.prevent="handleSubmit" label-width="120px">
+          <el-form label-width="120px" @submit.prevent="handleSubmit">
             <el-form-item label="作品图片 *" required>
               <el-upload
                 class="artwork-uploader"
@@ -25,17 +25,14 @@
                 </div>
               </el-upload>
               <div class="form-help">支持 JPG、PNG、GIF 格式，最大 10MB</div>
-              
+
               <div v-if="uploadingImage" class="mt-2">
                 <el-progress :percentage="100" status="success" :indeterminate="true" />
               </div>
             </el-form-item>
 
             <el-form-item label="作品标题 *" required>
-              <el-input
-                v-model="form.title"
-                placeholder="请输入作品标题"
-              />
+              <el-input v-model="form.title" placeholder="请输入作品标题" />
             </el-form-item>
 
             <el-form-item label="作品分类 *" required>
@@ -61,16 +58,10 @@
 
             <div class="form-row">
               <el-form-item label="作品尺寸">
-                <el-input
-                  v-model="form.dimensions"
-                  placeholder="例如：100cm × 80cm"
-                />
+                <el-input v-model="form.dimensions" placeholder="例如：100cm × 80cm" />
               </el-form-item>
               <el-form-item label="作品材质">
-                <el-input
-                  v-model="form.material"
-                  placeholder="例如：布面油画"
-                />
+                <el-input v-model="form.material" placeholder="例如：布面油画" />
               </el-form-item>
             </div>
 
@@ -81,8 +72,8 @@
                   :key="tag"
                   :type="form.tags.includes(tag) ? 'primary' : 'info'"
                   class="tag-item"
+                  style="cursor: pointer"
                   @click="toggleTag(tag)"
-                  style="cursor: pointer;"
                 >
                   {{ tag }}
                 </el-tag>
@@ -152,10 +143,21 @@ const form = ref<ArtworkUploadForm>({
   tags: [],
   dimensions: '',
   material: '',
-  featured: false
+  featured: false,
 })
 
-const availableTags = ['抽象', '写实', '现代', '古典', '风景', '人物', '静物', '动物', '建筑', '肖像']
+const availableTags = [
+  '抽象',
+  '写实',
+  '现代',
+  '古典',
+  '风景',
+  '人物',
+  '静物',
+  '动物',
+  '建筑',
+  '肖像',
+]
 const customTag = ref('')
 const imagePreview = ref('')
 const imageFile = ref<File | null>(null)
@@ -220,7 +222,7 @@ const handleSubmit = async () => {
   try {
     await artworkStore.createArtwork(form.value)
     success.value = '作品发布成功！'
-    
+
     setTimeout(() => {
       router.push('/gallery')
     }, 1500)

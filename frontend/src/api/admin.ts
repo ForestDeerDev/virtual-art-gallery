@@ -5,14 +5,14 @@ export default {
   getStats(): Promise<AdminStats> {
     return request<AdminStats>({
       url: '/admin/stats',
-      method: 'get'
+      method: 'get',
     })
   },
 
   getAllUsers(): Promise<UserManagement[]> {
     return request<UserManagement[]>({
       url: '/admin/users',
-      method: 'get'
+      method: 'get',
     })
   },
 
@@ -20,14 +20,14 @@ export default {
     return request<void>({
       url: `/admin/users/${userId}/role`,
       method: 'put',
-      data: { role }
+      data: { role },
     })
   },
 
   deleteUser(userId: number): Promise<void> {
     return request<void>({
       url: `/admin/users/${userId}`,
-      method: 'delete'
+      method: 'delete',
     })
-  }
+  },
 }

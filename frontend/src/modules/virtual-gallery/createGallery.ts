@@ -3,20 +3,29 @@ import type { GalleryOptions, GalleryInstance } from '@/types/gallery'
 import { Octree, createPlayerCapsule, type Capsule } from '@/utils/collision'
 
 export function createGallery(options: GalleryOptions): GalleryInstance {
-  const { container, artworks, getControls, config = {}, onArtworkClick, onLoadingStart, onLoadingProgress, onLoadingComplete } = options
-  
+  const {
+    container,
+    artworks,
+    getControls,
+    config = {},
+    onArtworkClick,
+    onLoadingStart,
+    onLoadingProgress,
+    onLoadingComplete,
+  } = options
+
   // 核心对象
   let scene: THREE.Scene | null = null
   let camera: THREE.PerspectiveCamera | null = null
   let renderer: THREE.WebGLRenderer | null = null
   let raycaster: THREE.Raycaster | null = null
   let mouse: THREE.Vector2 | null = null
-  let artworkMeshes: THREE.Mesh[] = []
+  const artworkMeshes: THREE.Mesh[] = []
   let animationId: number | null = null
   let mounted = false // 防重复挂载
   let octree: Octree | null = null // 八叉树碰撞世界
   let playerCapsule: Capsule | null = null // 玩家胶囊体
-  
+
   // 配置参数
   const roomWidth = config.roomWidth ?? 20
   const roomHeight = config.roomHeight ?? 5
@@ -24,13 +33,20 @@ export function createGallery(options: GalleryOptions): GalleryInstance {
   const cameraHeight = config.cameraHeight ?? 1.7
   const fogNear = config.fogNear ?? 10
   const fogFar = config.fogFar ?? 50
-  
+
   // 内部状态
-  const keys = { forward: false, backward: false, left: false, right: false, up: false, down: false }
+  const keys = {
+    forward: false,
+    backward: false,
+    left: false,
+    right: false,
+    up: false,
+    down: false,
+  }
   const velocity = new THREE.Vector3()
   const direction = new THREE.Vector3()
   let isPointerLocked = false
-  
+
   // 初始化场景
   const initScene = () => {
     const width = container.clientWidth
@@ -57,18 +73,18 @@ export function createGallery(options: GalleryOptions): GalleryInstance {
     // 初始化八叉树碰撞世界
     const bounds = new THREE.Box3(
       new THREE.Vector3(-roomWidth / 2, 0, -roomDepth / 2),
-      new THREE.Vector3(roomWidth / 2, roomHeight, roomDepth / 2)
+      new THREE.Vector3(roomWidth / 2, roomHeight, roomDepth / 2),
     )
     octree = new Octree(bounds, 8, 8)
 
     // 初始化玩家胶囊体
     playerCapsule = createPlayerCapsule(camera.position.clone(), 1.8, 0.3)
   }
-  
+
   // 设置灯光
   const setupLighting = () => {
     if (!scene) return
-    
+
     const ambientLight = new THREE.AmbientLight(0xffffff, 0.8)
     scene.add(ambientLight)
 
@@ -97,16 +113,16 @@ export function createGallery(options: GalleryOptions): GalleryInstance {
     pointLight.position.set(0, 3, 0)
     scene.add(pointLight)
   }
-  
+
   // 创建房间
   const createRoom = () => {
     if (!scene || !octree) return
 
     const floorGeometry = new THREE.PlaneGeometry(roomWidth, roomDepth)
-    const floorMaterial = new THREE.MeshStandardMaterial({ 
+    const floorMaterial = new THREE.MeshStandardMaterial({
       color: 0x4a4a6a,
       roughness: 0.8,
-      metalness: 0.2
+      metalness: 0.2,
     })
     const floor = new THREE.Mesh(floorGeometry, floorMaterial)
     floor.rotation.x = -Math.PI / 2
@@ -115,9 +131,9 @@ export function createGallery(options: GalleryOptions): GalleryInstance {
     octree.add(floor)
 
     const ceilingGeometry = new THREE.PlaneGeometry(roomWidth, roomDepth)
-    const ceilingMaterial = new THREE.MeshStandardMaterial({ 
+    const ceilingMaterial = new THREE.MeshStandardMaterial({
       color: 0x3a3a5e,
-      roughness: 0.9
+      roughness: 0.9,
     })
     const ceiling = new THREE.Mesh(ceilingGeometry, ceilingMaterial)
     ceiling.rotation.x = Math.PI / 2
@@ -125,10 +141,10 @@ export function createGallery(options: GalleryOptions): GalleryInstance {
     scene.add(ceiling)
     octree.add(ceiling)
 
-    const wallMaterial = new THREE.MeshStandardMaterial({ 
+    const wallMaterial = new THREE.MeshStandardMaterial({
       color: 0x5a5a7a,
       roughness: 0.7,
-      metalness: 0.1
+      metalness: 0.1,
     })
 
     const backWallGeometry = new THREE.PlaneGeometry(roomWidth, roomHeight)
@@ -161,37 +177,37 @@ export function createGallery(options: GalleryOptions): GalleryInstance {
     scene.add(rightWall)
     octree.add(rightWall)
   }
-  
+
   // 添加艺术品
   const addArtworks = () => {
     if (!scene || !raycaster) return
-    
+
     // 创建 LoadingManager 管理图片加载
     const loadingManager = new THREE.LoadingManager()
-    
+
     loadingManager.onStart = () => {
       onLoadingStart?.()
     }
-    
+
     loadingManager.onProgress = (_url: string, itemsLoaded: number, itemsTotal: number) => {
       const progress = (itemsLoaded / itemsTotal) * 100
       onLoadingProgress?.(progress)
     }
-    
+
     loadingManager.onLoad = () => {
       onLoadingComplete?.()
     }
-    
+
     loadingManager.onError = (url: string) => {
       console.error('Error loading:', url)
     }
-    
+
     const textureLoader = new THREE.TextureLoader(loadingManager)
     const baseFrameGeometry = new THREE.BoxGeometry(3, 4, 0.15)
-    const baseFrameMaterial = new THREE.MeshStandardMaterial({ 
+    const baseFrameMaterial = new THREE.MeshStandardMaterial({
       color: 0x8b4513,
       roughness: 0.6,
-      metalness: 0.3
+      metalness: 0.3,
     })
 
     const positions = [
@@ -204,17 +220,20 @@ export function createGallery(options: GalleryOptions): GalleryInstance {
       { x: 9.9, y: 2.5, z: 3, rotationY: -Math.PI / 2 },
       { x: -6, y: 2.5, z: 7.4, rotationY: Math.PI },
       { x: 0, y: 2.5, z: 7.4, rotationY: Math.PI },
-      { x: 6, y: 2.5, z: 7.4, rotationY: Math.PI }
+      { x: 6, y: 2.5, z: 7.4, rotationY: Math.PI },
     ]
 
     positions.forEach((pos, index) => {
-      const artwork = artworks.length === 0 ? {
-        id: index + 1,
-        title: `艺术作品 ${index + 1}`,
-        artist: '未知艺术家',
-        category: '未分类',
-        imageUrl: 'https://via.placeholder.com/400x500?text=No+Image'
-      } : artworks[index % artworks.length]
+      const artwork =
+        artworks.length === 0
+          ? {
+              id: index + 1,
+              title: `艺术作品 ${index + 1}`,
+              artist: '未知艺术家',
+              category: '未分类',
+              imageUrl: 'https://via.placeholder.com/400x500?text=No+Image',
+            }
+          : artworks[index % artworks.length]
 
       // 为每个 mesh clone geometry 和 material，避免重复 dispose
       const frameGeometry = baseFrameGeometry.clone()
@@ -223,33 +242,28 @@ export function createGallery(options: GalleryOptions): GalleryInstance {
       frame.position.set(pos.x, pos.y, pos.z)
       frame.rotation.y = pos.rotationY
       frame.castShadow = true
-      frame.userData = { 
-        type: 'artwork', 
+      frame.userData = {
+        type: 'artwork',
         id: artwork.id,
         title: artwork.title,
         artist: artwork.artist,
         category: artwork.category,
-        imageUrl: artwork.imageUrl
+        imageUrl: artwork.imageUrl,
       }
       scene!.add(frame)
       artworkMeshes.push(frame)
 
       const canvasGeometry = new THREE.PlaneGeometry(2.6, 3.6)
-      const texture = textureLoader.load(
-        artwork.imageUrl,
-        undefined,
-        undefined,
-        (err: unknown) => {
-          console.error('Texture loading error:', err)
-        }
-      )
+      const texture = textureLoader.load(artwork.imageUrl, undefined, undefined, (err: unknown) => {
+        console.error('Texture loading error:', err)
+      })
       texture.colorSpace = THREE.SRGBColorSpace
-      
-      const canvasMaterial = new THREE.MeshStandardMaterial({ 
+
+      const canvasMaterial = new THREE.MeshStandardMaterial({
         map: texture,
         roughness: 0.3,
         metalness: 0.1,
-        side: THREE.DoubleSide
+        side: THREE.DoubleSide,
       })
       const canvas = new THREE.Mesh(canvasGeometry, canvasMaterial)
       canvas.position.set(0, 0, 0.08)
@@ -263,31 +277,31 @@ export function createGallery(options: GalleryOptions): GalleryInstance {
       spotlight.target = canvas
       frame.add(spotlight)
     })
-    
+
     // 清理基础几何体和材质
     baseFrameGeometry.dispose()
     baseFrameMaterial.dispose()
   }
-  
+
   // 添加装饰
   const addDecorations = () => {
     if (!scene) return
-    
+
     const pedestalGeometry = new THREE.CylinderGeometry(0.3, 0.4, 1, 32)
-    const pedestalMaterial = new THREE.MeshStandardMaterial({ 
+    const pedestalMaterial = new THREE.MeshStandardMaterial({
       color: 0x6a6a8a,
       roughness: 0.5,
-      metalness: 0.3
+      metalness: 0.3,
     })
 
     const pedestalPositions = [
       { x: -3, z: 0 },
       { x: 3, z: 0 },
       { x: 0, z: -3 },
-      { x: 0, z: 3 }
+      { x: 0, z: 3 },
     ]
 
-    pedestalPositions.forEach(pos => {
+    pedestalPositions.forEach((pos) => {
       const pedestal = new THREE.Mesh(pedestalGeometry, pedestalMaterial)
       pedestal.position.set(pos.x, 0.5, pos.z)
       pedestal.castShadow = true
@@ -296,10 +310,10 @@ export function createGallery(options: GalleryOptions): GalleryInstance {
       if (octree) octree.add(pedestal)
 
       const sculptureGeometry = new THREE.IcosahedronGeometry(0.3, 0)
-      const sculptureMaterial = new THREE.MeshStandardMaterial({ 
+      const sculptureMaterial = new THREE.MeshStandardMaterial({
         color: 0xffd700,
         roughness: 0.2,
-        metalness: 0.8
+        metalness: 0.8,
       })
       const sculpture = new THREE.Mesh(sculptureGeometry, sculptureMaterial)
       sculpture.position.set(pos.x, 1.3, pos.z)
@@ -309,9 +323,9 @@ export function createGallery(options: GalleryOptions): GalleryInstance {
     })
 
     const benchGeometry = new THREE.BoxGeometry(4, 0.4, 1)
-    const benchMaterial = new THREE.MeshStandardMaterial({ 
+    const benchMaterial = new THREE.MeshStandardMaterial({
       color: 0x7c7c9a,
-      roughness: 0.6
+      roughness: 0.6,
     })
     const bench = new THREE.Mesh(benchGeometry, benchMaterial)
     bench.position.set(0, 0.2, -4)
@@ -320,7 +334,7 @@ export function createGallery(options: GalleryOptions): GalleryInstance {
     scene.add(bench)
     if (octree) octree.add(bench)
   }
-  
+
   // 设置控制
   const setupControls = () => {
     // 点击容器请求指针锁定
@@ -340,26 +354,60 @@ export function createGallery(options: GalleryOptions): GalleryInstance {
     // 使用 mousedown 代替 click 来选择画框，避免与 pointerlock 冲突
     document.addEventListener('mousedown', onClick)
   }
-  
+
   const onKeyDown = (event: KeyboardEvent) => {
     switch (event.code) {
-      case 'KeyW': case 'ArrowUp': keys.forward = true; break
-      case 'KeyS': case 'ArrowDown': keys.backward = true; break
-      case 'KeyA': case 'ArrowLeft': keys.left = true; break
-      case 'KeyD': case 'ArrowRight': keys.right = true; break
-      case 'Space': keys.up = true; break
-      case 'ShiftLeft': case 'ShiftRight': keys.down = true; break
+      case 'KeyW':
+      case 'ArrowUp':
+        keys.forward = true
+        break
+      case 'KeyS':
+      case 'ArrowDown':
+        keys.backward = true
+        break
+      case 'KeyA':
+      case 'ArrowLeft':
+        keys.left = true
+        break
+      case 'KeyD':
+      case 'ArrowRight':
+        keys.right = true
+        break
+      case 'Space':
+        keys.up = true
+        break
+      case 'ShiftLeft':
+      case 'ShiftRight':
+        keys.down = true
+        break
     }
   }
 
   const onKeyUp = (event: KeyboardEvent) => {
     switch (event.code) {
-      case 'KeyW': case 'ArrowUp': keys.forward = false; break
-      case 'KeyS': case 'ArrowDown': keys.backward = false; break
-      case 'KeyA': case 'ArrowLeft': keys.left = false; break
-      case 'KeyD': case 'ArrowRight': keys.right = false; break
-      case 'Space': keys.up = false; break
-      case 'ShiftLeft': case 'ShiftRight': keys.down = false; break
+      case 'KeyW':
+      case 'ArrowUp':
+        keys.forward = false
+        break
+      case 'KeyS':
+      case 'ArrowDown':
+        keys.backward = false
+        break
+      case 'KeyA':
+      case 'ArrowLeft':
+        keys.left = false
+        break
+      case 'KeyD':
+      case 'ArrowRight':
+        keys.right = false
+        break
+      case 'Space':
+        keys.up = false
+        break
+      case 'ShiftLeft':
+      case 'ShiftRight':
+        keys.down = false
+        break
     }
   }
 
@@ -392,13 +440,13 @@ export function createGallery(options: GalleryOptions): GalleryInstance {
       }
     }
   }
-  
+
   // 动画循环
   const animate = () => {
     animationId = requestAnimationFrame(animate)
-    
+
     if (!camera || !octree || !playerCapsule) return
-    
+
     const controlsState = getControls()
     const speed = controlsState.moveSpeed * 0.1
 
@@ -453,14 +501,14 @@ export function createGallery(options: GalleryOptions): GalleryInstance {
       renderer.render(scene, camera)
     }
   }
-  
+
   // 重置相机
   const resetCamera = () => {
     if (!camera) return
     camera.position.set(0, cameraHeight, 8)
     camera.rotation.set(0, 0, 0)
   }
-  
+
   // 窗口大小调整
   const onResize = () => {
     if (!camera || !renderer) return
@@ -470,21 +518,21 @@ export function createGallery(options: GalleryOptions): GalleryInstance {
     camera.updateProjectionMatrix()
     renderer.setSize(width, height)
   }
-  
+
   // 彻底清理资源（包括纹理）
   const dispose = () => {
     if (animationId) {
       cancelAnimationFrame(animationId)
     }
-    
+
     // 清理Three.js资源
     if (scene) {
       scene.traverse((object) => {
         if (object instanceof THREE.Mesh) {
           object.geometry.dispose()
-          
+
           if (Array.isArray(object.material)) {
-            object.material.forEach(material => {
+            object.material.forEach((material) => {
               if (material.map) material.map.dispose()
               material.dispose()
             })
@@ -495,11 +543,11 @@ export function createGallery(options: GalleryOptions): GalleryInstance {
         }
       })
     }
-    
+
     if (renderer) {
       renderer.dispose()
     }
-    
+
     // 移除事件监听
     document.removeEventListener('keydown', onKeyDown)
     document.removeEventListener('keyup', onKeyUp)
@@ -507,12 +555,12 @@ export function createGallery(options: GalleryOptions): GalleryInstance {
     document.removeEventListener('mousedown', onClick)
     window.removeEventListener('resize', onResize)
   }
-  
+
   // 启动画廊（防重复）
   const mount = () => {
     if (mounted) return
     mounted = true
-    
+
     initScene()
     setupLighting()
     createRoom()
@@ -522,10 +570,10 @@ export function createGallery(options: GalleryOptions): GalleryInstance {
     animate()
     window.addEventListener('resize', onResize)
   }
-  
+
   return {
     mount,
     dispose,
-    resetCamera
+    resetCamera,
   }
 }

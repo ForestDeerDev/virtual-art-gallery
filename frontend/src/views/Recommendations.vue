@@ -1,15 +1,13 @@
 <template>
   <div>
     <Navbar />
-    
+
     <div class="container recommendations-container">
       <h2 class="mb-4">
         <el-icon color="#f59e0b" class="me-2"><Star /></el-icon>
         为您推荐
       </h2>
-      <p class="text-muted mb-4">
-        基于您的兴趣标签和浏览历史，我们为您精心挑选了以下作品
-      </p>
+      <p class="text-muted mb-4">基于您的兴趣标签和浏览历史，我们为您精心挑选了以下作品</p>
 
       <div v-if="loading" class="loading-spinner">
         <el-icon class="is-loading" :size="50"><Loading /></el-icon>
@@ -33,12 +31,7 @@
           </template>
           <p class="mb-0">
             根据您的兴趣标签：
-            <el-tag
-              v-for="tag in userTags"
-              :key="tag"
-              type="primary"
-              class="me-2"
-            >
+            <el-tag v-for="tag in userTags" :key="tag" type="primary" class="me-2">
               {{ tag }}
             </el-tag>
             ，我们为您推荐了以下作品
@@ -130,21 +123,19 @@ const userTags = computed(() => {
  */
 const toRecommendation = (artwork: Artwork): Recommendation => {
   const artworkTags = parseCommaSeparated(artwork.tags)
-  const matchingTags = artworkTags.filter(tag =>
-    userTags.value.includes(tag)
-  )
+  const matchingTags = artworkTags.filter((tag) => userTags.value.includes(tag))
 
   return {
     ...artwork,
     matchingTags,
-    relevanceScore: matchingTags.length > 0 ? '高' : '中'
+    relevanceScore: matchingTags.length > 0 ? '高' : '中',
   }
 }
 
 onMounted(async () => {
   // 清除localStorage中的旧数据，确保只使用最新的用户信息
   localStorage.removeItem('userInfo')
-  
+
   // 先获取最新的用户信息，确保标签数据正确
   try {
     const userInfo = await userApi.getUserInfo()
@@ -160,19 +151,19 @@ const loadRecommendations = async () => {
   loading.value = true
   try {
     const response = await artworkApi.getRecommendations()
-    
+
     // 如果没有推荐，基于用户标签生成推荐
     if (response.length === 0 && userTags.value.length > 0) {
       const allArtworks = await artworkApi.getArtworks({ pageSize: 50 })
       const all = allArtworks.data
-      
+
       // 根据标签匹配推荐
-              recommendations.value = all
-                .map((artwork) => ({
+      recommendations.value = all
+        .map((artwork) => ({
           ...toRecommendation(artwork),
-          randomScore: Math.random()
+          randomScore: Math.random(),
         }))
-        .filter(artwork => artwork.matchingTags.length > 0)
+        .filter((artwork) => artwork.matchingTags.length > 0)
         .sort((a, b) => {
           // 先按匹配标签数量排序
           if (b.matchingTags.length !== a.matchingTags.length) {
@@ -204,7 +195,7 @@ const loadRecommendations = async () => {
       createTime: new Date().toISOString(),
       updateTime: new Date().toISOString(),
       matchingTags: userTags.value.slice(0, 2),
-      relevanceScore: '高'
+      relevanceScore: '高',
     }))
   } finally {
     loading.value = false
@@ -326,4 +317,3 @@ const loadRecommendations = async () => {
   }
 }
 </style>
-

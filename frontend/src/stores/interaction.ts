@@ -6,9 +6,9 @@ import type { Comment, LikeStatus } from '@/types'
 export const useInteractionStore = defineStore('interaction', () => {
   const likeStatus = ref<LikeStatus>({
     isLiked: false,
-    likeCount: 0
+    likeCount: 0,
   })
-  
+
   const comments = ref<Comment[]>([])
   const loading = ref(false)
   const error = ref<string | null>(null)
@@ -22,14 +22,14 @@ export const useInteractionStore = defineStore('interaction', () => {
     try {
       const [countResponse, statusResponse] = await Promise.all([
         interactionApi.getLikeCount(artworkId),
-        interactionApi.checkLikeStatus(artworkId)
+        interactionApi.checkLikeStatus(artworkId),
       ])
-      
+
       likeStatus.value = {
         likeCount: countResponse.likeCount,
-        isLiked: statusResponse.isLiked
+        isLiked: statusResponse.isLiked,
       }
-      
+
       return likeStatus.value
     } catch (err: unknown) {
       error.value = err instanceof Error ? err.message : '获取点赞状态失败'
@@ -52,12 +52,12 @@ export const useInteractionStore = defineStore('interaction', () => {
       } else {
         response = await interactionApi.likeArtwork(artworkId)
       }
-      
+
       likeStatus.value = {
         likeCount: response.likeCount,
-        isLiked: !likeStatus.value.isLiked
+        isLiked: !likeStatus.value.isLiked,
       }
-      
+
       return likeStatus.value
     } catch (err: unknown) {
       error.value = err instanceof Error ? err.message : '点赞操作失败'
@@ -75,9 +75,9 @@ export const useInteractionStore = defineStore('interaction', () => {
       // 先获取顶层评论列表
       const response = await interactionApi.getTopLevelComments(artworkId)
       comments.value = response
-      
+
       const commentsWithReplies = await Promise.all(
-        comments.value.map(async comment => {
+        comments.value.map(async (comment) => {
           try {
             // 对每条评论，需要异步获取它的回复列表
             const replies = await interactionApi.getReplies(comment.id)
@@ -85,9 +85,9 @@ export const useInteractionStore = defineStore('interaction', () => {
           } catch {
             return { ...comment, replies: [] }
           }
-        })
+        }),
       )
-      
+
       comments.value = commentsWithReplies
       return comments.value
     } catch (err: unknown) {
@@ -100,15 +100,19 @@ export const useInteractionStore = defineStore('interaction', () => {
     }
   }
 
-  async function submitComment(artworkId: number, content: string, parentId: number | null = null): Promise<void> {
+  async function submitComment(
+    artworkId: number,
+    content: string,
+    parentId: number | null = null,
+  ): Promise<void> {
     loading.value = true
     error.value = null
     try {
       await interactionApi.createComment(artworkId, {
         content: content.trim(),
-        parentId: parentId || undefined
+        parentId: parentId || undefined,
       })
-      
+
       await fetchComments(artworkId)
       await fetchLikeStatus(artworkId)
     } catch (err: unknown) {
@@ -127,7 +131,7 @@ export const useInteractionStore = defineStore('interaction', () => {
       await interactionApi.deleteComment(commentId)
       // filter 方法在内部遍历时，会依次把每个评论对象传入给 c 回调函数
       // 删除 id 等于 commentId 的评论，保留所有不匹配的评论
-      comments.value = comments.value.filter(c => c.id !== commentId)
+      comments.value = comments.value.filter((c) => c.id !== commentId)
     } catch (err: unknown) {
       error.value = err instanceof Error ? err.message : '删除评论失败'
       console.error('deleteComment error:', err)
@@ -168,6 +172,6 @@ export const useInteractionStore = defineStore('interaction', () => {
     submitReply,
     resetLikeStatus,
     clearComments,
-    clearError
+    clearError,
   }
 })

@@ -5,23 +5,14 @@
         <div class="register-container">
           <el-card class="register-card" shadow="always">
             <h2 class="register-title">注册</h2>
-            
-            <el-form @submit.prevent="handleRegister" :model="form" label-position="top">
+
+            <el-form :model="form" label-position="top" @submit.prevent="handleRegister">
               <el-form-item label="用户名">
-                <el-input
-                  v-model="form.username"
-                  placeholder="请输入用户名"
-                  required
-                />
+                <el-input v-model="form.username" placeholder="请输入用户名" required />
               </el-form-item>
 
               <el-form-item label="邮箱">
-                <el-input
-                  v-model="form.email"
-                  type="email"
-                  placeholder="请输入邮箱"
-                  required
-                />
+                <el-input v-model="form.email" type="email" placeholder="请输入邮箱" required />
               </el-form-item>
 
               <el-form-item label="密码">
@@ -65,8 +56,8 @@
                     :key="tag"
                     :type="form.tags.includes(tag) ? 'primary' : 'info'"
                     class="tag-item"
+                    style="cursor: pointer"
                     @click="toggleTag(tag)"
-                    style="cursor: pointer;"
                   >
                     {{ tag }}
                   </el-tag>
@@ -91,13 +82,7 @@
               <router-link to="/login">立即登录</router-link>
             </div>
 
-            <el-alert
-              v-if="error"
-              type="error"
-              :title="error"
-              :closable="false"
-              class="mt-3"
-            />
+            <el-alert v-if="error" type="error" :title="error" :closable="false" class="mt-3" />
           </el-card>
         </div>
       </el-main>
@@ -130,10 +115,21 @@ const form = ref<RegisterForm>({
   password: '',
   confirmPassword: '',
   tags: [],
-  avatar: null
+  avatar: null,
 })
 
-const availableTags = ['油画', '水彩', '素描', '雕塑', '摄影', '数字艺术', '抽象', '写实', '现代', '古典']
+const availableTags = [
+  '油画',
+  '水彩',
+  '素描',
+  '雕塑',
+  '摄影',
+  '数字艺术',
+  '抽象',
+  '写实',
+  '现代',
+  '古典',
+]
 const avatarPreview = ref('')
 const loading = ref(false)
 const error = ref('')
@@ -148,7 +144,7 @@ const handleAvatarChange = (file: UploadFile) => {
   reader.onload = (e) => {
     avatarPreview.value = e.target?.result as string
   }
-  
+
   reader.readAsDataURL(fileObj)
 }
 
@@ -169,13 +165,13 @@ const handleRegister = async () => {
 
   loading.value = true
   error.value = ''
-  
+
   try {
     const userData = {
       username: form.value.username,
       email: form.value.email,
       password: form.value.password,
-      tags: form.value.tags
+      tags: form.value.tags,
     }
 
     await userStore.register(userData)
@@ -271,4 +267,3 @@ const handleRegister = async () => {
   margin-top: 12px;
 }
 </style>
-

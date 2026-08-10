@@ -3,21 +3,24 @@
     <el-pagination
       :current-page="currentPage"
       :page-count="totalPages"
-      @current-change="handlePageChange"
       layout="prev, pager, next"
       class="pagination"
+      @current-change="handlePageChange"
     />
   </div>
 </template>
 
 <script setup lang="ts">
-withDefaults(defineProps<{
-  currentPage: number
-  totalPages: number
-}>(), {
-  currentPage: 1,
-  totalPages: 1
-})
+withDefaults(
+  defineProps<{
+    currentPage: number
+    totalPages: number
+  }>(),
+  {
+    currentPage: 1,
+    totalPages: 1,
+  },
+)
 
 const emit = defineEmits<{
   'page-change': [page: number]

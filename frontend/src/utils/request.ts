@@ -1,4 +1,10 @@
-import axios, { type AxiosInstance, type InternalAxiosRequestConfig, type AxiosResponse, type AxiosError, type AxiosRequestConfig } from 'axios'
+import axios, {
+  type AxiosInstance,
+  type InternalAxiosRequestConfig,
+  type AxiosResponse,
+  type AxiosError,
+  type AxiosRequestConfig,
+} from 'axios'
 import { ElMessage } from 'element-plus'
 import { useUserStore } from '@/stores/user'
 import { isTokenExpired } from '@/utils/jwt'
@@ -10,9 +16,8 @@ interface SilentError extends Error {
 
 const instance: AxiosInstance = axios.create({
   baseURL: '/api',
-  timeout: 10000
+  timeout: 10000,
 })
-
 
 // 请求拦截器
 instance.interceptors.request.use(
@@ -28,7 +33,7 @@ instance.interceptors.request.use(
         // 把失败结果传递给后续 Promise 链处理
         return Promise.reject(error)
       }
-      
+
       config.headers.set('Authorization', `Bearer ${userStore.token}`)
       console.log('Request with token:', config.url, userStore.token.substring(0, 20) + '...')
     } else {
@@ -38,7 +43,7 @@ instance.interceptors.request.use(
   },
   (error: AxiosError) => {
     return Promise.reject(error)
-  }
+  },
 )
 
 // 响应拦截器
@@ -77,7 +82,7 @@ instance.interceptors.response.use(
       ElMessage.error('网络错误，请检查网络连接')
     }
     return Promise.reject(error)
-  }
+  },
 )
 
 /**

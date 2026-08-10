@@ -6,21 +6,15 @@
           <div v-if="loading" class="mb-4">
             <el-icon class="is-loading" :size="48" color="#409EFF"><Loading /></el-icon>
           </div>
-          <h2 class="text-center mb-4" v-if="loading">正在处理登录...</h2>
-          <h2 class="text-center mb-4 text-success" v-else-if="success">
+          <h2 v-if="loading" class="text-center mb-4">正在处理登录...</h2>
+          <h2 v-else-if="success" class="text-center mb-4 text-success">
             <el-icon :size="32" color="#67C23A"><CircleCheckFilled /></el-icon> 登录成功
           </h2>
-          <h2 class="text-center mb-4 text-danger" v-else-if="error">
+          <h2 v-else-if="error" class="text-center mb-4 text-danger">
             <el-icon :size="32" color="#F56C6C"><CircleCloseFilled /></el-icon> 登录失败
           </h2>
-          <p class="mb-4" v-if="message">{{ message }}</p>
-          <el-button 
-            type="primary" 
-            v-if="!loading" 
-            @click="redirectToHome"
-          >
-            返回首页
-          </el-button>
+          <p v-if="message" class="mb-4">{{ message }}</p>
+          <el-button v-if="!loading" type="primary" @click="redirectToHome"> 返回首页 </el-button>
         </div>
       </el-card>
     </div>
@@ -43,8 +37,6 @@ const success = ref(false)
 const error = ref(false)
 const message = ref('')
 
-
-
 onMounted(async () => {
   try {
     // 从URL中获取授权码和提供商
@@ -57,15 +49,14 @@ onMounted(async () => {
 
     // 调用后端API完成登录
     await userStore.oauthLogin({ provider, code })
-    
+
     success.value = true
     message.value = '登录成功，正在跳转...'
-    
+
     // 延迟跳转，让用户看到成功信息
     setTimeout(() => {
       redirectToHome()
     }, 1500)
-    
   } catch (err: unknown) {
     console.error('OAuth登录失败:', err)
     error.value = true
@@ -109,11 +100,11 @@ const redirectToHome = () => {
 }
 
 .text-success {
-  color: #67C23A;
+  color: #67c23a;
 }
 
 .text-danger {
-  color: #F56C6C;
+  color: #f56c6c;
 }
 
 .mb-4 {

@@ -6,7 +6,7 @@ import type {
   UserUpdateRequest,
   AuthResponse,
   User,
-  UploadAvatarResponse
+  UploadAvatarResponse,
 } from '@/types'
 
 export default {
@@ -15,7 +15,7 @@ export default {
     return request<AuthResponse>({
       url: '/auth/login',
       method: 'post',
-      data: credentials
+      data: credentials,
     })
   },
 
@@ -24,7 +24,7 @@ export default {
     return request<AuthResponse>({
       url: '/auth/register',
       method: 'post',
-      data: userData
+      data: userData,
     })
   },
 
@@ -33,7 +33,7 @@ export default {
     return request<AuthResponse>({
       url: `/auth/oauth/${requestData.provider}`,
       method: 'post',
-      data: { code: requestData.code }
+      data: { code: requestData.code },
     })
   },
 
@@ -41,18 +41,16 @@ export default {
   getUserInfo(): Promise<User> {
     return request<User>({
       url: '/user/info',
-      method: 'get'
+      method: 'get',
     })
   },
 
   // 更新用户信息
-  updateProfile(
-    userData: UserUpdateRequest
-  ): Promise<User> {
+  updateProfile(userData: UserUpdateRequest): Promise<User> {
     return request<User>({
       url: '/user/profile',
       method: 'put',
-      data: userData
+      data: userData,
     })
   },
 
@@ -63,7 +61,7 @@ export default {
     return request<UploadAvatarResponse>({
       url: '/upload/avatar',
       method: 'post',
-      data: formData
+      data: formData,
     })
-  }
+  },
 }
