@@ -78,14 +78,14 @@ public interface ArtworkRepository extends JpaRepository<Artwork, Long> {
 
     /**
      * 根据标签搜索作品
-     * 查找标签中包含指定标签的作品，支持模糊匹配
+     * 按逗号分隔符精确匹配指定标签的作品（FIND_IN_SET），避免子串/跨边界误匹配
      * 
      * @param tag 标签名称
      * @param enabled 是否启用
      * @param pageable 分页参数
-     * @return 包含指定标签的作品分页列表
+     * @return 精确匹配指定标签的作品分页列表
      */
-    @Query("SELECT a FROM Artwork a JOIN FETCH a.artist WHERE a.tags LIKE %:tag% AND a.enabled = :enabled")
+    @Query("SELECT a FROM Artwork a JOIN FETCH a.artist WHERE FUNCTION('FIND_IN_SET', :tag, a.tags) > 0 AND a.enabled = :enabled")
     Page<Artwork> findByTag(@Param("tag") String tag, @Param("enabled") Boolean enabled, Pageable pageable);
 
     /**
@@ -101,11 +101,11 @@ public interface ArtworkRepository extends JpaRepository<Artwork, Long> {
      * @return 按标签匹配度排序的作品分页列表
      */
     @Query("SELECT a FROM Artwork a JOIN FETCH a.artist WHERE a.enabled = :enabled AND " +
-           "(a.tags LIKE %:tag1% OR a.tags LIKE %:tag2% OR a.tags LIKE %:tag3%) " +
+           "(FUNCTION('FIND_IN_SET', :tag1, a.tags) > 0 OR FUNCTION('FIND_IN_SET', :tag2, a.tags) > 0 OR FUNCTION('FIND_IN_SET', :tag3, a.tags) > 0) " +
            "ORDER BY " +
-           "CASE WHEN a.tags LIKE %:tag1% THEN 1 ELSE 0 END + " +
-           "CASE WHEN a.tags LIKE %:tag2% THEN 1 ELSE 0 END + " +
-           "CASE WHEN a.tags LIKE %:tag3% THEN 1 ELSE 0 END DESC")
+           "CASE WHEN FUNCTION('FIND_IN_SET', :tag1, a.tags) > 0 THEN 1 ELSE 0 END + " +
+           "CASE WHEN FUNCTION('FIND_IN_SET', :tag2, a.tags) > 0 THEN 1 ELSE 0 END + " +
+           "CASE WHEN FUNCTION('FIND_IN_SET', :tag3, a.tags) > 0 THEN 1 ELSE 0 END DESC")
     Page<Artwork> findByTags(@Param("tag1") String tag1, 
                             @Param("tag2") String tag2, 
                             @Param("tag3") String tag3,

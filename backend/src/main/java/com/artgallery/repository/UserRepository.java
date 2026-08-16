@@ -65,13 +65,13 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     /**
      * 根据兴趣标签查找用户
-     * 查找标签中包含指定标签的用户，支持模糊匹配
+     * 按逗号分隔符精确匹配指定标签的用户（FIND_IN_SET），避免子串/跨边界误匹配
      * 用于用户推荐和兴趣匹配
      * 
      * @param tag 标签名称
-     * @return 包含指定标签的用户列表
+     * @return 精确匹配指定标签的用户列表
      */
-    @Query("SELECT u FROM User u WHERE u.tags LIKE %:tag%")
+    @Query("SELECT u FROM User u WHERE FUNCTION('FIND_IN_SET', :tag, u.tags) > 0")
     List<User> findByTag(@Param("tag") String tag);
 
     /**

@@ -48,35 +48,33 @@ export const useArtworkStore = defineStore(
     const hasArtworks = computed(() => artworks.value.length > 0)
     const isEmpty = computed(() => !loading.value && artworks.value.length === 0)
 
+    /**
+     * 统一构建查询参数：filters + pagination 合二为一
+     * 所有筛选条件（keyword/category/tags/sortBy）一起传递，
+     * 后端在 getArtworks 接口内统一处理，避免 keyword 走独立 API 导致其他筛选丢失。
+     */
+    function buildQuery(): PageQuery {
+      const query: PageQuery = {
+        page: pagination.value.currentPage - 1,
+        pageSize: pagination.value.pageSize,
+        sortBy: filters.value.sortBy,
+      }
+      const keyword = filters.value.keyword?.trim()
+      if (keyword) query.keyword = keyword
+      if (filters.value.category) query.category = filters.value.category
+      if (filters.value.tags) query.tags = filters.value.tags
+      return query
+    }
+
     async function fetchArtworks(): Promise<ArtworkListResponse> {
       loading.value = true
       error.value = null
       try {
-        // requestParams 构建请求参数 作为查询条件发送给后端
-        // 只在参数有实际值时才添加，避免空字符串导致后端查询失败
-        const requestParams: PageQuery = {
-          page: pagination.value.currentPage - 1,
-          pageSize: pagination.value.pageSize,
-          sortBy: filters.value.sortBy,
-        }
-
-        if (filters.value.category) {
-          requestParams.category = filters.value.category
-        }
-        if (filters.value.tags) {
-          requestParams.tags = filters.value.tags
-        }
-
-        // response 处理响应数据 作为查询结果返回给前端，然后存入 store 的状态中
-        // 调用 API 获取作品列表，等待后端响应
+        const requestParams = buildQuery()
         const response = await artworkApi.getArtworks(requestParams)
-        // 将返回的作品列表存入 store
         artworks.value = response.data.map(normalizeArtwork)
-        // 更新总页数
         pagination.value.totalPages = response.totalPages
-        // 更新总条数
         pagination.value.totalElements = response.total
-
         return response
       } catch (err: unknown) {
         error.value = err instanceof Error ? err.message : '获取作品列表失败'
@@ -147,35 +145,10 @@ export const useArtworkStore = defineStore(
 
     async function searchArtworks(keyword: string): Promise<ArtworkListResponse> {
       const trimmedKeyword = keyword?.trim() ?? ''
-
-      // 使用 setFilters 更新关键词，自动重置页码
+      // 只更新 filters 中的 keyword，重置到第1页
       setFilters({ keyword: trimmedKeyword })
-
-      // 搜索关键词为空时，返回所有作品
-      if (!trimmedKeyword) {
-        return fetchArtworks()
-      }
-
-      loading.value = true
-      error.value = null
-      try {
-        // 传递分页参数，后端已支持分页
-        const response = await artworkApi.searchArtworks(
-          trimmedKeyword,
-          pagination.value.currentPage - 1,
-          pagination.value.pageSize,
-        )
-        artworks.value = response.data.map(normalizeArtwork)
-        pagination.value.totalPages = response.totalPages
-        pagination.value.totalElements = response.total
-        return response
-      } catch (err: unknown) {
-        error.value = err instanceof Error ? err.message : '搜索作品失败'
-        console.error('searchArtworks error:', err)
-        throw err
-      } finally {
-        loading.value = false
-      }
+      // 统一走 fetchArtworks：buildQuery 会把 keyword + category + tags + sortBy 一起传给后端
+      return fetchArtworks()
     }
 
     async function createArtwork(artworkData: ArtworkCreateRequest): Promise<Artwork> {
@@ -330,6 +303,7 @@ export const useArtworkStore = defineStore(
       updateArtwork,
       deleteArtwork,
       batchDeleteArtworks,
+      buildQuery,
       setFilters,
       resetFilters,
       setPage,

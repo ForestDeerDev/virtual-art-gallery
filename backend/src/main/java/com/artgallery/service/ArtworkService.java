@@ -26,10 +26,12 @@ public interface ArtworkService {
      * @param sortBy 排序方式：latest（最新）、popular（最受欢迎）、title（标题）
      * @param tags 标签筛选（可选）
      * @param featured 是否推荐作品筛选（可选）
+     * @param keyword 搜索关键词（可选，与其他筛选条件联动）
      * @return 分页响应，包含作品列表和分页信息
      */
     PageResponse<ArtworkDTO> getArtworks(Integer page, Integer pageSize, 
-                                        String category, String sortBy, String tags, Boolean featured);
+                                        String category, String sortBy, String tags, Boolean featured,
+                                        String keyword);
 
     /**
      * 获取艺术作品详情

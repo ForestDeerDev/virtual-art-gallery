@@ -27,15 +27,17 @@ public class ArtworkController {
     }
 
     /**
-     * 获取艺术作品列表（分页）
+     * 获取艺术作品列表（分页 + 搜索 + 筛选统一入口）
      * 
-     * GET /api/artworks?page=0&pageSize=12&category=油画&sortBy=latest&tags=抽象
+     * GET /api/artworks?page=0&pageSize=12&category=油画&sortBy=latest&tags=抽象&keyword=梵高
      * 
      * @param page 页码（从0开始）
      * @param pageSize 每页大小
      * @param category 分类
      * @param sortBy 排序方式
      * @param tags 标签
+     * @param featured 是否精选
+     * @param keyword 搜索关键词（可选，与 category/tags/sortBy 联动）
      * @return 分页响应
      */
     @GetMapping
@@ -45,10 +47,11 @@ public class ArtworkController {
             @RequestParam(name = "category", required = false) String category,
             @RequestParam(name = "sortBy", required = false) String sortBy,
             @RequestParam(name = "tags", required = false) String tags,
-            @RequestParam(name = "featured", required = false) Boolean featured) {
+            @RequestParam(name = "featured", required = false) Boolean featured,
+            @RequestParam(name = "keyword", required = false) String keyword) {
         
         PageResponse<ArtworkDTO> response = artworkService.getArtworks(
-            page, pageSize, category, sortBy, tags, featured
+            page, pageSize, category, sortBy, tags, featured, keyword
         );
         return ResponseEntity.ok(response);
     }

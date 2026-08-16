@@ -14,9 +14,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import java.util.List;
+import java.util.Map;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -57,16 +56,23 @@ public class ArtworkServiceImpl implements ArtworkService {
 
     private final FileStorageService fileStorageService;
 
-    public ArtworkServiceImpl(ArtworkRepository artworkRepository, UserRepository userRepository, ArtworkMapper artworkMapper, FileStorageService fileStorageService) {
+    /**
+     * 用于动态 JPQL 查询（keyword + category + tags 多条件 AND 叠加）
+     */
+    private final jakarta.persistence.EntityManager entityManager;
+
+    public ArtworkServiceImpl(ArtworkRepository artworkRepository, UserRepository userRepository, ArtworkMapper artworkMapper, FileStorageService fileStorageService, jakarta.persistence.EntityManager entityManager) {
         this.artworkRepository = artworkRepository;
         this.userRepository = userRepository;
         this.artworkMapper = artworkMapper;
         this.fileStorageService = fileStorageService;
+        this.entityManager = entityManager;
     }
 
     /**
      * 获取艺术作品列表（分页查询）
-     * 支持多种筛选条件和排序方式，为前端提供灵活的数据查询接口
+     * 支持多种筛选条件 AND 叠加：keyword（搜索）+ category + tags + featured 可同时生效，
+     * 并通过 sortBy 控制排序，为前端提供统一的查询入口。
      * 
      * @param page 页码（从0开始）
      * @param pageSize 每页大小
@@ -74,58 +80,101 @@ public class ArtworkServiceImpl implements ArtworkService {
      * @param sortBy 排序方式：latest（最新）、popular（最受欢迎）、title（标题）
      * @param tags 标签筛选（可选）
      * @param featured 是否推荐作品筛选（可选）
+     * @param keyword 搜索关键词（可选，标题模糊匹配）
      * @return 分页响应，包含作品列表和分页信息
      */
     @Override
     public PageResponse<ArtworkDTO> getArtworks(Integer page, Integer pageSize, 
-                                                String category, String sortBy, String tags, Boolean featured) {
-        // 设置默认分页参数
+                                                String category, String sortBy, String tags, Boolean featured,
+                                                String keyword) {
         if (page == null || page < 0) page = 0;
         if (pageSize == null || pageSize <= 0) pageSize = 12;
 
-        // 构建排序规则
-        Sort sort = Sort.by(Sort.Direction.DESC, "createTime");
-        if ("popular".equals(sortBy)) {
-            // 按热度排序：先按浏览量，再按点赞量
-            sort = Sort.by(Sort.Direction.DESC, "viewCount", "likeCount");
-        } else if ("title".equals(sortBy)) {
-            // 按标题升序排序
-            sort = Sort.by(Sort.Direction.ASC, "title");
+        // ---------- 构建排序子句（白名单校验，防注入） ----------
+        // key = 前端 sortBy 值，value = JPQL 排序字段 + 方向
+        // 仅允许预定义的 3 种排序，避免拼接用户输入导致字段注入
+        Map<String, String> sortMap = Map.of(
+            "latest",   "a.createTime DESC",
+            "popular",  "a.viewCount DESC, a.likeCount DESC",
+            "title",    "a.title ASC"
+        );
+        // 注意：Map.of() 返回的不可变 Map 不允许 null key，
+        String orderByClause = (sortBy == null)
+            ? "a.createTime DESC"
+            : sortMap.getOrDefault(sortBy, "a.createTime DESC");
+
+        // ---------- 动态 JPQL：所有条件 AND 叠加 ----------
+        StringBuilder jpql = new StringBuilder(
+            "SELECT a FROM Artwork a JOIN FETCH a.artist WHERE a.enabled = true"
+        );
+        StringBuilder countJpql = new StringBuilder(
+            "SELECT COUNT(a) FROM Artwork a WHERE a.enabled = true"
+        );
+        List<Object> params = new ArrayList<>();
+        int idx = 1;
+
+        if (keyword != null && !keyword.trim().isEmpty()) {
+            String kw = keyword.trim();
+            jpql.append(" AND a.title LIKE ?").append(idx);
+            countJpql.append(" AND a.title LIKE ?").append(idx);
+            params.add("%" + kw + "%");
+            idx++;
+        }
+        if (category != null && !category.trim().isEmpty()) {
+            String c = category.trim();
+            jpql.append(" AND a.category = ?").append(idx);
+            countJpql.append(" AND a.category = ?").append(idx);
+            params.add(c);
+            idx++;
+        }
+        if (tags != null && !tags.trim().isEmpty()) {
+            String t = tags.trim();
+            jpql.append(" AND FUNCTION('FIND_IN_SET', ?").append(idx).append(", a.tags) > 0");
+            countJpql.append(" AND FUNCTION('FIND_IN_SET', ?").append(idx).append(", a.tags) > 0");
+            params.add(t);
+            idx++;
+        }
+        if (featured != null) {
+            jpql.append(" AND a.featured = ?").append(idx);
+            countJpql.append(" AND a.featured = ?").append(idx);
+            params.add(featured);
+            idx++;
         }
 
-        // 创建分页对象
-        Pageable pageable = PageRequest.of(page, pageSize, sort);
-        Page<Artwork> artworkPage;
-
-        // 根据筛选条件执行不同的查询策略
-        if (featured != null && featured) {
-            // 查询推荐且启用的作品
-            artworkPage = artworkRepository.findByFeaturedAndEnabled(true, true, pageable);
-        } else if (category != null && !category.trim().isEmpty()) {
-            // 按分类筛选启用的作品
-            artworkPage = artworkRepository.findByCategoryAndEnabled(category.trim(), true, pageable);
-        } else if (tags != null && !tags.trim().isEmpty()) {
-            // 按标签筛选启用的作品
-            artworkPage = artworkRepository.findByTag(tags.trim(), true, pageable);
-        } else {
-            // 查询所有启用的作品
-            artworkPage = artworkRepository.findByEnabled(true, pageable);
+        // ---------- COUNT 查询（不含 ORDER BY，不含 FETCH） ----------
+        jakarta.persistence.Query countQuery = entityManager.createQuery(countJpql.toString());
+        for (int i = 0; i < params.size(); i++) {
+            countQuery.setParameter(i + 1, params.get(i));
         }
+        long total = ((Number) countQuery.getSingleResult()).longValue();
 
-        // 将实体对象转换为DTO对象，避免暴露内部数据结构
-        List<ArtworkDTO> artworkDTOs = artworkPage.getContent().stream()
+        // ---------- 主查询：一次构造，含排序 + 分页 ----------
+        String finalJpql = jpql + " ORDER BY " + orderByClause;
+        jakarta.persistence.Query dataQuery = entityManager.createQuery(finalJpql);
+        for (int i = 0; i < params.size(); i++) {
+            dataQuery.setParameter(i + 1, params.get(i));
+        }
+        dataQuery.setFirstResult(page * pageSize);
+        dataQuery.setMaxResults(pageSize);
+
+        @SuppressWarnings("unchecked")
+        List<Artwork> resultList = dataQuery.getResultList();
+
+        int totalPages = (int) Math.ceil((double) total / pageSize);
+        if (totalPages < 1) totalPages = 1;
+
+        List<ArtworkDTO> artworkDTOs = resultList.stream()
             .map(artworkMapper::toDto)
             .collect(Collectors.toList());
 
-        // 构建分页响应对象，页码从1开始返回给前端
         return new PageResponse<>(
             artworkDTOs,
-            page + 1,  // 前端页码从1开始
+            page + 1,
             pageSize,
-            artworkPage.getTotalElements(),
-            artworkPage.getTotalPages(),
-            artworkPage.hasPrevious(),
-            artworkPage.hasNext()
+            total,
+            totalPages,
+            page > 0,
+            page + 1 < totalPages
         );
     }
 
@@ -380,8 +429,8 @@ public class ArtworkServiceImpl implements ArtworkService {
     }
 
     /**
-     * 搜索艺术作品
-     * 根据关键词在作品标题中进行全文搜索，支持分页返回结果
+     * 搜索艺术作品（兼容旧接口：/artworks/search）
+     * 内部复用 getArtworks 以保证搜索逻辑一致（默认按最新排序）。
      * 
      * @param keyword 搜索关键词
      * @param page 页码（从0开始）
@@ -390,31 +439,7 @@ public class ArtworkServiceImpl implements ArtworkService {
      */
     @Override
     public PageResponse<ArtworkDTO> searchArtworks(String keyword, Integer page, Integer pageSize) {
-        // 设置默认分页参数
-        if (page == null || page < 0) page = 0;
-        if (pageSize == null || pageSize <= 0) pageSize = 12;
-
-        // 创建分页对象
-        Pageable pageable = PageRequest.of(page, pageSize);
-        
-        // 执行标题搜索查询
-        Page<Artwork> artworkPage = artworkRepository.searchByTitle(keyword, pageable);
-
-        // 转换为DTO对象
-        List<ArtworkDTO> artworkDTOs = artworkPage.getContent().stream()
-            .map(artworkMapper::toDto)
-            .collect(Collectors.toList());
-
-        // 构建分页响应
-        return new PageResponse<>(
-            artworkDTOs,
-            page + 1,
-            pageSize,
-            artworkPage.getTotalElements(),
-            artworkPage.getTotalPages(),
-            artworkPage.hasPrevious(),
-            artworkPage.hasNext()
-        );
+        return getArtworks(page, pageSize, null, "latest", null, null, keyword);
     }
 
     /**
