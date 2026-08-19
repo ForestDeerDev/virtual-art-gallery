@@ -5,6 +5,7 @@ import com.artgallery.entity.User;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
@@ -132,6 +133,18 @@ public interface ArtworkRepository extends JpaRepository<Artwork, Long> {
      */
     @Query("SELECT DISTINCT a FROM Artwork a JOIN FETCH a.artist WHERE a.id IN :ids")
     List<Artwork> findByIdIn(@Param("ids") List<Long> ids);
+
+    /**
+     * 原子自增作品浏览量
+     * 通过 SQL 层面的原子 UPDATE 避免"读-改-写"导致的并发丢失更新，
+     * 无需重新 save 整个实体，减少不必要的数据库写入。
+     *
+     * @param id 作品ID
+     * @return 受影响的行数；由于作品 ID 唯一，通常为 1（更新成功）或 0（无匹配记录）
+     */
+    @Modifying
+    @Query("UPDATE Artwork a SET a.viewCount = a.viewCount + 1 WHERE a.id = :id")
+    int incrementViewCount(@Param("id") Long id);
 
     /**
      * 统计指定状态的作品总数

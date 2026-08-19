@@ -192,9 +192,10 @@ public class ArtworkServiceImpl implements ArtworkService {
         Artwork artwork = artworkRepository.findById(id)
             .orElseThrow(() -> new BusinessException("ARTWORK_NOT_FOUND", "作品不存在"));
 
-        // 增加作品浏览量（每次查看都计数）
+        // 原子自增浏览量：直接执行 SQL UPDATE，避免并发下的丢失更新
+        artworkRepository.incrementViewCount(id);
+        // 同步 Java 对象的 viewCount，确保返回 DTO 使用最新值；仅更新内存对象，不写回数据库
         artwork.setViewCount(artwork.getViewCount() + 1);
-        artworkRepository.save(artwork);
 
         return artworkMapper.toDto(artwork);
     }

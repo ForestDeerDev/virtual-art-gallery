@@ -3,6 +3,7 @@ package com.artgallery.repository;
 import com.artgallery.entity.Comment;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 import java.util.List;
 
@@ -23,8 +24,8 @@ public interface CommentRepository extends JpaRepository<Comment, Long> {
      * @param artworkId 作品ID
      * @return 顶层评论列表，按创建时间倒序排列
      */
-    @Query("SELECT c FROM Comment c WHERE c.artwork.id = ?1 AND c.parent IS NULL ORDER BY c.createTime DESC")
-    List<Comment> findTopLevelCommentsByArtworkId(Long artworkId);
+    @Query("SELECT c FROM Comment c JOIN FETCH c.user WHERE c.artwork.id = :artworkId AND c.parent IS NULL ORDER BY c.createTime DESC")
+    List<Comment> findTopLevelCommentsByArtworkId(@Param("artworkId") Long artworkId);
 
     /**
      * 统计指定作品的总评论数量
@@ -33,8 +34,8 @@ public interface CommentRepository extends JpaRepository<Comment, Long> {
      * @param artworkId 作品ID
      * @return 评论总数量
      */
-    @Query("SELECT COUNT(c) FROM Comment c WHERE c.artwork.id = ?1")
-    Long countByArtworkId(Long artworkId);
+    @Query("SELECT COUNT(c) FROM Comment c WHERE c.artwork.id = :artworkId")
+    Long countByArtworkId(@Param("artworkId") Long artworkId);
 
     /**
      * 根据父评论ID查找所有子评论
@@ -44,6 +45,6 @@ public interface CommentRepository extends JpaRepository<Comment, Long> {
      * @param parentId 父评论ID
      * @return 子评论列表，按创建时间正序排列
      */
-    @Query("SELECT c FROM Comment c WHERE c.parent.id = ?1 ORDER BY c.createTime ASC")
-    List<Comment> findByParentId(Long parentId);
+    @Query("SELECT c FROM Comment c JOIN FETCH c.user WHERE c.parent.id = :parentId ORDER BY c.createTime ASC")
+    List<Comment> findByParentId(@Param("parentId") Long parentId);
 }

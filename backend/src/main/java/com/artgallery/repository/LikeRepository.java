@@ -3,6 +3,7 @@ package com.artgallery.repository;
 import com.artgallery.entity.Like;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 import java.util.Optional;
 
@@ -32,8 +33,8 @@ public interface LikeRepository extends JpaRepository<Like, Long> {
      * @param artworkId 作品ID
      * @return 点赞总数量
      */
-    @Query("SELECT COUNT(l) FROM Like l WHERE l.artwork.id = ?1")
-    Long countByArtworkId(Long artworkId);
+    @Query("SELECT COUNT(l) FROM Like l WHERE l.artwork.id = :artworkId")
+    Long countByArtworkId(@Param("artworkId") Long artworkId);
 
     /**
      * 删除用户对指定作品的点赞记录
