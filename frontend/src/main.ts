@@ -10,6 +10,7 @@ import * as ElementPlusIconsVue from '@element-plus/icons-vue'
 import './assets/css/main.css'
 import lazyLoad from './directives/lazyLoad'
 import { initializeApp } from './utils/initialize'
+import { initHttpVueAdapter } from './utils/httpVueAdapter'
 
 const app = createApp(App)
 const pinia = createPinia()
@@ -29,7 +30,8 @@ app.use(ElementPlus, {
 
 app.directive('lazy', lazyLoad)
 
-// 初始化应用
+initHttpVueAdapter()
+
 initializeApp()
 
 app.mount('#app')
