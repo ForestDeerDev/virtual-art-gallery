@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import userApi from '@/api/user'
-import { cleanTags } from '@/utils/tags'
+import { normalizeTaggable } from '@/utils/normalize'
 import { resetTokenExpiredFlag } from '@/utils/initialize'
 import type {
   User,
@@ -11,13 +11,6 @@ import type {
   UserUpdateRequest,
   AuthResponse,
 } from '@/types'
-
-function normalizeUserResponse(user: User): User {
-  return {
-    ...user,
-    tags: user.tags ? cleanTags(user.tags) : [],
-  }
-}
 
 export const useUserStore = defineStore(
   'user',
@@ -33,7 +26,7 @@ export const useUserStore = defineStore(
      * 统一处理 token、用户信息设置和重置 token 过期处理标志
      */
     function setAuthData(response: AuthResponse): void {
-      const user = normalizeUserResponse(response.user)
+      const user = normalizeTaggable(response.user)
 
       token.value = response.token
       userInfo.value = user
@@ -65,7 +58,7 @@ export const useUserStore = defineStore(
 
     async function updateUserInfo(userData: UserUpdateRequest): Promise<User> {
       const response = await userApi.updateProfile(userData)
-      const user = normalizeUserResponse(response)
+      const user = normalizeTaggable(response)
       userInfo.value = user
       return user
     }

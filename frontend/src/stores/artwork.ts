@@ -1,7 +1,8 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import artworkApi from '@/api/artwork'
-import { cleanTags } from '@/utils/tags'
+import { normalizeTaggable } from '@/utils/normalize'
+import { buildArtworkQuery, createDefaultFilters } from '@/utils/artworkQuery'
 import type {
   Artwork,
   ArtworkCreateRequest,
@@ -11,13 +12,6 @@ import type {
   PaginationState,
   ArtworkListResponse,
 } from '@/types'
-
-function normalizeArtwork(artwork: Artwork): Artwork {
-  return {
-    ...artwork,
-    tags: artwork.tags ? cleanTags(artwork.tags) : [],
-  }
-}
 
 export const useArtworkStore = defineStore(
   'artwork',
@@ -38,12 +32,7 @@ export const useArtworkStore = defineStore(
       totalElements: 0,
     })
 
-    const filters = ref<GalleryFilterState>({
-      category: '',
-      sortBy: 'latest',
-      tags: '',
-      keyword: '',
-    })
+    const filters = ref<GalleryFilterState>(createDefaultFilters())
 
     const hasArtworks = computed(() => artworks.value.length > 0)
     const isEmpty = computed(() => !loading.value && artworks.value.length === 0)
@@ -54,16 +43,7 @@ export const useArtworkStore = defineStore(
      * 后端在 getArtworks 接口内统一处理，避免 keyword 走独立 API 导致其他筛选丢失。
      */
     function buildQuery(): PageQuery {
-      const query: PageQuery = {
-        page: pagination.value.currentPage - 1,
-        pageSize: pagination.value.pageSize,
-        sortBy: filters.value.sortBy,
-      }
-      const keyword = filters.value.keyword?.trim()
-      if (keyword) query.keyword = keyword
-      if (filters.value.category) query.category = filters.value.category
-      if (filters.value.tags) query.tags = filters.value.tags
-      return query
+      return buildArtworkQuery(filters.value, pagination.value)
     }
 
     async function fetchArtworks(): Promise<ArtworkListResponse> {
@@ -72,7 +52,7 @@ export const useArtworkStore = defineStore(
       try {
         const requestParams = buildQuery()
         const response = await artworkApi.getArtworks(requestParams)
-        artworks.value = response.data.map(normalizeArtwork)
+        artworks.value = response.data.map(normalizeTaggable)
         pagination.value.totalPages = response.totalPages
         pagination.value.totalElements = response.total
         return response
@@ -90,7 +70,7 @@ export const useArtworkStore = defineStore(
       error.value = null
       try {
         const response = await artworkApi.getArtworks({ page: 0, pageSize })
-        featuredArtworks.value = response.data.map(normalizeArtwork)
+        featuredArtworks.value = response.data.map(normalizeTaggable)
         return featuredArtworks.value
       } catch (err: unknown) {
         error.value = err instanceof Error ? err.message : '获取精选作品失败'
@@ -106,7 +86,7 @@ export const useArtworkStore = defineStore(
       error.value = null
       try {
         const response = await artworkApi.getArtworkById(id)
-        currentArtwork.value = normalizeArtwork(response)
+        currentArtwork.value = normalizeTaggable(response)
 
         if (currentArtwork.value?.category) {
           await fetchRelatedArtworks(currentArtwork.value.category, id)
@@ -131,7 +111,7 @@ export const useArtworkStore = defineStore(
       try {
         const response = await artworkApi.getArtworks({ category, limit: 8 })
         relatedArtworks.value = response.data
-          .map(normalizeArtwork)
+          .map(normalizeTaggable)
           .filter((item) => item.id !== excludeId)
           .slice(0, limit)
         return relatedArtworks.value
@@ -156,7 +136,7 @@ export const useArtworkStore = defineStore(
       error.value = null
       try {
         const response = await artworkApi.createArtwork(artworkData)
-        artworks.value.unshift(normalizeArtwork(response))
+        artworks.value.unshift(normalizeTaggable(response))
         pagination.value.totalElements += 1
         return response
       } catch (err: unknown) {
@@ -173,7 +153,7 @@ export const useArtworkStore = defineStore(
       error.value = null
       try {
         const response = await artworkApi.updateArtwork(id, artworkData)
-        const normalizedResponse = normalizeArtwork(response)
+        const normalizedResponse = normalizeTaggable(response)
         const index = artworks.value.findIndex((a) => a.id === id)
         if (index !== -1) {
           artworks.value[index] = normalizedResponse
@@ -237,12 +217,7 @@ export const useArtworkStore = defineStore(
     }
 
     function resetFilters(): void {
-      filters.value = {
-        category: '',
-        sortBy: 'latest',
-        tags: '',
-        keyword: '',
-      }
+      filters.value = createDefaultFilters()
       pagination.value.currentPage = 1
     }
 
