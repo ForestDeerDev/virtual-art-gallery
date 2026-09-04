@@ -5,12 +5,40 @@ import axios, {
   type AxiosError,
   type AxiosRequestConfig,
 } from "axios";
+import { toast } from "sonner";
+import { useAuthStore } from "@/stores/auth";
 import { isTokenExpired } from "@/utils/jwt";
-import {
-  getAuthToken,
-  notifyTokenExpired,
-  notifyError,
-} from "@/utils/httpConfig";
+
+// 防止重复处理 Token 过期
+let isHandlingTokenExpired = false;
+
+function handleTokenExpired(): void {
+  if (typeof window === "undefined") return;
+  if (isHandlingTokenExpired) return;
+  isHandlingTokenExpired = true;
+
+  console.log("Token expired, handling logout");
+
+  useAuthStore.getState().clearAuth();
+
+  if (window.location.pathname !== "/login") {
+    const currentUrl = encodeURIComponent(
+      window.location.pathname + window.location.search,
+    );
+    // 跳转到登录页，并携带当前页面地址和 Token 过期原因
+    window.location.replace(`/login?redirect=${currentUrl}&reason=expired`);
+  } else {
+    toast.error("登录已过期，请重新登录");
+  }
+}
+
+export function resetTokenExpiredFlag(): void {
+  isHandlingTokenExpired = false;
+}
+
+function showError(message: string): void {
+  toast.error(message);
+}
 
 interface SilentError extends Error {
   silent?: boolean;
@@ -23,11 +51,11 @@ const instance: AxiosInstance = axios.create({
 
 instance.interceptors.request.use(
   (config: InternalAxiosRequestConfig) => {
-    const token = getAuthToken();
+    const token = useAuthStore.getState().token;
     if (token) {
       if (isTokenExpired(token)) {
         console.log("Token expired, logging out before request:", config.url);
-        notifyTokenExpired();
+        handleTokenExpired();
         const error: SilentError = new Error("Token expired");
         error.silent = true;
         // 把失败结果传递给后续 Promise 链处理
@@ -64,28 +92,25 @@ instance.interceptors.response.use(
       switch (error.response.status) {
         case 401:
           console.log("Received 401 response, logging out");
-          notifyTokenExpired();
+          handleTokenExpired();
           break;
         case 403:
-          notifyError(403, "权限不足，您没有访问该资源的权限");
+          showError("权限不足，您没有访问该资源的权限");
           break;
         case 404:
-          notifyError(404, "请求的资源不存在");
+          showError("请求的资源不存在");
           break;
         case 500:
-          notifyError(500, "服务器错误，请稍后重试");
+          showError("服务器错误，请稍后重试");
           break;
         default:
           const responseData = error.response.data as { message?: string };
-          notifyError(
-            error.response.status,
-            responseData?.message || "请求失败，请稍后重试",
-          );
+          showError(responseData?.message || "请求失败，请稍后重试");
       }
     } else if ("code" in error && error.code === "ECONNABORTED") {
-      notifyError(null, "请求超时，请检查网络连接");
+      showError("请求超时，请检查网络连接");
     } else {
-      notifyError(null, "网络错误，请检查网络连接");
+      showError("网络错误，请检查网络连接");
     }
     return Promise.reject(error);
   },
