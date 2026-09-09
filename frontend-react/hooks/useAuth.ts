@@ -39,6 +39,14 @@ export function useOAuthLogin() {
   });
 }
 
+export function redirectToGithub(): void {
+  const clientId = process.env.NEXT_PUBLIC_GITHUB_CLIENT_ID;
+  const redirectUri = `${window.location.origin}/oauth/callback/github`;
+  const scope = "user:email read:user";
+  const githubAuthUrl = `https://github.com/login/oauth/authorize?client_id=${clientId}&redirect_uri=${encodeURIComponent(redirectUri)}&scope=${encodeURIComponent(scope)}`;
+  window.location.href = githubAuthUrl;
+}
+
 export function useIsAuthenticated(): boolean {
   return useAuthStore((state) => !!state.token);
 }
