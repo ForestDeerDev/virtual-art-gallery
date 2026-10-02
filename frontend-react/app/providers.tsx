@@ -15,7 +15,13 @@ export function Providers({ children }: { children: React.ReactNode }) {
         richColors
         closeButton
         toastOptions={{
-          duration: 3000,
+          duration: 6000,
+          style: {
+            maxWidth: "200px",
+            padding: "8px 12px",
+            fontSize: "13px",
+            lineHeight: "1.5",
+          },
         }}
       />
     </QueryClientProvider>
