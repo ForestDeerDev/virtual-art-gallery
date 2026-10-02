@@ -17,27 +17,22 @@ function handleTokenExpired(): void {
   if (isHandlingTokenExpired) return;
   isHandlingTokenExpired = true;
 
-  console.log("Token expired, handling logout");
-
   useAuthStore.getState().clearAuth();
 
-  if (window.location.pathname !== "/login") {
-    const currentUrl = encodeURIComponent(
-      window.location.pathname + window.location.search,
-    );
-    // 跳转到登录页，并携带当前页面地址和 Token 过期原因
-    window.location.replace(`/login?redirect=${currentUrl}&reason=expired`);
-  } else {
-    toast.error("登录已过期，请重新登录");
-  }
+  toast.error("登录已过期，请重新登录", {
+    id: "token-expired",
+    duration: 5000,
+    closeButton: false,
+  });
 }
 
 export function resetTokenExpiredFlag(): void {
   isHandlingTokenExpired = false;
+  toast.dismiss("token-expired");
 }
 
 function showError(message: string): void {
-  toast.error(message);
+  toast.error(message, { id: message });
 }
 
 interface SilentError extends Error {
@@ -54,7 +49,6 @@ instance.interceptors.request.use(
     const token = useAuthStore.getState().token;
     if (token) {
       if (isTokenExpired(token)) {
-        console.log("Token expired, logging out before request:", config.url);
         handleTokenExpired();
         const error: SilentError = new Error("Token expired");
         error.silent = true;
@@ -63,13 +57,6 @@ instance.interceptors.request.use(
       }
 
       config.headers.set("Authorization", `Bearer ${token}`);
-      console.log(
-        "Request with token:",
-        config.url,
-        token.substring(0, 20) + "...",
-      );
-    } else {
-      console.log("Request without token:", config.url);
     }
     return config;
   },
@@ -91,7 +78,6 @@ instance.interceptors.response.use(
     if ("response" in error && error.response) {
       switch (error.response.status) {
         case 401:
-          console.log("Received 401 response, logging out");
           handleTokenExpired();
           break;
         case 403:

@@ -48,7 +48,7 @@ export function parseJwtPayload(token: string): JwtPayload | null {
 
 export function isTokenExpired(
   token: string,
-  bufferSeconds: number = 60,
+  bufferSeconds: number = 5,
 ): boolean {
   if (!token) {
     return true;
@@ -63,21 +63,4 @@ export function isTokenExpired(
   const expirationTime = payload.exp;
 
   return currentTime >= expirationTime - bufferSeconds;
-}
-
-export function getTokenExpirationTime(token: string): number | null {
-  const payload = parseJwtPayload(token);
-  return payload?.exp ?? null;
-}
-
-export function getTokenRemainingTime(token: string): number {
-  const expirationTime = getTokenExpirationTime(token);
-  if (!expirationTime) {
-    return 0;
-  }
-
-  const currentTime = Math.floor(Date.now() / 1000);
-  const remaining = expirationTime - currentTime;
-
-  return Math.max(0, remaining);
 }
