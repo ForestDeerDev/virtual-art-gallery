@@ -238,7 +238,7 @@ export function Navbar() {
             </button>
           </div>
         ) : (
-          <div className="ml-auto hidden items-center gap-1 lg:flex">
+          <div className="ml-auto hidden items-center gap-1.5 lg:flex">
             <Link
               href="/login"
               className={cn(
