@@ -6,12 +6,12 @@ export function useFeaturedArtworks(limit = 12) {
   return useQuery<Artwork[]>({
     queryKey: ["artworks", "featured", limit],
     queryFn: async () => {
-      const res = await artworkApi.getArtworks({
+      const artworkListResponse = await artworkApi.getArtworks({
         featured: true,
         page: 0,
         pageSize: limit,
       });
-      return res.data;
+      return artworkListResponse.data;
     },
     staleTime: 5 * 60 * 1000,
   });
@@ -29,8 +29,11 @@ export function useCategoryThumbnails(pageSize = 50) {
   return useQuery<Artwork[]>({
     queryKey: ["artworks", "category-thumbnails", pageSize],
     queryFn: async () => {
-      const res = await artworkApi.getArtworks({ page: 0, pageSize });
-      return res.data;
+      const artworkListResponse = await artworkApi.getArtworks({
+        page: 0,
+        pageSize,
+      });
+      return artworkListResponse.data;
     },
     staleTime: 10 * 60 * 1000,
   });

@@ -22,10 +22,10 @@ export function useGallery(
     queryKey: ["gallery", "artworks", filters, page, pageSize],
     queryFn: async () => {
       const params = buildArtworkQuery(filters, pagination);
-      const res = await artworkApi.getArtworks(params);
+      const artworkListResponse = await artworkApi.getArtworks(params);
       return {
-        ...res,
-        data: res.data.map(normalizeTaggable),
+        ...artworkListResponse,
+        data: artworkListResponse.data.map(normalizeTaggable),
       };
     },
     staleTime: 30 * 1000,
@@ -47,14 +47,14 @@ export function useGalleryTags() {
       const TAG_PAGE_SIZE = 100;
       const MAX_PAGES = 20;
 
-      const first = await artworkApi.getArtworks({
+      const firstPageResponse = await artworkApi.getArtworks({
         page: 0,
         pageSize: TAG_PAGE_SIZE,
       });
-      const artworks = [...first.data];
-      const totalPages = Math.min(first.totalPages, MAX_PAGES);
+      const artworks = [...firstPageResponse.data];
+      const totalPages = Math.min(firstPageResponse.totalPages, MAX_PAGES);
 
-      const rest = await Promise.all(
+      const remainingPageResponses = await Promise.all(
         Array.from({ length: totalPages - 1 }, (_, i) =>
           artworkApi.getArtworks({
             page: i + 1,
@@ -62,7 +62,9 @@ export function useGalleryTags() {
           }),
         ),
       );
-      rest.forEach((res) => artworks.push(...res.data));
+      remainingPageResponses.forEach((pageResponse) =>
+        artworks.push(...pageResponse.data),
+      );
 
       const tags = new Set<string>();
       artworks.map(normalizeTaggable).forEach((artwork) => {

@@ -78,7 +78,7 @@ const HERO_CARD_STYLES: {
 
 const DAY_SEED = Math.floor(Date.now() / 86_400_000);
 
-export default function HomePage() {
+function HomeContent() {
   const { data: featured, isLoading: featuredLoading } =
     useFeaturedArtworks(12);
   const { data: categories, isLoading: categoriesLoading } = useCategoryStats();
@@ -102,11 +102,8 @@ export default function HomePage() {
   }, [featured]);
 
   return (
-    <div className="flex min-h-screen flex-col bg-background">
-      <Navbar />
-
-      <main className="flex-1">
-        {/* Background wrapper: Hero + Featured Artworks header */}
+    <>
+      {/* Background wrapper: Hero + Featured Artworks header */}
         <div className="relative isolate overflow-hidden">
           {/* Base background fallback */}
           <div className="absolute inset-0 -z-20 bg-[#101844]" />
@@ -219,7 +216,7 @@ export default function HomePage() {
 
           {/* Featured Artworks header */}
           <section className="relative py-20">
-            <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+            <div className="mx-auto max-w-page px-6">
               <div className="text-center">
                 <h2 className="font-serif text-3xl font-extrabold tracking-wide text-white sm:text-4xl">
                   精选作品
@@ -237,7 +234,7 @@ export default function HomePage() {
 
         {/* Featured Artworks cards */}
         <section className="py-8">
-          <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <div className="mx-auto max-w-page px-6">
             {featuredLoading ? (
               <div className="flex flex-col items-center gap-3 py-16">
                 <Loader2 className="size-10 animate-spin text-indigo-500" />
@@ -255,7 +252,7 @@ export default function HomePage() {
 
         {/* Categories */}
         <section className="pt-3 pb-10">
-          <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <div className="mx-auto max-w-page px-6">
             <div className="text-center">
               <h2 className="font-serif text-3xl font-extrabold tracking-wide text-foreground sm:text-4xl">
                 艺术分类
@@ -301,7 +298,7 @@ export default function HomePage() {
                           className="scale-125 object-cover opacity-20 blur-2xl transition-all duration-500 group-hover:scale-[1.4] group-hover:opacity-30"
                         />
                       )}
-                      <div className="relative h-44 overflow-hidden rounded-xl bg-stone-700">
+                      <div className="relative aspect-[16/10] overflow-hidden rounded-xl bg-stone-700">
                         {first ? (
                           rest.length > 0 ? (
                             <div className="flex h-full gap-2 p-2">
@@ -372,8 +369,17 @@ export default function HomePage() {
             )}
           </div>
         </section>
-      </main>
+    </>
+  );
+}
 
+export default function HomePage() {
+  return (
+    <div className="flex min-h-screen flex-col bg-background">
+      <Navbar />
+      <main className="flex-1">
+        <HomeContent />
+      </main>
       <Footer />
     </div>
   );

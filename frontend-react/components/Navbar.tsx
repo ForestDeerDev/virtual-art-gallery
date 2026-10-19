@@ -150,7 +150,7 @@ export function Navbar() {
       )}
       style={heroHeaderStyle}
     >
-      <nav className="mx-auto flex h-16 max-w-7xl items-center gap-4 px-4 sm:px-6 lg:px-8">
+      <nav className="mx-auto flex h-16 max-w-page items-center gap-4 px-6">
         <Link href="/home" className="group flex shrink-0 items-center gap-2">
           <Stone
             className={cn(
@@ -307,7 +307,7 @@ export function Navbar() {
           id="mobile-menu"
           className="animate-in fade-in slide-in-from-top-2 duration-200 border-t border-border/50 bg-background/95 backdrop-blur-md lg:hidden"
         >
-          <nav className="mx-auto max-w-7xl space-y-1 px-4 py-4 sm:px-6">
+          <nav className="mx-auto max-w-page space-y-1 px-6 py-4">
             {navItems.map(({ href, label, icon: Icon }) => {
               const active = isActive(href);
               return (

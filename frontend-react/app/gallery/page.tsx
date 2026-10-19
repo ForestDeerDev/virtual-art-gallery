@@ -110,8 +110,8 @@ function GalleryContent() {
   }, [searchInput, updateParams]);
 
   return (
-    <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
-      <div className="mb-8 flex flex-wrap items-center justify-between gap-4">
+    <div className="mx-auto max-w-page px-6 py-1 pb-6">
+      <div className="mb-3 flex flex-wrap items-center justify-between gap-4">
         <h1 className="sr-only">艺术画廊</h1>
         <div className="flex min-w-[200px] flex-1 items-center gap-1.5 max-w-xs">
           <Input

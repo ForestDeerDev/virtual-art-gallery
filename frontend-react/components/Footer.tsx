@@ -74,7 +74,7 @@ export function Footer() {
       <div className="pointer-events-none absolute right-[18%] top-[35%] -z-10 size-4 rounded-full bg-white/20 blur-sm" />
       <div className="pointer-events-none absolute left-[55%] bottom-[25%] -z-10 size-3 rounded-full bg-cyan-200/30 blur-sm" />
 
-      <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+      <div className="mx-auto max-w-page px-6 py-8">
         <div className="grid grid-cols-1 gap-12 md:grid-cols-2 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_minmax(0,1.2fr)] lg:items-start">
           {/* 品牌区 */}
           <div>

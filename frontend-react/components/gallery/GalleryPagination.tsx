@@ -31,7 +31,7 @@ export function GalleryPagination({
   if (totalPages > 1) push(totalPages);
 
   return (
-    <div className="mt-12 flex justify-center">
+    <div className="mt-6 flex justify-center">
       <nav className="flex items-center gap-1">
         <Button
           variant="outline"
