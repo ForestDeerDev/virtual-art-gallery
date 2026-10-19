@@ -15,8 +15,8 @@ const interactionApi = {
     });
   },
 
-  unlikeArtwork(artworkId: number): Promise<void> {
-    return request<void>({
+  unlikeArtwork(artworkId: number): Promise<LikeCountResponse> {
+    return request<LikeCountResponse>({
       url: `/interactions/artworks/${artworkId}/like`,
       method: "delete",
     });
