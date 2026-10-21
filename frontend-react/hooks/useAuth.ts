@@ -1,3 +1,4 @@
+import { useSyncExternalStore } from "react";
 import { useMutation } from "@tanstack/react-query";
 import userApi from "@/api/user";
 import { useAuthStore } from "@/stores/auth";
@@ -57,4 +58,16 @@ export function useIsAdmin(): boolean {
 
 export function useCurrentUser(): User | null {
   return useAuthStore((state) => state.userInfo);
+}
+
+function subscribeToHydration(onStoreChange: () => void) {
+  return useAuthStore.persist.onFinishHydration(onStoreChange);
+}
+
+export function useAuthHydrated(): boolean {
+  return useSyncExternalStore(
+    subscribeToHydration,
+    () => useAuthStore.persist.hasHydrated(),
+    () => false,
+  );
 }
