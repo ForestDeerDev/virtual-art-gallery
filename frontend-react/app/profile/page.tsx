@@ -10,6 +10,7 @@ import { toast } from "sonner";
 import { isAxiosError } from "axios";
 import { Loader2, Plus } from "lucide-react";
 
+import { Avatar } from "@/components/Avatar";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { RequireAuth } from "@/components/auth/RequireAuth";
@@ -22,7 +23,6 @@ import { useCurrentUser, useIsAdmin } from "@/hooks/useAuth";
 import { useAuthStore } from "@/stores/auth";
 import { normalizeTaggable } from "@/utils/normalize";
 import { parseCommaSeparated } from "@/utils/tags";
-import { cn } from "@/lib/utils";
 
 const profileSchema = z.object({
   username: z
@@ -54,43 +54,6 @@ function getErrorMessage(error: unknown) {
   return "更新失败，请重试";
 }
 
-function AvatarImage({
-  src,
-  username,
-  className,
-}: {
-  src?: string;
-  username: string;
-  className?: string;
-}) {
-  const [failedSrc, setFailedSrc] = useState<string | null>(null);
-
-  if (src && failedSrc !== src) {
-    return (
-      <Image
-        src={src}
-        alt={username}
-        width={160}
-        height={160}
-        unoptimized
-        onError={() => setFailedSrc(src)}
-        className={cn("rounded-full object-cover", className)}
-      />
-    );
-  }
-
-  return (
-    <div
-      className={cn(
-        "flex items-center justify-center rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 font-semibold text-white",
-        className,
-      )}
-    >
-      {username.charAt(0).toUpperCase()}
-    </div>
-  );
-}
-
 function ProfileContent() {
   const userInfo = useCurrentUser();
   const isAdmin = useIsAdmin();
@@ -115,7 +78,6 @@ function ProfileContent() {
 
   const updateProfileMutation = useMutation({
     mutationFn: async (values: ProfileFormValues) => {
-      // 有新头像时先上传，再随资料一起提交
       let avatar: string | undefined;
       if (avatarFile) {
         const res = await userApi.uploadAvatar(avatarFile);
@@ -149,16 +111,16 @@ function ProfileContent() {
     );
   };
 
-  const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
+  const handleAvatarChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
     if (!file) return;
 
     setAvatarFile(file);
     const reader = new FileReader();
-    reader.onload = (ev) => setAvatarPreview(ev.target?.result as string);
+    reader.onload = (loadEvent) =>
+      setAvatarPreview(loadEvent.target?.result as string);
     reader.readAsDataURL(file);
-    // 重置以支持重复选择同一文件
-    e.target.value = "";
+    event.target.value = "";
   };
 
   const onSubmit = (values: ProfileFormValues) => {
@@ -170,9 +132,10 @@ function ProfileContent() {
       <aside className="lg:w-72 lg:shrink-0">
         <Card>
           <CardContent className="flex flex-col items-center gap-3 p-8 text-center">
-            <AvatarImage
+            <Avatar
               src={userInfo.avatar}
               username={userInfo.username}
+              size={160}
               className="size-36 text-4xl"
             />
             <h2 className="text-lg font-semibold">{userInfo.username}</h2>

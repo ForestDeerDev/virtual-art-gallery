@@ -116,9 +116,9 @@ function GalleryContent() {
         <div className="flex min-w-[200px] flex-1 items-center gap-1.5 max-w-xs">
           <Input
             value={searchInput}
-            onChange={(e) => setSearchInput(e.target.value)}
-            onKeyDown={(e) => {
-              if (e.key === "Enter") handleSearch();
+            onChange={(event) => setSearchInput(event.target.value)}
+            onKeyDown={(event) => {
+              if (event.key === "Enter") handleSearch();
             }}
             placeholder="搜索艺术作品..."
             className="h-9 w-full min-w-0"

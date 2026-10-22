@@ -151,7 +151,7 @@ function CommentItem({
         <div className="mt-3 space-y-2 pl-2">
           <textarea
             value={replyContent}
-            onChange={(e) => setReplyContent(e.target.value)}
+            onChange={(event) => setReplyContent(event.target.value)}
             placeholder="写下您的回复..."
             rows={2}
             className="w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
@@ -313,7 +313,7 @@ function ArtworkDetailContent() {
                 <div className="space-y-2">
                   <textarea
                     value={commentContent}
-                    onChange={(e) => setCommentContent(e.target.value)}
+                    onChange={(event) => setCommentContent(event.target.value)}
                     placeholder="写下您的评论..."
                     rows={3}
                     autoFocus

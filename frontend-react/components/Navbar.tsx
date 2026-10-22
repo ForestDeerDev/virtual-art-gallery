@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
 import {
   LogOut,
@@ -26,6 +25,7 @@ import {
   useCurrentUser,
 } from "@/hooks/useAuth";
 import { cn } from "@/lib/utils";
+import { Avatar } from "@/components/Avatar";
 
 interface NavItem {
   href: string;
@@ -40,35 +40,12 @@ function UserAvatar({
   user?: User | null;
   className?: string;
 }) {
-  const [failedSrc, setFailedSrc] = useState<string | null>(null);
-
-  const avatar = user?.avatar;
-  if (avatar && failedSrc !== avatar) {
-    return (
-      <Image
-        src={avatar}
-        alt={user.username}
-        width={64}
-        height={64}
-        unoptimized
-        onError={() => setFailedSrc(avatar)}
-        className={cn(
-          "rounded-full object-cover ring-2 ring-indigo-500/30",
-          className,
-        )}
-      />
-    );
-  }
-
   return (
-    <div
-      className={cn(
-        "flex items-center justify-center rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 text-sm font-semibold text-white ring-2 ring-indigo-500/30",
-        className,
-      )}
-    >
-      {user?.username?.charAt(0).toUpperCase()}
-    </div>
+    <Avatar
+      src={user?.avatar}
+      username={user?.username}
+      className={cn("text-sm ring-2 ring-indigo-500/30", className)}
+    />
   );
 }
 
@@ -98,8 +75,8 @@ export function Navbar() {
 
   useEffect(() => {
     if (!mobileOpen) return;
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Escape") setMobileOpen(false);
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") setMobileOpen(false);
     };
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
