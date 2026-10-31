@@ -18,21 +18,9 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import artworkApi from "@/api/artwork";
+import { TagPicker } from "@/components/TagPicker";
 
 const CATEGORIES = ["油画", "水彩", "素描", "雕塑", "摄影", "数字艺术", "其他"];
-
-const PRESET_TAGS = [
-  "抽象",
-  "写实",
-  "现代",
-  "古典",
-  "风景",
-  "人物",
-  "静物",
-  "动物",
-  "建筑",
-  "肖像",
-];
 
 const MAX_IMAGE_SIZE = 10 * 1024 * 1024;
 
@@ -55,14 +43,12 @@ function UploadContent() {
 
   const [imagePreview, setImagePreview] = useState<string>("");
   const [uploadingImage, setUploadingImage] = useState(false);
-  const [customTag, setCustomTag] = useState("");
 
   const {
     register,
     handleSubmit,
     control,
     setValue,
-    getValues,
     formState: { errors },
   } = useForm<UploadFormValues>({
     resolver: zodResolver(uploadSchema),
@@ -130,24 +116,6 @@ function UploadContent() {
       setUploadingImage(false);
       if (fileInputRef.current) fileInputRef.current.value = "";
     }
-  };
-
-  const toggleTag = (tag: string) => {
-    const current = getValues("tags");
-    const updated = current.includes(tag)
-      ? current.filter((t) => t !== tag)
-      : [...current, tag];
-    setValue("tags", updated, { shouldValidate: true });
-  };
-
-  const addCustomTag = () => {
-    const trimmed = customTag.trim();
-    if (!trimmed) return;
-    const current = getValues("tags");
-    if (!current.includes(trimmed)) {
-      setValue("tags", [...current, trimmed], { shouldValidate: true });
-    }
-    setCustomTag("");
   };
 
   const tags = useWatch({ control, name: "tags" });
@@ -319,54 +287,12 @@ function UploadContent() {
             {/* 标签 */}
             <div className="space-y-2">
               <Label>作品标签</Label>
-              <div className="flex flex-wrap gap-2">
-                {PRESET_TAGS.map((tag) => {
-                  const selected = tags.includes(tag);
-                  return (
-                    <button
-                      key={tag}
-                      type="button"
-                      onClick={() => toggleTag(tag)}
-                      className={
-                        "rounded-full border px-3 py-1 text-sm transition-all " +
-                        (selected
-                          ? "border-indigo-500 bg-indigo-500/10 text-indigo-600"
-                          : "border-input text-muted-foreground hover:border-indigo-400 hover:text-indigo-500")
-                      }
-                    >
-                      {tag}
-                    </button>
-                  );
-                })}
-                {tags
-                  .filter((tag) => !PRESET_TAGS.includes(tag))
-                  .map((tag) => (
-                    <button
-                      key={tag}
-                      type="button"
-                      onClick={() => toggleTag(tag)}
-                      className="rounded-full border border-indigo-500 bg-indigo-500/10 px-3 py-1 text-sm text-indigo-600"
-                    >
-                      {tag} ✕
-                    </button>
-                  ))}
-              </div>
-              <div className="flex gap-2">
-                <Input
-                  placeholder="添加自定义标签"
-                  value={customTag}
-                  onChange={(event) => setCustomTag(event.target.value)}
-                  onKeyDown={(event) => {
-                    if (event.key === "Enter") {
-                      event.preventDefault();
-                      addCustomTag();
-                    }
-                  }}
-                />
-                <Button type="button" variant="outline" onClick={addCustomTag}>
-                  添加
-                </Button>
-              </div>
+              <TagPicker
+                value={tags}
+                onChange={(updatedTags) =>
+                  setValue("tags", updatedTags, { shouldValidate: true })
+                }
+              />
             </div>
 
             {/* 精选 */}
