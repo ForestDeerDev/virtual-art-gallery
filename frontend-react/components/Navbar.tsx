@@ -85,11 +85,9 @@ export function Navbar() {
   const navItems: NavItem[] = [
     { href: "/home", label: "首页", icon: Home },
     { href: "/gallery", label: "画廊", icon: ImageIcon },
+    { href: "/curation", label: "策展", icon: Sparkles },
     ...(isLoggedIn
-      ? [
-          { href: "/recommendations", label: "推荐", icon: Sparkles },
-          { href: "/upload", label: "上传作品", icon: Upload },
-        ]
+      ? [{ href: "/upload", label: "上传作品", icon: Upload }]
       : []),
     ...(isAdmin ? [{ href: "/admin", label: "管理", icon: Leaf }] : []),
   ];
