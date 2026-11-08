@@ -10,6 +10,7 @@ Thumbs.db
 # IDE文件
 .vscode/
 .idea/
+.trae/
 *.iws
 *.iml
 *.ipr
@@ -47,9 +48,6 @@ lerna-debug.log*
 # 后端特定
 backend/bin/
 backend/uploads/
-
-# 前端特定
-!frontend/.vscode/extensions.json
 
 # 笔记
 笔记/
