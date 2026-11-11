@@ -1,4 +1,4 @@
-import { useQuery } from "@tanstack/react-query";
+import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
 import artworkApi from "@/api/artwork";
 import { normalizeTaggable } from "@/utils/normalize";
 import { buildArtworkQuery } from "@/utils/artworkQuery";
@@ -8,19 +8,18 @@ const PAGE_SIZE = 12;
 
 export function useGallery(
   filters: GalleryFilterState,
-  page: number,
   pageSize = PAGE_SIZE,
+  initialPage = 1,
 ) {
-  const pagination: PaginationState = {
-    currentPage: page,
-    pageSize,
-    totalPages: 1,
-    totalElements: 0,
-  };
-
-  return useQuery({
-    queryKey: ["gallery", "artworks", filters, page, pageSize],
-    queryFn: async () => {
+  return useInfiniteQuery({
+    queryKey: ["gallery", "artworks", filters, pageSize, initialPage],
+    queryFn: async ({ pageParam }) => {
+      const pagination: PaginationState = {
+        currentPage: pageParam as number,
+        pageSize,
+        totalPages: 1,
+        totalElements: 0,
+      };
       const params = buildArtworkQuery(filters, pagination);
       const artworkListResponse = await artworkApi.getArtworks(params);
       return {
@@ -28,6 +27,9 @@ export function useGallery(
         data: artworkListResponse.data.map(normalizeTaggable),
       };
     },
+    initialPageParam: initialPage,
+    getNextPageParam: (lastPage) =>
+      lastPage.page < lastPage.totalPages ? lastPage.page + 1 : undefined,
     staleTime: 30 * 1000,
   });
 }

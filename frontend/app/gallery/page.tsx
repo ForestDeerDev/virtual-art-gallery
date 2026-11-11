@@ -1,6 +1,6 @@
 "use client";
 
-import { Suspense, useCallback, useState } from "react";
+import { Suspense, useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import {
@@ -19,7 +19,6 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 import { GalleryFilters } from "@/components/gallery/GalleryFilters";
-import { GalleryPagination } from "@/components/gallery/GalleryPagination";
 import {
   useGallery,
   useGalleryCategories,
@@ -40,7 +39,7 @@ function GalleryContent() {
     keyword: searchParams.get("keyword") ?? "",
   };
 
-  const page = Number(searchParams.get("page") ?? "1") || 1;
+  const initialPage = Number(searchParams.get("page") ?? "1") || 1;
 
   const [filtersOpen, setFiltersOpen] = useState(false);
   const hasActiveFilters = Boolean(
@@ -71,14 +70,32 @@ function GalleryContent() {
     [pathname, router, searchParams],
   );
 
-  const { data, isLoading } = useGallery(filters, page);
+  const { data, isLoading, hasNextPage, fetchNextPage, isFetchingNextPage } =
+    useGallery(filters, 12, initialPage);
   const { data: categories, isLoading: categoriesLoading } =
     useGalleryCategories();
   const { data: tagsData } = useGalleryTags();
   const availableTags = tagsData ?? [];
 
-  const artworks = data?.data ?? [];
-  const totalPages = data?.totalPages ?? 1;
+  const artworks = data?.pages.flatMap((pageData) => pageData.data) ?? [];
+
+  const sentinelRef = useRef<HTMLDivElement>(null);
+
+  // 底部哨兵进入视口时自动加载下一页
+  useEffect(() => {
+    const element = sentinelRef.current;
+    if (!element) return;
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting && hasNextPage && !isFetchingNextPage) {
+          fetchNextPage();
+        }
+      },
+      { rootMargin: "300px" },
+    );
+    observer.observe(element);
+    return () => observer.disconnect();
+  }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
 
   const handleFilterChange = (newFilters: GalleryFilterState) => {
     updateParams({
@@ -98,10 +115,6 @@ function GalleryContent() {
       keyword: "",
       page: 1,
     });
-  };
-
-  const handlePageChange = (newPage: number) => {
-    updateParams({ page: newPage });
   };
 
   const handleSearch = useCallback(() => {
@@ -229,11 +242,17 @@ function GalleryContent() {
             ))}
           </div>
 
-          <GalleryPagination
-            currentPage={page}
-            totalPages={totalPages}
-            onPageChange={handlePageChange}
-          />
+          <div ref={sentinelRef} className="h-4" />
+          <div className="mt-6 flex justify-center py-2">
+            {isFetchingNextPage ? (
+              <div className="flex items-center gap-2 text-muted-foreground">
+                <Loader2 className="size-4 animate-spin" />
+                <span className="text-sm">加载中...</span>
+              </div>
+            ) : !hasNextPage ? (
+              <p className="text-sm text-muted-foreground">已经到底啦</p>
+            ) : null}
+          </div>
         </>
       )}
     </div>
