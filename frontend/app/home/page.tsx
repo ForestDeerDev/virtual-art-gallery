@@ -17,7 +17,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
-import { ArtworkCard } from "@/components/ArtworkCard";
+import { ArtworkMasonry } from "@/components/ArtworkMasonry";
 import {
   useFeaturedArtworks,
   useCategoryStats,
@@ -241,11 +241,7 @@ function HomeContent() {
                 <p className="text-muted-foreground">加载中...</p>
               </div>
             ) : (
-              <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-                {featured?.map((artwork) => (
-                  <ArtworkCard key={artwork.id} artwork={artwork} />
-                ))}
-              </div>
+              <ArtworkMasonry artworks={featured ?? []} />
             )}
           </div>
         </section>

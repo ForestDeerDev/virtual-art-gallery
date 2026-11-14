@@ -7,11 +7,6 @@ import lombok.NoArgsConstructor;
 import java.time.LocalDateTime;
 import java.util.List;
 
-/**
- * 艺术作品DTO
- * 
- * @author Art Gallery Team
- */
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -19,11 +14,13 @@ public class ArtworkDTO {
 
     private Long id;
     private String title;
-    private String artist;  // 艺术家用户名
-    private Long artistId;  // 艺术家ID
+    private String artist;
+    private Long artistId;
     private String category;
     private String description;
     private String imageUrl;
+    private Integer imageWidth;
+    private Integer imageHeight;
     private String videoUrl;
     private List<String> tags;
     private String dimensions;
@@ -36,4 +33,3 @@ public class ArtworkDTO {
     private LocalDateTime createTime;
     private LocalDateTime updateTime;
 }
-

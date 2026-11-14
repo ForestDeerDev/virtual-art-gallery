@@ -12,10 +12,15 @@ import com.artgallery.service.ArtworkService;
 import com.artgallery.service.FileStorageService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import java.awt.image.BufferedImage;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.List;
 import java.util.Map;
+import javax.imageio.ImageIO;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -35,6 +40,9 @@ import java.util.ArrayList;
 public class ArtworkServiceImpl implements ArtworkService {
 
     private static final Logger logger = LoggerFactory.getLogger(ArtworkServiceImpl.class);
+
+    @Value("${file.upload.path:./uploads/}")
+    private String uploadBasePath;
 
     /**
      * 艺术作品数据访问层
@@ -239,9 +247,31 @@ public class ArtworkServiceImpl implements ArtworkService {
             artwork.setTagsList(request.getTags());
         }
 
+        resolveAndSetImageDimensions(artwork);
+
         // 保存作品到数据库
         artwork = artworkRepository.save(artwork);
         return artworkMapper.toDto(artwork);
+    }
+
+    private void resolveAndSetImageDimensions(Artwork artwork) {
+        String imageUrl = artwork.getImageUrl();
+        if (imageUrl == null || !imageUrl.startsWith("/uploads/")) {
+            return;
+        }
+        try {
+            String relative = imageUrl.substring("/uploads/".length());
+            Path filePath = Paths.get(uploadBasePath).resolve(relative);
+            BufferedImage image = ImageIO.read(filePath.toFile());
+            if (image != null) {
+                artwork.setImageWidth(image.getWidth());
+                artwork.setImageHeight(image.getHeight());
+            } else {
+                logger.warn("无法解析图片尺寸（格式不支持）：{}", imageUrl);
+            }
+        } catch (Exception e) {
+            logger.warn("解析图片尺寸失败（不影响主流程）：{}", imageUrl, e);
+        }
     }
 
     /**
@@ -274,8 +304,10 @@ public class ArtworkServiceImpl implements ArtworkService {
         if (request.getDescription() != null) {
             artwork.setDescription(request.getDescription());
         }
+        boolean imageChanged = false;
         if (request.getImageUrl() != null) {
             artwork.setImageUrl(request.getImageUrl());
+            imageChanged = true;
         }
         if (request.getVideoUrl() != null) {
             artwork.setVideoUrl(request.getVideoUrl());
@@ -294,6 +326,10 @@ public class ArtworkServiceImpl implements ArtworkService {
         }
         if (request.getTags() != null) {
             artwork.setTagsList(request.getTags());
+        }
+
+        if (imageChanged) {
+            resolveAndSetImageDimensions(artwork);
         }
 
         // 保存更新后的作品

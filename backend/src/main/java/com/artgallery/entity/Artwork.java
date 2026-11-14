@@ -79,10 +79,10 @@ public class Artwork extends BaseTaggableEntity {
     @Column(length = 500)
     private String imageUrl;
 
-    /**
-     * 作品视频URL（可选）
-     * 用于展示作品的创作过程或动态效果
-     */
+    private Integer imageWidth;
+
+    private Integer imageHeight;
+
     @Column(length = 500)
     private String videoUrl;
 

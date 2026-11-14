@@ -4,13 +4,17 @@ import type { Artwork } from "@/types";
 
 interface ArtworkCardProps {
   artwork: Artwork;
+  aspectRatio: number;
 }
 
-export function ArtworkCard({ artwork }: ArtworkCardProps) {
+export function ArtworkCard({ artwork, aspectRatio }: ArtworkCardProps) {
   return (
     <div className="group overflow-hidden rounded-xl border border-border bg-background shadow-sm transition-all hover:-translate-y-1 hover:shadow-lg">
       <Link href={`/artworks/${artwork.id}`} className="block">
-        <div className="relative aspect-square overflow-hidden bg-muted">
+        <div
+          className="relative overflow-hidden bg-muted"
+          style={{ aspectRatio }}
+        >
           <Image
             src={artwork.imageUrl}
             alt={artwork.title}

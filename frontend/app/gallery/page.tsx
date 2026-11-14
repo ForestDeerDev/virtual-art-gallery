@@ -1,6 +1,12 @@
 "use client";
 
-import { Suspense, useCallback, useEffect, useRef, useState } from "react";
+import {
+  Suspense,
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import {
@@ -14,7 +20,7 @@ import {
 } from "lucide-react";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
-import { ArtworkCard } from "@/components/ArtworkCard";
+import { ArtworkMasonry } from "@/components/ArtworkMasonry";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
@@ -236,11 +242,7 @@ function GalleryContent() {
         </div>
       ) : (
         <>
-          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-            {artworks.map((artwork) => (
-              <ArtworkCard key={artwork.id} artwork={artwork} />
-            ))}
-          </div>
+          <ArtworkMasonry artworks={artworks} />
 
           <div ref={sentinelRef} className="h-4" />
           <div className="mt-6 flex justify-center py-2">

@@ -8,6 +8,8 @@ export interface Artwork {
   category: string;
   description?: string;
   imageUrl: string;
+  imageWidth: number;
+  imageHeight: number;
   videoUrl?: string;
   tags?: string[];
   dimensions?: string;
