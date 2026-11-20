@@ -3,32 +3,42 @@
 import { Suspense, useState } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useForm } from "react-hook-form";
+import { useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { Eye, EyeOff, Loader2 } from "lucide-react";
+import {
+  AlertCircle,
+  ArrowRight,
+  Eye,
+  EyeOff,
+  Loader2,
+  Lock,
+  Mail,
+  Palette,
+  User,
+} from "lucide-react";
 import { isAxiosError } from "axios";
 
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
-import { Separator } from "@/components/ui/separator";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { useRegister, redirectToGithub } from "@/hooks/useAuth";
+import { useRegister } from "@/hooks/useAuth";
 
 const registerSchema = z
   .object({
     username: z
       .string()
-      .min(3, "用户名至少3个字符")
-      .max(50, "用户名最多50个字符"),
-    email: z.email("请输入有效的邮箱地址"),
-    password: z.string().min(6, "密码至少6位").max(100, "密码最多100位"),
-    confirmPassword: z.string().min(1, "请确认密码"),
+      .min(3, "Username must be at least 3 characters")
+      .max(50, "Username must be at most 50 characters"),
+    email: z.email("Please enter a valid email address"),
+    password: z
+      .string()
+      .min(6, "Password must be at least 6 characters")
+      .max(100, "Password must be at most 100 characters"),
+    confirmPassword: z.string().min(1, "Please confirm your password"),
   })
   .refine((data) => data.password === data.confirmPassword, {
-    message: "两次输入的密码不一致",
+    message: "Passwords do not match",
     path: ["confirmPassword"],
   });
 
@@ -47,16 +57,37 @@ const AVAILABLE_TAGS = [
   "古典",
 ];
 
+const TAG_DISPLAY: Record<string, string> = {
+  油画: "Oil Painting",
+  水彩: "Watercolor",
+  素描: "Sketch",
+  雕塑: "Sculpture",
+  摄影: "Photography",
+  数字艺术: "Digital Art",
+  抽象: "Abstract",
+  写实: "Realism",
+  现代: "Modern",
+  古典: "Classical",
+};
+
 function getErrorMessage(error: unknown) {
   if (!error) {
     return "";
   }
 
   if (isAxiosError<{ message?: string }>(error)) {
-    return error.response?.data?.message ?? "注册失败，请重试";
+    if (!error.response) {
+      return error.code === "ECONNABORTED"
+        ? "Request timed out, please try again"
+        : "Network error, please check your connection";
+    }
+
+    return (
+      error.response.data?.message ?? "Registration failed, please try again"
+    );
   }
 
-  return "注册失败，请重试";
+  return "Registration failed, please try again";
 }
 
 function isSafeRedirect(url: string | null): url is string {
@@ -74,6 +105,7 @@ function RegisterContent() {
   const {
     register,
     handleSubmit,
+    control,
     formState: { errors },
   } = useForm<RegisterFormValues>({
     resolver: zodResolver(registerSchema),
@@ -109,115 +141,178 @@ function RegisterContent() {
   };
 
   const errorMessage = getErrorMessage(registerMutation.error);
+  const passwordValue = useWatch({ control, name: "password" }) ?? "";
+  const passedChecks = [
+    passwordValue.length >= 6,
+    /\d/.test(passwordValue),
+    /[a-z]/.test(passwordValue) && /[A-Z]/.test(passwordValue),
+  ].filter(Boolean).length;
 
   return (
-    <div className="relative flex min-h-screen justify-center px-4 py-8">
-      <div
-        className="absolute inset-0 bg-cover bg-center bg-no-repeat"
-        style={{ backgroundImage: "url('/login-bg.jpg')" }}
-      />
+    <div className="flex min-h-screen bg-[#fef7ef]">
+      <main className="flex flex-1 items-center justify-center px-6 py-10 sm:px-10">
+        <div className="w-full max-w-lg animate-fade-up">
+          <div className="mb-9 flex items-center gap-3 lg:hidden">
+            <div className="flex size-11 items-center justify-center rounded-xl bg-gradient-to-br from-[#918a84] to-[#7a746e] shadow-lg shadow-[#918a84]/30">
+              <Palette className="size-5 text-white" />
+            </div>
+            <p className="font-serif text-xl font-semibold">
+              Virtual Art Gallery
+            </p>
+          </div>
 
-      <Card className="relative z-10 my-auto w-full max-w-md rounded-2xl border border-white/40 bg-white/80 shadow-2xl backdrop-blur-xl animate-in fade-in zoom-in duration-500 transition-transform hover:-translate-y-1">
-        <CardHeader className="items-center text-center">
-          <CardTitle className="text-2xl font-bold text-indigo-600">
-            注册
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+          <div>
+            <h1 className="font-serif text-4xl font-semibold tracking-tight">
+              Begin Your Art Journey
+            </h1>
+            <p className="mt-2 text-sm text-muted-foreground">
+              Create an account to collect and share the artworks you love
+            </p>
+          </div>
+
+          <form
+            onSubmit={handleSubmit(onSubmit)}
+            className="mt-9 space-y-6"
+            noValidate
+          >
             <div className="space-y-2">
-              <Label htmlFor="username">用户名</Label>
-              <Input
-                id="username"
-                placeholder="请输入用户名（3-50个字符）"
-                className="focus-visible:!border-indigo-400 focus-visible:!ring-indigo-400/30"
-                {...register("username")}
-              />
+              <Label htmlFor="username">Username</Label>
+              <div className="relative">
+                <User className="pointer-events-none absolute top-1/2 left-3.5 size-5 -translate-y-1/2 text-muted-foreground" />
+                <Input
+                  id="username"
+                  autoComplete="username"
+                  placeholder="Enter a username (3-50 characters)"
+                  aria-invalid={!!errors.username}
+                  className="h-12 rounded-xl bg-white/60 pl-11 focus-visible:border-indigo-400! focus-visible:ring-indigo-400/30!"
+                  {...register("username")}
+                />
+              </div>
               {errors.username && (
-                <p className="text-sm text-destructive">
+                <p className="text-xs text-destructive">
                   {errors.username.message}
                 </p>
               )}
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="email">邮箱</Label>
-              <Input
-                id="email"
-                type="email"
-                placeholder="请输入邮箱"
-                className="focus-visible:!border-indigo-400 focus-visible:!ring-indigo-400/30"
-                {...register("email")}
-              />
+              <Label htmlFor="email">Email</Label>
+              <div className="relative">
+                <Mail className="pointer-events-none absolute top-1/2 left-3.5 size-5 -translate-y-1/2 text-muted-foreground" />
+                <Input
+                  id="email"
+                  type="email"
+                  autoComplete="email"
+                  placeholder="Enter your email"
+                  aria-invalid={!!errors.email}
+                  className="h-12 rounded-xl bg-white/60 pl-11 focus-visible:border-indigo-400! focus-visible:ring-indigo-400/30!"
+                  {...register("email")}
+                />
+              </div>
               {errors.email && (
-                <p className="text-sm text-destructive">
+                <p className="text-xs text-destructive">
                   {errors.email.message}
                 </p>
               )}
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="password">密码</Label>
+              <Label htmlFor="password">Password</Label>
               <div className="relative">
+                <Lock className="pointer-events-none absolute top-1/2 left-3.5 size-5 -translate-y-1/2 text-muted-foreground" />
                 <Input
                   id="password"
                   type={showPassword ? "text" : "password"}
-                  placeholder="请输入密码（至少6位）"
-                  className="pr-10 focus-visible:!border-indigo-400 focus-visible:!ring-indigo-400/30"
+                  autoComplete="new-password"
+                  placeholder="Enter a password (at least 6 characters)"
+                  aria-invalid={!!errors.password}
+                  className="h-12 rounded-xl bg-white/60 pr-12 pl-11 focus-visible:border-indigo-400! focus-visible:ring-indigo-400/30!"
                   {...register("password")}
                 />
                 <button
                   type="button"
                   tabIndex={-1}
+                  aria-label={showPassword ? "Hide password" : "Show password"}
                   onClick={() => setShowPassword((v) => !v)}
-                  className="absolute inset-y-0 right-3 flex items-center text-muted-foreground hover:text-foreground"
+                  className="absolute inset-y-0 right-3 flex items-center text-muted-foreground transition-colors hover:text-foreground"
                 >
                   {showPassword ? (
-                    <EyeOff className="size-4" />
+                    <EyeOff className="size-5" />
                   ) : (
-                    <Eye className="size-4" />
+                    <Eye className="size-5" />
                   )}
                 </button>
               </div>
+              {passwordValue.length > 0 && (
+                <div className="flex items-center gap-3 pt-1">
+                  <div className="flex flex-1 gap-1">
+                    {[0, 1, 2].map((i) => (
+                      <div
+                        key={i}
+                        className={`h-1 flex-1 rounded-full transition-colors ${
+                          i < passedChecks
+                            ? ["bg-red-400", "bg-amber-400", "bg-emerald-500"][
+                                Math.max(passedChecks - 1, 0)
+                              ]
+                            : "bg-border"
+                        }`}
+                      />
+                    ))}
+                  </div>
+                  <span className="text-xs text-muted-foreground">
+                    {
+                      ["Weak", "Medium", "Strong"][
+                        Math.max(passedChecks - 1, 0)
+                      ]
+                    }
+                  </span>
+                </div>
+              )}
               {errors.password && (
-                <p className="text-sm text-destructive">
+                <p className="text-xs text-destructive">
                   {errors.password.message}
                 </p>
               )}
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="confirmPassword">确认密码</Label>
+              <Label htmlFor="confirmPassword">Confirm Password</Label>
               <div className="relative">
+                <Lock className="pointer-events-none absolute top-1/2 left-3.5 size-5 -translate-y-1/2 text-muted-foreground" />
                 <Input
                   id="confirmPassword"
                   type={showConfirmPassword ? "text" : "password"}
-                  placeholder="请再次输入密码"
-                  className="pr-10 focus-visible:!border-indigo-400 focus-visible:!ring-indigo-400/30"
+                  autoComplete="new-password"
+                  placeholder="Re-enter your password"
+                  aria-invalid={!!errors.confirmPassword}
+                  className="h-12 rounded-xl bg-white/60 pr-12 pl-11 focus-visible:border-indigo-400! focus-visible:ring-indigo-400/30!"
                   {...register("confirmPassword")}
                 />
                 <button
                   type="button"
                   tabIndex={-1}
+                  aria-label={
+                    showConfirmPassword ? "Hide password" : "Show password"
+                  }
                   onClick={() => setShowConfirmPassword((v) => !v)}
-                  className="absolute inset-y-0 right-3 flex items-center text-muted-foreground hover:text-foreground"
+                  className="absolute inset-y-0 right-3 flex items-center text-muted-foreground transition-colors hover:text-foreground"
                 >
                   {showConfirmPassword ? (
-                    <EyeOff className="size-4" />
+                    <EyeOff className="size-5" />
                   ) : (
-                    <Eye className="size-4" />
+                    <Eye className="size-5" />
                   )}
                 </button>
               </div>
               {errors.confirmPassword && (
-                <p className="text-sm text-destructive">
+                <p className="text-xs text-destructive">
                   {errors.confirmPassword.message}
                 </p>
               )}
             </div>
 
             <div className="space-y-2">
-              <Label>兴趣标签（可选）</Label>
+              <Label>Interests</Label>
               <div className="flex flex-wrap gap-2">
                 {AVAILABLE_TAGS.map((tag) => {
                   const selected = selectedTags.includes(tag);
@@ -225,14 +320,15 @@ function RegisterContent() {
                     <button
                       key={tag}
                       type="button"
+                      aria-pressed={selected}
                       onClick={() => toggleTag(tag)}
-                      className={
+                      className={`rounded-full px-3.5 py-1.5 text-xs transition-all active:scale-95 ${
                         selected
-                          ? "rounded-full bg-indigo-500 px-3 py-1 text-xs text-white"
-                          : "rounded-full border border-border bg-background px-3 py-1 text-xs text-muted-foreground transition-colors hover:border-indigo-400 hover:text-indigo-600"
-                      }
+                          ? "bg-[#918a84] text-white shadow-md shadow-[#918a84]/30"
+                          : "border border-border bg-background text-muted-foreground hover:border-[#918a84] hover:text-[#7a746e]"
+                      }`}
                     >
-                      {tag}
+                      {TAG_DISPLAY[tag] ?? tag}
                     </button>
                   );
                 })}
@@ -240,65 +336,61 @@ function RegisterContent() {
             </div>
 
             {errorMessage && (
-              <Alert
-                variant="destructive"
-                className="animate-in fade-in slide-in-from-top-1"
+              <div
+                role="alert"
+                className="flex animate-in items-start gap-2.5 rounded-xl border border-destructive/30 bg-destructive/10 px-4 py-3 text-sm text-destructive fade-in slide-in-from-top-1"
               >
-                <AlertDescription>{errorMessage}</AlertDescription>
-              </Alert>
+                <AlertCircle className="mt-0.5 size-4 shrink-0" />
+                <span>{errorMessage}</span>
+              </div>
             )}
 
             <Button
               type="submit"
-              className="w-full bg-gradient-to-r from-indigo-500 to-purple-600 text-white shadow-lg shadow-indigo-500/30 hover:from-indigo-600 hover:to-purple-700 hover:shadow-indigo-500/40 hover:-translate-y-0.5"
               disabled={registerMutation.isPending}
+              className="group h-12 w-full rounded-xl bg-[#918a84] text-white shadow-md transition-all hover:bg-[#7a746e] active:scale-[0.98]"
             >
-              {registerMutation.isPending && (
-                <Loader2 className="mr-2 animate-spin" />
+              {registerMutation.isPending ? (
+                <>
+                  <Loader2 className="size-5 animate-spin" />
+                  Creating account…
+                </>
+              ) : (
+                <>
+                  Create Account
+                  <ArrowRight className="size-5 transition-transform group-hover:translate-x-1" />
+                </>
               )}
-              注册
             </Button>
           </form>
 
-          <div className="flex items-center gap-4">
-            <Separator className="flex-1" />
-            <span className="text-xs text-muted-foreground">
-              使用第三方账号注册
-            </span>
-            <Separator className="flex-1" />
-          </div>
-
-          <div className="flex gap-3">
-            <Button
-              type="button"
-              variant="outline"
-              className="flex-1 hover:-translate-y-0.5 hover:border-foreground hover:bg-foreground hover:text-background"
-              onClick={redirectToGithub}
-            >
-              <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-                <path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12" />
-              </svg>
-              GitHub
-            </Button>
-            <Button type="button" variant="outline" className="flex-1" disabled>
-              <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-                <path d="M8.691 2.188C3.891 2.188 0 5.476 0 9.53c0 2.212 1.17 4.203 3.002 5.55a.59.59 0 0 1 .213.665l-.39 1.48c-.019.07-.048.141-.048.213c0 .163.13.295.29.295a.33.33 0 0 0 .167-.054l1.903-1.114a.86.86 0 0 1 .717-.098a10.2 10.2 0 0 0 2.837.403c.276 0 .543-.027.811-.05c-.857-2.578.157-4.972 1.932-6.446c1.703-1.415 3.882-1.98 5.853-1.838c-.576-3.583-4.196-6.348-8.596-6.348M5.785 5.991c.642 0 1.162.529 1.162 1.18a1.17 1.17 0 0 1-1.162 1.178A1.17 1.17 0 0 1 4.623 7.17c0-.651.52-1.18 1.162-1.18zm5.813 0c.642 0 1.162.529 1.162 1.18a1.17 1.17 0 0 1-1.162 1.178a1.17 1.17 0 0 1-1.162-1.178c0-.651.52-1.18 1.162-1.18m5.34 2.867c-1.797-.052-3.746.512-5.28 1.786c-1.72 1.428-2.687 3.72-1.78 6.22c.942 2.453 3.666 4.229 6.884 4.229c.826 0 1.622-.12 2.361-.336a.72.72 0 0 1 .598.082l1.584.926a.3.3 0 0 0 .14.047c.134 0 .24-.111.24-.247c0-.06-.023-.12-.038-.177l-.327-1.233a.6.6 0 0 1-.023-.156a.49.49 0 0 1 .201-.398C23.024 18.48 24 16.82 24 14.98c0-3.21-2.931-5.837-6.656-6.088V8.89c-.135-.01-.27-.027-.407-.03zm-2.53 3.274c.535 0 .969.44.969.982a.976.976 0 0 1-.969.983a.976.976 0 0 1-.969-.983c0-.542.434-.982.97-.982zm4.844 0c.535 0 .969.44.969.982a.976.976 0 0 1-.969.983a.976.976 0 0 1-.969-.983c0-.542.434-.982.969-.982" />
-              </svg>
-              微信
-            </Button>
-          </div>
-
-          <p className="text-center text-sm text-muted-foreground">
-            已有账号？
+          <p className="mt-9 text-center text-sm text-muted-foreground">
+            Already have an account?
             <Link
               href="/login"
-              className="ml-1 font-medium text-indigo-600 underline-offset-4 transition-colors hover:text-purple-600 hover:underline"
+              className="ml-1 font-medium text-[#7a746e] underline decoration-[#918a84]/50 decoration-[1.5px] underline-offset-[3px] transition-colors hover:text-[#5f5a55] hover:decoration-[#7a746e] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#918a84]/60"
             >
-              立即登录
+              Sign in
             </Link>
           </p>
-        </CardContent>
-      </Card>
+
+          <p className="mt-3 text-center text-sm text-muted-foreground/70">
+            <Link
+              href="/gallery"
+              className="underline decoration-[#918a84]/50 decoration-[1.5px] underline-offset-[3px] transition-colors hover:text-foreground hover:decoration-[#7a746e] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#918a84]/60"
+            >
+              Browse the gallery
+            </Link>
+          </p>
+        </div>
+      </main>
+
+      <aside className="relative hidden w-1/2 shrink-0 overflow-hidden lg:block">
+        <div
+          className="absolute inset-0 bg-cover bg-center bg-no-repeat"
+          style={{ backgroundImage: "url('/register-bg.jpg')" }}
+        />
+      </aside>
     </div>
   );
 }
