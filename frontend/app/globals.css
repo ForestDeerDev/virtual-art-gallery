@@ -122,7 +122,7 @@
 
 @theme {
   --animate-kenburns: kenburns 10s ease-in-out infinite alternate;
-  --animate-fade-up: fade-up 0.8s cubic-bezier(0.22, 1, 0.36, 1) both;
+  --animate-fade-up: fade-up 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
 
   @keyframes kenburns {
     from {
@@ -136,13 +136,11 @@
   @keyframes fade-up {
     from {
       opacity: 0;
-      transform: translateY(22px);
-      filter: blur(6px);
+      transform: translateY(12px);
     }
     to {
       opacity: 1;
       transform: translateY(0);
-      filter: blur(0);
     }
   }
 }
@@ -164,4 +162,15 @@
   html {
     @apply font-sans;
   }
+}
+
+/* Override browser autofill backgrounds; keep this outside @layer to ensure higher priority than Tailwind utilities. */
+input:autofill,
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus,
+input:-webkit-autofill:active {
+  box-shadow: 0 0 0 1000px #fffcf9 inset !important;
+  caret-color: var(--foreground);
+  transition: background-color 9999s ease-in-out 0s;
 }
