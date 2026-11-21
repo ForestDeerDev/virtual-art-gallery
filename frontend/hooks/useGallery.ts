@@ -46,33 +46,8 @@ export function useGalleryTags() {
   return useQuery<string[]>({
     queryKey: ["gallery", "tags"],
     queryFn: async () => {
-      const TAG_PAGE_SIZE = 100;
-      const MAX_PAGES = 20;
-
-      const firstPageResponse = await artworkApi.getArtworks({
-        page: 0,
-        pageSize: TAG_PAGE_SIZE,
-      });
-      const artworks = [...firstPageResponse.data];
-      const totalPages = Math.min(firstPageResponse.totalPages, MAX_PAGES);
-
-      const remainingPageResponses = await Promise.all(
-        Array.from({ length: totalPages - 1 }, (_, i) =>
-          artworkApi.getArtworks({
-            page: i + 1,
-            pageSize: TAG_PAGE_SIZE,
-          }),
-        ),
-      );
-      remainingPageResponses.forEach((pageResponse) =>
-        artworks.push(...pageResponse.data),
-      );
-
-      const tags = new Set<string>();
-      artworks.map(normalizeTaggable).forEach((artwork) => {
-        artwork.tags.forEach((tag) => tags.add(tag));
-      });
-      return Array.from(tags).sort((a, b) => a.localeCompare(b, "zh"));
+      const tags = await artworkApi.getTags();
+      return [...tags].sort((a, b) => a.localeCompare(b, "en"));
     },
     staleTime: 10 * 60 * 1000,
   });

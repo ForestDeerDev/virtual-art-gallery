@@ -207,6 +207,12 @@ public class ArtworkController {
         return ResponseEntity.ok(categories);
     }
 
+    @GetMapping("/tags")
+    public ResponseEntity<List<String>> getTags() {
+        List<String> tags = artworkService.getTags();
+        return ResponseEntity.ok(tags);
+    }
+
     /**
      * 获取所有分类的作品数量统计
      * 

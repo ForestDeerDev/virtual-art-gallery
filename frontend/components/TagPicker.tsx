@@ -3,19 +3,7 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-
-const PRESET_TAGS = [
-  "抽象",
-  "写实",
-  "现代",
-  "古典",
-  "风景",
-  "人物",
-  "静物",
-  "动物",
-  "建筑",
-  "肖像",
-];
+import { useGalleryTags } from "@/hooks/useGallery";
 
 export function TagPicker({
   value,
@@ -24,6 +12,7 @@ export function TagPicker({
   value: string[];
   onChange: (tags: string[]) => void;
 }) {
+  const { data: presetTags = [], isLoading: tagsLoading } = useGalleryTags();
   const [customTag, setCustomTag] = useState("");
 
   const toggleTag = (tag: string) => {
@@ -46,26 +35,30 @@ export function TagPicker({
   return (
     <div className="space-y-2">
       <div className="flex flex-wrap gap-2">
-        {PRESET_TAGS.map((tag) => {
-          const selected = value.includes(tag);
-          return (
-            <button
-              key={tag}
-              type="button"
-              onClick={() => toggleTag(tag)}
-              className={
-                "rounded-full border px-3 py-1 text-sm transition-all " +
-                (selected
-                  ? "border-indigo-500 bg-indigo-500/10 text-indigo-600"
-                  : "border-input text-muted-foreground hover:border-indigo-400 hover:text-indigo-500")
-              }
-            >
-              {tag}
-            </button>
-          );
-        })}
+        {tagsLoading ? (
+          <span className="text-sm text-muted-foreground">Loading tags…</span>
+        ) : (
+          presetTags.map((tag) => {
+            const selected = value.includes(tag);
+            return (
+              <button
+                key={tag}
+                type="button"
+                onClick={() => toggleTag(tag)}
+                className={
+                  "rounded-full border px-3 py-1 text-sm transition-all " +
+                  (selected
+                    ? "border-indigo-500 bg-indigo-500/10 text-indigo-600"
+                    : "border-input text-muted-foreground hover:border-indigo-400 hover:text-indigo-500")
+                }
+              >
+                {tag}
+              </button>
+            );
+          })
+        )}
         {value
-          .filter((tag) => !PRESET_TAGS.includes(tag))
+          .filter((tag) => !presetTags.includes(tag))
           .map((tag) => (
             <button
               key={tag}

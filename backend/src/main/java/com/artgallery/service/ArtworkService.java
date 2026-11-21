@@ -109,6 +109,8 @@ public interface ArtworkService {
      */
     List<String> getCategories();
 
+    List<String> getTags();
+
     /**
      * 获取所有分类的作品数量统计
      * 

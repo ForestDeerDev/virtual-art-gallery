@@ -95,6 +95,13 @@ const artworkApi = {
     });
   },
 
+  getTags(): Promise<string[]> {
+    return request<string[]>({
+      url: "/artworks/tags",
+      method: "get",
+    });
+  },
+
   getCategoryStats(): Promise<CategoryStats[]> {
     return request<CategoryStats[]>({
       url: "/artworks/category-stats",

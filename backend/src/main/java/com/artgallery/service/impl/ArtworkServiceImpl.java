@@ -26,6 +26,9 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import java.util.stream.Collectors;
 import java.util.ArrayList;
+import java.util.LinkedHashSet;
+import java.util.Set;
+import com.artgallery.util.TagUtils;
 
 /**
  * 艺术作品服务实现类
@@ -531,6 +534,15 @@ public class ArtworkServiceImpl implements ArtworkService {
     @Override
     public List<String> getCategories() {
         return artworkRepository.findAllCategories();
+    }
+
+    @Override
+    public List<String> getTags() {
+        Set<String> tagSet = new LinkedHashSet<>();
+        for (String rawTags : artworkRepository.findAllTags()) {
+            tagSet.addAll(TagUtils.parseTags(rawTags));
+        }
+        return new ArrayList<>(tagSet);
     }
 
     /**

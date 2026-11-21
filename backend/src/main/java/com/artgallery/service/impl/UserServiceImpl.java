@@ -7,13 +7,16 @@ import com.artgallery.exception.BusinessException;
 import com.artgallery.mapper.UserMapper;
 import com.artgallery.oauth.OAuthUserInfo;
 import com.artgallery.repository.UserRepository;
+import com.artgallery.service.ArtworkService;
 import com.artgallery.service.UserService;
 import com.artgallery.util.JwtUtil;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
@@ -29,12 +32,22 @@ public class UserServiceImpl implements UserService {
     private final PasswordEncoder passwordEncoder;
     private final JwtUtil jwtUtil;
     private final UserMapper userMapper;
+    private final ArtworkService artworkService;
 
-    public UserServiceImpl(UserRepository userRepository, PasswordEncoder passwordEncoder, JwtUtil jwtUtil, UserMapper userMapper) {
+    public UserServiceImpl(UserRepository userRepository, PasswordEncoder passwordEncoder, JwtUtil jwtUtil, UserMapper userMapper, ArtworkService artworkService) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.jwtUtil = jwtUtil;
         this.userMapper = userMapper;
+        this.artworkService = artworkService;
+    }
+
+    private List<String> filterTagsToPool(List<String> userTags) {
+        if (userTags == null || userTags.isEmpty()) {
+            return userTags;
+        }
+        Set<String> pool = new HashSet<>(artworkService.getTags());
+        return userTags.stream().filter(pool::contains).collect(Collectors.toList());
     }
 
     /**
@@ -69,7 +82,7 @@ public class UserServiceImpl implements UserService {
         
         // 设置兴趣标签
         if (request.getTags() != null && !request.getTags().isEmpty()) {
-            user.setTagsList(request.getTags());
+            user.setTagsList(filterTagsToPool(request.getTags()));
         }
 
         // 保存用户
@@ -220,7 +233,7 @@ public class UserServiceImpl implements UserService {
         }
 
         if (userDTO.getTags() != null) {
-            user.setTagsList(userDTO.getTags());
+            user.setTagsList(filterTagsToPool(userDTO.getTags()));
         }
 
         user = userRepository.save(user);

@@ -23,6 +23,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { useRegister } from "@/hooks/useAuth";
+import { useGalleryTags } from "@/hooks/useGallery";
 
 const registerSchema = z
   .object({
@@ -43,32 +44,6 @@ const registerSchema = z
   });
 
 type RegisterFormValues = z.infer<typeof registerSchema>;
-
-const AVAILABLE_TAGS = [
-  "油画",
-  "水彩",
-  "素描",
-  "雕塑",
-  "摄影",
-  "数字艺术",
-  "抽象",
-  "写实",
-  "现代",
-  "古典",
-];
-
-const TAG_DISPLAY: Record<string, string> = {
-  油画: "Oil Painting",
-  水彩: "Watercolor",
-  素描: "Sketch",
-  雕塑: "Sculpture",
-  摄影: "Photography",
-  数字艺术: "Digital Art",
-  抽象: "Abstract",
-  写实: "Realism",
-  现代: "Modern",
-  古典: "Classical",
-};
 
 function getErrorMessage(error: unknown) {
   if (!error) {
@@ -98,6 +73,8 @@ function RegisterContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const registerMutation = useRegister();
+  const { data: availableTags = [], isLoading: tagsLoading } =
+    useGalleryTags();
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
@@ -314,24 +291,30 @@ function RegisterContent() {
             <div className="space-y-2">
               <Label>Interests</Label>
               <div className="flex flex-wrap gap-2">
-                {AVAILABLE_TAGS.map((tag) => {
-                  const selected = selectedTags.includes(tag);
-                  return (
-                    <button
-                      key={tag}
-                      type="button"
-                      aria-pressed={selected}
-                      onClick={() => toggleTag(tag)}
-                      className={`rounded-full px-3.5 py-1.5 text-xs transition-all active:scale-95 ${
-                        selected
-                          ? "bg-[#918a84] text-white shadow-md shadow-[#918a84]/30"
-                          : "border border-border bg-background text-muted-foreground hover:border-[#918a84] hover:text-[#7a746e]"
-                      }`}
-                    >
-                      {TAG_DISPLAY[tag] ?? tag}
-                    </button>
-                  );
-                })}
+                {tagsLoading ? (
+                  <span className="text-xs text-muted-foreground">
+                    Loading tags…
+                  </span>
+                ) : (
+                  availableTags.map((tag) => {
+                    const selected = selectedTags.includes(tag);
+                    return (
+                      <button
+                        key={tag}
+                        type="button"
+                        aria-pressed={selected}
+                        onClick={() => toggleTag(tag)}
+                        className={`rounded-full px-3.5 py-1.5 text-xs transition-all active:scale-95 ${
+                          selected
+                            ? "bg-[#918a84] text-white shadow-md shadow-[#918a84]/30"
+                            : "border border-border bg-background text-muted-foreground hover:border-[#918a84] hover:text-[#7a746e]"
+                        }`}
+                      >
+                        {tag}
+                      </button>
+                    );
+                  })
+                )}
               </div>
             </div>
 

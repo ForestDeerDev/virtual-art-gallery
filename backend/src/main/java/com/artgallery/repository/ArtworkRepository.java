@@ -200,5 +200,8 @@ public interface ArtworkRepository extends JpaRepository<Artwork, Long> {
      */
     @Query("SELECT DISTINCT a.category FROM Artwork a WHERE a.enabled = true ORDER BY a.category")
     List<String> findAllCategories();
+
+    @Query("SELECT a.tags FROM Artwork a WHERE a.enabled = true AND a.tags IS NOT NULL AND a.tags <> ''")
+    List<String> findAllTags();
 }
 

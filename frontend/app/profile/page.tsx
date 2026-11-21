@@ -20,6 +20,7 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import userApi from "@/api/user";
 import { useCurrentUser, useIsAdmin } from "@/hooks/useAuth";
+import { useGalleryTags } from "@/hooks/useGallery";
 import { useAuthStore } from "@/stores/auth";
 import { normalizeTaggable } from "@/utils/normalize";
 import { parseCommaSeparated } from "@/utils/tags";
@@ -34,19 +35,6 @@ const profileSchema = z.object({
 
 type ProfileFormValues = z.infer<typeof profileSchema>;
 
-const AVAILABLE_TAGS = [
-  "油画",
-  "水彩",
-  "素描",
-  "雕塑",
-  "摄影",
-  "数字艺术",
-  "抽象",
-  "写实",
-  "现代",
-  "古典",
-];
-
 function getErrorMessage(error: unknown) {
   if (isAxiosError<{ message?: string }>(error)) {
     return error.response?.data?.message ?? "更新失败，请重试";
@@ -57,6 +45,7 @@ function getErrorMessage(error: unknown) {
 function ProfileContent() {
   const userInfo = useCurrentUser();
   const isAdmin = useIsAdmin();
+  const { data: availableTags = [] } = useGalleryTags();
 
   const {
     register,
@@ -217,7 +206,7 @@ function ProfileContent() {
             <div className="space-y-2">
               <Label>兴趣标签</Label>
               <div className="flex flex-wrap gap-2">
-                {AVAILABLE_TAGS.map((tag) => {
+                {availableTags.map((tag) => {
                   const selected = selectedTags.includes(tag);
                   return (
                     <button
